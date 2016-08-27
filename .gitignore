@@ -25,5 +25,11 @@
 
 # Executables
 *.exe
+
+# other
+
 *.out
 *.app
+*.log
+**/Debug/*
+.suo
