@@ -24,5 +24,11 @@
     <ClInclude Include="getSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="hadd-ref.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

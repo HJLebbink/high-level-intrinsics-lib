@@ -16,9 +16,35 @@ namespace hli {
 
 	inline __m128i _mm_hadd_epi8(
 		const __m128i * const mem_addr,
-		const long long nElements)
+		const __int64 nBytes)
 	{
 		return _mm_setzero_si128();
+	}
+
+	inline __m128i _mm_hadd_epu8(
+		const __m128i * const mem_addr,
+		const __int64 nBytes)
+	{
+		const bool useMethod1 = true;
+
+
+		if (useMethod1) {
+			const __int64 nBlocks = nBytes >> 4; // divide by 16 to get the number of _m128 regs (blocks)
+			__m128i sum = _mm_setzero_si128();
+
+			for (__int64 block = 0; block < nBlocks; ++block) {
+				sum = _mm_add_epi64(sum, _mm_sad_epu8(_mm_load_si128(&mem_addr[block]), _mm_setzero_si128()));
+			}
+
+			const __m128i sum_up = _mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(sum), _mm_castsi128_ps(sum)));
+			const __m128i sum_lo = _mm_castps_si128(_mm_movelh_ps(_mm_castsi128_ps(sum), _mm_castsi128_ps(sum)));
+			return _mm_add_epi64(sum_lo, sum_up);
+		}
+		else {
+			return _mm_setzero_si128();
+		}
+
+
 		/*
 		const __m128i * mem_addr = mem_addr;
 

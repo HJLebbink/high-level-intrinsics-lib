@@ -128,7 +128,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="getSet.h" />
+    <ClInclude Include="hadd-ref.h" />
     <ClInclude Include="hadd.h" />
+    <ClInclude Include="timer.h" />
     <ClInclude Include="toString.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
