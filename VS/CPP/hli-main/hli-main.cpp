@@ -20,8 +20,8 @@
 #include <chrono>
 #include <algorithm> // for std::min
 
-#include "..\hli-lib\hadd.h"
-#include "..\hli-lib\hadd-ref.h"
+#include "..\hli-lib\_mm_hadd_epi8.h"
+#include "..\hli-lib\_mm_hadd_epu8.h"
 #include "..\hli-lib\toString.h"
 #include "..\hli-lib\timer.h"
 
@@ -46,7 +46,7 @@ namespace hli {
 			for (size_t i = 0; i < nExperiments; ++i) {
 
 				timer::reset_and_start_timer();
-				const __m128i result_ref = hli::ref::_mm_hadd_epi8(mem_addr, nBytes);
+				const __m128i result_ref = hli::_mm_hadd_epi8_ref(mem_addr, nBytes);
 				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 				timer::reset_and_start_timer();
@@ -72,29 +72,38 @@ namespace hli {
 
 		{
 			double min_ref = std::numeric_limits<double>::max();
-			double min = std::numeric_limits<double>::max();
+			double min1 = std::numeric_limits<double>::max();
+			double min2 = std::numeric_limits<double>::max();
 
 			for (__int64 i = 0; i < nExperiments; ++i) {
 
 				timer::reset_and_start_timer();
-				const __m128i result_ref = hli::ref::_mm_hadd_epu8(mem_addr, nBytes);
+				const __m128i result_ref = hli::_mm_hadd_epu8_ref(mem_addr, nBytes);
 				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 				timer::reset_and_start_timer();
-				const __m128i result = hli::_mm_hadd_epu8(mem_addr, nBytes);
-				min = std::min(min, timer::get_elapsed_kcycles());
+				const __m128i result1 = hli::_mm_hadd_epu8_method1(mem_addr, nBytes);
+				min1 = std::min(min1, timer::get_elapsed_kcycles());
 
-				if (result_ref.m128i_u64[0] != result.m128i_u64[0]) {
-					std::cout << "INFO: test _mm_hadd_epu8: result-ref=" << hli::toString_u64(result_ref) << "; result=" << hli::toString_u64(result) << std::endl;
+				if (result_ref.m128i_u64[0] != result1.m128i_u64[0]) {
+					std::cout << "INFO: test _mm_hadd_epu8: result-ref=" << hli::toString_u64(result_ref) << "; result=" << hli::toString_u64(result1) << std::endl;
+				}
+
+				timer::reset_and_start_timer();
+				const __m128i result2 = hli::_mm_hadd_epu8_method2(mem_addr, nBytes);
+				min2 = std::min(min2, timer::get_elapsed_kcycles());
+
+				if (result_ref.m128i_u64[0] != result2.m128i_u64[0]) {
+					std::cout << "INFO: test _mm_hadd_epu8: result-ref=" << hli::toString_u64(result_ref) << "; result=" << hli::toString_u64(result2) << std::endl;
 				}
 			}
-			printf("[Reference]    : %2.5f Kcycles\n", min_ref);
-			printf("[Method1]      : %2.5f Kcycles; %2.5f\n", min, min_ref/min);
+			printf("[_mm_hadd_epu8 Ref]    : %2.5f Kcycles\n", min_ref);
+			printf("[_mm_hadd_epu8 Method1]: %2.5f Kcycles; %2.3f times faster\n", min1, min_ref / min1);
+			printf("[_mm_hadd_epu8 Method2]: %2.5f Kcycles; %2.3f times faster\n", min2, min_ref / min2);
 		}
 
 		_mm_free(mem_addr);
 	}
-
 }
 
 int main()
@@ -107,7 +116,7 @@ int main()
 	{
 		const auto start = std::chrono::system_clock::now();
 
-		hli::test_mm_hadd_epu8(200, 10000);
+		hli::test_mm_hadd_epu8(2000, 10000);
 
 		const auto diff = std::chrono::system_clock::now() - start;
 		std::cout << std::endl 

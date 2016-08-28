@@ -15,19 +15,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="hadd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="toString.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="getSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="hadd-ref.h">
+    <ClInclude Include="timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="timer.h">
+    <ClInclude Include="_mm_hadd_epu8.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_mm_hadd_epi8.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

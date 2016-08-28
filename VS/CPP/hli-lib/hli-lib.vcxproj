@@ -128,8 +128,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="getSet.h" />
-    <ClInclude Include="hadd-ref.h" />
-    <ClInclude Include="hadd.h" />
+    <ClInclude Include="_mm_hadd_epi8.h" />
+    <ClInclude Include="_mm_hadd_epu8.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="toString.h" />
   </ItemGroup>
