@@ -1,32 +1,45 @@
 #pragma once
 
+#include <iostream>		// for cout
+
 //#include "mmintrin.h"  // mmx
 #include "emmintrin.h"  // sse
 #include "pmmintrin.h"  // sse3
 #include "tmmintrin.h"  // ssse3
 #include "smmintrin.h"  // sse4.1
 #include "nmmintrin.h"  // sse4.2
-//#include "immintrin.h"  // avx, avx2, avx512, FP16C, KNCNI, FMA
+#include "immintrin.h"  // avx, avx2, avx512, FP16C, KNCNI, FMA
 //#include "ammintrin.h"  // AMD-specific intrinsics
+
+
+#include "toString.h"
 
 namespace hli {
 
-	// Horizontally add adjacent pairs of 64-bit integers in a, store the result twice in dst.
+	// Horizontally add adjacent pairs of 64-bit integers in a, store the result in dst.
 	// Operation:
-	// dst[63:0] := a[63:0] + a[127:64]
-	// dst[127:64] := a[63:0] + a[127:64]
+	// tmp := a[63:0] + a[127:64]
+	// dst[31:0] := tmp
+	// dst[63:32] := tmp
+	// dst[95:64] := tmp
+	// dst[127:96] := tmp
 	inline __m128i _mm_hadd_epi64(__m128i a)
 	{
-		const __m128i sum_up = _mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(a), _mm_castsi128_ps(a)));
-		const __m128i sum_lo = _mm_castps_si128(_mm_movelh_ps(_mm_castsi128_ps(a), _mm_castsi128_ps(a)));
-		return _mm_add_epi64(sum_lo, sum_up);
+		const __m128i b = _mm_shuffle_epi32(a, 0b00000000);
+		const __m128i c = _mm_shuffle_epi32(a, 0b10101010);
+		const __m128i d = _mm_add_epi32(b, c);
+		//std::cout << "INFO: hli:::_mm_hadd_epi64: a=" << toString_u32(a) << "; b=" << toString_u32(b) << "; c=" << toString_u32(c) << "; d=" << toString_u32(d) << std::endl;
+		return d;
 	}
 
 	// Horizontally add all 8-bit integers in mem_addr (with nBytes).
 	// Operation:
-	// dst[63:0] := sum(mem_addr)
-	// dst[127:64] := sum(mem_addr)
-	template <int N_BITS = 8>
+	// tmp := sum(mem_addr)
+	// dst[31:0] := tmp
+	// dst[63:32] := tmp
+	// dst[95:64] := tmp
+	// dst[127:96] := tmp
+	template <int N_BITS>
 	inline __m128i _mm_hadd_epu8(
 		const __m128i * const mem_addr,
 		const size_t nBytes)
@@ -40,13 +53,21 @@ namespace hli {
 			const __m128i * const mem_addr,
 			const size_t nBytes)
 		{
+
+			// AVX
+			// vpsrldq     xmm4, xmm3, 4
+			// vpmovzxbd   xmm2, xmm3
+			// vpmovzxbd   xmm4, xmm4
+			// vpaddd      xmm1, xmm1, xmm2
+			// vpaddd      xmm0, xmm0, xmm4
+
 			const unsigned __int8 * const ptr = reinterpret_cast<const unsigned __int8 * const>(mem_addr);
-			unsigned __int64 sum = 0;
+			unsigned __int32 sum = 0;
 			for (size_t i = 0; i < nBytes; ++i) {
 				sum += ptr[i];
 				//std::cout << "INFO: hli::priv::_mm_hadd_epu8_ref: i=" << i << "; sum="<<sum << std::endl;
 			}
-			return _mm_set1_epi64x(sum);
+			return _mm_set1_epi32(sum);
 		}
 
 		inline __m128i _mm_hadd_epu8_method2(
@@ -150,7 +171,6 @@ namespace hli {
 					sum_p = _mm_add_epi8(sum_p, _mm_load_si128(&mem_addr[block + 3]));
 					sum = _mm_add_epi64(sum, _mm_sad_epu8(sum_p, _mm_setzero_si128()));
 				}
-
 				const size_t tail = nBlocks & 0b11;
 				if (tail > 0) {
 					for (size_t block = (nBlocks - tail); block < nBlocks; ++block) {

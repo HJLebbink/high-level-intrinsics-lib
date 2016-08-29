@@ -25,7 +25,6 @@ namespace hli {
 		const __m128i sum_a = _mm_add_epi64(a, b);
 		const __m128i sum_b = _mm_castpd_si128(_mm_permute_pd(_mm_castsi128_pd(sum_a), 0b01));
 		const __m128i sum = _mm_add_epi64(sum_a, sum_b);
-
 		const __m256i result = _mm256_insertf128_si256(_mm256_castsi128_si256(sum), sum, 1);
 		//std::cout << "INFO: hli::_mm256_hadd_epi64: sum_a=" << toString_u64(sum_a) << "; sum_b=" << toString_u64(sum_b) << "; result=" << toString_u64(result) << std::endl;
 		return result;
@@ -81,6 +80,20 @@ namespace hli {
 					sum1 = _mm_add_epi64(sum1, _mm_sad_epu8(_mm256_extractf128_si256(d, 0), _mm_setzero_si128()));
 					sum2 = _mm_add_epi64(sum2, _mm_sad_epu8(_mm256_extractf128_si256(d, 1), _mm_setzero_si128()));
 				}
+
+
+				//sum = _mm_add_epi64(sum, _mm_sad_epu8(sum_p, _mm_setzero_si128()));
+
+				//const __m256i x = _mm256_cvtepu8_epi32(sum);
+
+				//__asm {
+				//	movq xmm1, sum
+				//	vpmovzxbd xmm1, xmm3 
+				//}
+
+
+
+
 				return _mm256_hadd_epi64(sum1, sum2);
 			}
 		};

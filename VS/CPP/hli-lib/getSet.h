@@ -40,11 +40,11 @@ namespace hli {
 	}
 
 
-	inline double get_f64(const __m128& V, const size_t i)
+	inline double get_f64(const __m128d& V, const size_t i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 2, "");
 		union {
-			__m128 v;
+			__m128d v;
 			double a[2];
 		} converter;
 		converter.v = V;

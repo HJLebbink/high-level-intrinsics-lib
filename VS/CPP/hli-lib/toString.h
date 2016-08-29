@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <bitset>
+#include <iomanip>      // std::setprecision
 
 #include "getSet.h"
 
@@ -13,7 +14,7 @@ namespace hli {
 	inline std::string toString_f64(const __m256 i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 4; ++j) stringStream << get_f64(i, j) << " ";
+		for (size_t j = 0; j < 4; ++j) stringStream << std::setprecision(16) << get_f64(i, j) << " ";
 		return stringStream.str();
 	}
 	inline std::string toString_u64(const __m256i i)
@@ -30,10 +31,10 @@ namespace hli {
 	}
 
 
-	inline std::string toString_f64(const __m128 i)
+	inline std::string toString_f64(const __m128d i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 2; ++j) stringStream << get_f64(i, j) << " ";
+		for (size_t j = 0; j < 2; ++j) stringStream << std::setprecision(16) << get_f64(i, j) << " ";
 		return stringStream.str();
 	}
 	inline std::string toString_u64(const __m128i i)
@@ -53,7 +54,7 @@ namespace hli {
 	inline std::string toString_f32(const __m128 i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 4; ++j) stringStream << get_f32(i, j) << " ";
+		for (size_t j = 0; j < 4; ++j) stringStream << std::setprecision(16) << get_f32(i, j) << " ";
 		return stringStream.str();
 	}
 	inline std::string toString_u32(const __m128i i)
