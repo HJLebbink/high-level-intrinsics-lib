@@ -36,6 +36,12 @@
     <ClInclude Include="_mm_variance_epu8.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="_mm_corr_epu8.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_mm_covar_epu8.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="test.asm">

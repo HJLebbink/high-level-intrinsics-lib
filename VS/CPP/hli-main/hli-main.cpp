@@ -26,6 +26,8 @@
 #include "..\hli-lib\_mm_hadd_epu8.h"
 #include "..\hli-lib\_mm256_hadd_epu8.h"
 #include "..\hli-lib\_mm_variance_epu8.h"
+#include "..\hli-lib\_mm_corr_epu8.h"
+
 
 /*
 namespace stats {
@@ -291,6 +293,74 @@ namespace hli {
 		_mm_free(mem_addr);
 	}
 
+	void test_mm_corr_epu8(const size_t nBlocks, const size_t nExperiments)
+	{
+		const double delta = 0.0000001;
+		const size_t nBytes = 16 * nBlocks;
+		__m128i * const mem_addr1 = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
+		__m128i * const mem_addr2 = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
+		fillRand_epu8<5>(mem_addr1, nBytes);
+		fillRand_epu8<5>(mem_addr2, nBytes);
+
+		{
+			double min_ref = std::numeric_limits<double>::max();
+			double min1 = std::numeric_limits<double>::max();
+			double min2 = std::numeric_limits<double>::max();
+			double min3 = std::numeric_limits<double>::max();
+			double min4 = std::numeric_limits<double>::max();
+
+			for (size_t i = 0; i < nExperiments; ++i) {
+
+				timer::reset_and_start_timer();
+				const __m128d result_ref = hli::priv::_mm_corr_epu8_ref(mem_addr1, mem_addr2, nBytes);
+				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
+
+				{
+					timer::reset_and_start_timer();
+					const __m128d result = hli::_mm_corr_epu8<8>(mem_addr1, mem_addr2, nBytes);
+					min1 = std::min(min1, timer::get_elapsed_kcycles());
+
+					if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
+						std::cout << "INFO: test _mm_variance_epu8<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
+					}
+				}
+				{
+					timer::reset_and_start_timer();
+					const __m128d result = hli::_mm_corr_epu8<7>(mem_addr1, mem_addr2, nBytes);
+					min2 = std::min(min2, timer::get_elapsed_kcycles());
+
+					if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
+						std::cout << "INFO: test _mm_variance_epu8<7>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
+					}
+				}
+				{
+					timer::reset_and_start_timer();
+					const __m128d result = hli::_mm_corr_epu8<6>(mem_addr1, mem_addr2, nBytes);
+					min3 = std::min(min3, timer::get_elapsed_kcycles());
+
+					if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
+						std::cout << "INFO: test _mm_variance_epu8<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
+					}
+				}
+				{
+					timer::reset_and_start_timer();
+					const __m128d result = hli::_mm_corr_epu8<5>(mem_addr1, mem_addr2, nBytes);
+					min4 = std::min(min4, timer::get_elapsed_kcycles());
+
+					if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
+						std::cout << "INFO: test _mm_variance_epu8<5>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
+					}
+				}
+			}
+			printf("[_mm_variance_epu8 Ref]    : %2.5f Kcycles\n", min_ref);
+			printf("[_mm_variance_epu8<8>]     : %2.5f Kcycles; %2.3f times faster than ref\n", min1, min_ref / min1);
+			printf("[_mm_variance_epu8<7>]     : %2.5f Kcycles; %2.3f times faster than ref\n", min2, min_ref / min2);
+			printf("[_mm_variance_epu8<6>]     : %2.5f Kcycles; %2.3f times faster than ref\n", min3, min_ref / min3);
+			printf("[_mm_variance_epu8<5>]     : %2.5f Kcycles; %2.3f times faster than ref\n", min4, min_ref / min4);
+		}
+		_mm_free(mem_addr1);
+		_mm_free(mem_addr2);
+	}
 }
 
 int main()
@@ -304,9 +374,11 @@ int main()
 		const auto start = std::chrono::system_clock::now();
 
 		//hli::test_mm_hadd_epu8(10010, 10000);
+		//hli::test_mm_variance_epu8(10010, 10000);
+		hli::test_mm_corr_epu8(10010, 10000);
+
 		//hli::test_mm256_hadd_epu8(10010, 10000);
 
-		hli::test_mm_variance_epu8(10010, 10000);
 
 		const auto diff = std::chrono::system_clock::now() - start;
 		std::cout << std::endl 
