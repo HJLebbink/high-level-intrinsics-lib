@@ -30,5 +30,8 @@
     <ClInclude Include="_mm_hadd_epi8.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="_mm256_hadd_epu8.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -34,3 +34,4 @@
 **/Debug/*
 .suo
 **/Release/
+.dropbox.attr

@@ -9,6 +9,27 @@
 namespace hli {
 
 
+
+	inline std::string toString_f64(const __m256 i)
+	{
+		std::ostringstream stringStream;
+		for (size_t j = 0; j < 4; ++j) stringStream << get_f64(i, j) << " ";
+		return stringStream.str();
+	}
+	inline std::string toString_u64(const __m256i i)
+	{
+		std::ostringstream stringStream;
+		for (size_t j = 0; j < 4; ++j) stringStream << get_u64(i, j) << " ";
+		return stringStream.str();
+	}
+	inline std::string toString_i64(const __m256i i)
+	{
+		std::ostringstream stringStream;
+		for (size_t j = 0; j < 4; ++j) stringStream << get_i64(i, j) << " ";
+		return stringStream.str();
+	}
+
+
 	inline std::string toString_f64(const __m128 i)
 	{
 		std::ostringstream stringStream;
