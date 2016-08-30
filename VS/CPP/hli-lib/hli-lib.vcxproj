@@ -135,6 +135,7 @@
     <ClInclude Include="_mm_hadd_epu8.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="toString.h" />
+    <ClInclude Include="_mm_permute_epu8.h" />
     <ClInclude Include="_mm_variance_epu8.h" />
   </ItemGroup>
   <ItemGroup>

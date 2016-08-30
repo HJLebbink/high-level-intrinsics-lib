@@ -27,7 +27,7 @@
 #include "..\hli-lib\_mm256_hadd_epu8.h"
 #include "..\hli-lib\_mm_variance_epu8.h"
 #include "..\hli-lib\_mm_corr_epu8.h"
-
+#include "..\hli-lib\_mm_permute_epu8.h"
 
 /*
 namespace stats {
@@ -335,7 +335,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					const __m128d result = hli::_mm_corr_epu8_method2<8>(mem_addr1, mem_addr2, nBytes);
+					const __m128d result = hli::priv::_mm_corr_epu8_method2<8>(mem_addr1, mem_addr2, nBytes);
 					min3 = std::min(min3, timer::get_elapsed_kcycles());
 
 					if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
@@ -344,7 +344,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					const __m128d result = hli::_mm_corr_epu8_method2<6>(mem_addr1, mem_addr2, nBytes);
+					const __m128d result = hli::priv::_mm_corr_epu8_method2<6>(mem_addr1, mem_addr2, nBytes);
 					min4 = std::min(min4, timer::get_elapsed_kcycles());
 
 					if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
@@ -358,6 +358,87 @@ namespace hli {
 			printf("[_mm_corr_epu8<8> method2]: %2.5f Kcycles; %2.3f times faster than ref\n", min3, min_ref / min3);
 			printf("[_mm_corr_epu8<6> method2]: %2.5f Kcycles; %2.3f times faster than ref\n", min4, min_ref / min4);
 		}
+		_mm_free(mem_addr1);
+		_mm_free(mem_addr2);
+	}
+
+	void test_mm_rescale_epu16(const size_t nBlocks, const size_t nExperiments)
+	{
+		const size_t nBytes = 16 * nBlocks;
+		__m128i * const mem_addr = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
+		__m128i * const mem_addr1 = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
+		__m128i * const mem_addr2 = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
+		fillRand_epu8<8>(mem_addr, nBytes);
+
+		double min_ref = std::numeric_limits<double>::max();
+		double min1 = std::numeric_limits<double>::max();
+
+		for (size_t i = 0; i < nExperiments; ++i) {
+
+			memcpy(mem_addr1, mem_addr, nBytes);
+			timer::reset_and_start_timer();
+			hli::priv::_mm_rescale_epu16_ref(mem_addr1, nBytes);
+			min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
+
+			{
+				memcpy(mem_addr2, mem_addr, nBytes);
+				timer::reset_and_start_timer();
+				hli::_mm_rescale_epu16(mem_addr2, nBytes);
+				min1 = std::min(min1, timer::get_elapsed_kcycles());
+
+				for (size_t block = 0; block < nBlocks; ++block) {
+					for (size_t j = 0; j < 8; ++j) {
+						if (std::abs(mem_addr1[block].m128i_u16[j] != mem_addr2[block].m128i_u16[j])) {
+							std::cout << "INFO: test mm_rescale_epu16: result-ref=" << hli::toString_u16(mem_addr1[block]) << "; result=" << hli::toString_u16(mem_addr2[block]) << std::endl;
+						}
+					}
+				}
+			}
+
+			printf("[_mm_rescale_epu16 Ref] : %2.5f Kcycles\n", min_ref);
+			printf("[_mm_rescale_epu16]     : %2.5f Kcycles; %2.3f times faster than ref\n", min1, min_ref / min1);
+		}
+		_mm_free(mem_addr);
+		_mm_free(mem_addr1);
+		_mm_free(mem_addr2);
+	}
+
+	void test_mm_rand_si128(const size_t nBlocks, const size_t nExperiments)
+	{
+		const size_t nBytes = 16 * nBlocks;
+		__m128i * const mem_addr1 = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
+		__m128i * const mem_addr2 = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
+		const __m128i randSeeds = _mm_set_epi32(rand(), rand(), rand(), rand());
+
+		__m128i randInts1 = randSeeds;
+		__m128i randInts2 = randSeeds;
+
+		double min_ref = std::numeric_limits<double>::max();
+		double min1 = std::numeric_limits<double>::max();
+
+		for (size_t i = 0; i < nExperiments; ++i) {
+
+			timer::reset_and_start_timer();
+			hli::priv::_mm_rand_si128_ref(mem_addr1, nBytes, randInts1);
+			min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
+
+			{
+				timer::reset_and_start_timer();
+				hli::_mm_rand_si128(mem_addr2, nBytes, randInts2);
+				min1 = std::min(min1, timer::get_elapsed_kcycles());
+
+				for (size_t block = 0; block < nBlocks; ++block) {
+					for (size_t j = 0; j < 4; ++j) {
+						if (std::abs(mem_addr1[block].m128i_u32[j] != mem_addr2[block].m128i_u32[j])) {
+							std::cout << "INFO: test _mm_rand_si128: result-ref=" << hli::toString_u32(mem_addr1[block]) << "; result=" << hli::toString_u32(mem_addr2[block]) << std::endl;
+						}
+					}
+				}
+			}
+		}
+		printf("[_mm_rand_si128 Ref] : %2.5f Kcycles\n", min_ref);
+		printf("[_mm_rand_si128]     : %2.5f Kcycles; %2.3f times faster than ref\n", min1, min_ref / min1);
+
 		_mm_free(mem_addr1);
 		_mm_free(mem_addr2);
 	}
@@ -375,10 +456,11 @@ int main()
 
 		//hli::test_mm_hadd_epu8(10010, 10000);
 		//hli::test_mm_variance_epu8(10010, 10000);
-		hli::test_mm_corr_epu8(1010, 10000);
+		//hli::test_mm_corr_epu8(1010, 10000);
 
 		//hli::test_mm256_hadd_epu8(10010, 10000);
-
+		//hli::test_mm_rescale_epu16(110, 100);
+		hli::test_mm_rand_si128(110, 10000);
 
 		const auto diff = std::chrono::system_clock::now() - start;
 		std::cout << std::endl 

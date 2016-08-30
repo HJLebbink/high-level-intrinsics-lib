@@ -29,8 +29,8 @@ namespace hli {
 			const __m128i data1 = _mm_load_si128(&mem_addr1[block]);
 			const __m128i data2 = _mm_load_si128(&mem_addr2[block]);
 			{
-				const __m128i d1 = _mm_cvtepi8_epi32(data1);
-				const __m128i d2 = _mm_cvtepi8_epi32(data2);
+				const __m128i d1 = _mm_cvtepu8_epi32(data1);
+				const __m128i d2 = _mm_cvtepu8_epi32(data2);
 				const __m128d d1a = _mm_sub_pd(_mm_cvtepi32_pd(d1), average1);
 				const __m128d d2a = _mm_sub_pd(_mm_cvtepi32_pd(d2), average2);
 				const __m128d d1b = _mm_sub_pd(_mm_cvtepi32_pd(_mm_shuffle_epi32(d1, 0b01011011)), average1);
@@ -39,8 +39,8 @@ namespace hli {
 				result_b = _mm_add_pd(result_b, _mm_mul_pd(d1b, d2b));
 			}
 			{
-				const __m128i d1 = _mm_cvtepi8_epi32(_mm_shuffle_epi32(data1, 0b01010101));
-				const __m128i d2 = _mm_cvtepi8_epi32(_mm_shuffle_epi32(data2, 0b01010101));
+				const __m128i d1 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data1, 0b01010101));
+				const __m128i d2 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data2, 0b01010101));
 				const __m128d d1a = _mm_sub_pd(_mm_cvtepi32_pd(d1), average1);
 				const __m128d d2a = _mm_sub_pd(_mm_cvtepi32_pd(d2), average2);
 				const __m128d d1b = _mm_sub_pd(_mm_cvtepi32_pd(_mm_shuffle_epi32(d1, 0b01011011)), average1);
@@ -49,8 +49,8 @@ namespace hli {
 				result_b = _mm_add_pd(result_b, _mm_mul_pd(d1b, d2b));
 			}
 			{
-				const __m128i d1 = _mm_cvtepi8_epi32(_mm_shuffle_epi32(data1, 0b10101010));
-				const __m128i d2 = _mm_cvtepi8_epi32(_mm_shuffle_epi32(data2, 0b10101010));
+				const __m128i d1 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data1, 0b10101010));
+				const __m128i d2 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data2, 0b10101010));
 				const __m128d d1a = _mm_sub_pd(_mm_cvtepi32_pd(d1), average1);
 				const __m128d d2a = _mm_sub_pd(_mm_cvtepi32_pd(d2), average2);
 				const __m128d d1b = _mm_sub_pd(_mm_cvtepi32_pd(_mm_shuffle_epi32(d1, 0b01011011)), average1);
@@ -59,8 +59,8 @@ namespace hli {
 				result_b = _mm_add_pd(result_b, _mm_mul_pd(d1b, d2b));
 			}
 			{
-				const __m128i d1 = _mm_cvtepi8_epi32(_mm_shuffle_epi32(data1, 0b11111111));
-				const __m128i d2 = _mm_cvtepi8_epi32(_mm_shuffle_epi32(data2, 0b11111111));
+				const __m128i d1 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data1, 0b11111111));
+				const __m128i d2 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data2, 0b11111111));
 				const __m128d d1a = _mm_sub_pd(_mm_cvtepi32_pd(d1), average1);
 				const __m128d d2a = _mm_sub_pd(_mm_cvtepi32_pd(d2), average2);
 				const __m128d d1b = _mm_sub_pd(_mm_cvtepi32_pd(_mm_shuffle_epi32(d1, 0b01011011)), average1);
