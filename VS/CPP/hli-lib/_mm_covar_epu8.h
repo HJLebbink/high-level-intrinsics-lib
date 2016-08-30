@@ -14,19 +14,13 @@
 namespace hli {
 
 	// Variance population SSE: return 2x double var
-	template <int N_BITS>
 	inline __m128d _mm_covar_epu8(
 		const __m128i * const mem_addr1,
 		const __m128i * const mem_addr2,
-		const size_t nBytes)
+		const size_t nBytes,
+		const __m128d average1,
+		const __m128d average2)
 	{
-		const __m128d nElements = _mm_set1_pd(static_cast<double>(nBytes));
-
-		const __m128d sum1 = _mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(mem_addr1, nBytes));
-		const __m128d average1 = _mm_div_pd(sum1, nElements);
-		const __m128d sum2 = _mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(mem_addr2, nBytes));
-		const __m128d average2 = _mm_div_pd(sum2, nElements);
-
 		__m128d result_a = _mm_setzero_pd();
 		__m128d result_b = _mm_setzero_pd();
 
@@ -77,8 +71,26 @@ namespace hli {
 			//std::cout << "INFO: hli:::_mm_variance_epu8: data=" << toString_u8(data) << "; d1=" << toString_u32(d1) << "; d2=" << toString_u32(d2) << "; d3=" << toString_u32(d3) << "; d4=" << toString_u32(d4) << std::endl;
 		}
 		result_a = _mm_add_pd(result_a, result_b);
+		const __m128d nElements = _mm_set1_pd(static_cast<double>(nBytes));
 		return _mm_div_pd(_mm_hadd_pd(result_a, result_a), nElements);
 	}
+
+	template <int N_BITS>
+	inline __m128d _mm_covar_epu8(
+		const __m128i * const mem_addr1,
+		const __m128i * const mem_addr2,
+		const size_t nBytes) 
+	{
+		const __m128d nElements = _mm_set1_pd(static_cast<double>(nBytes));
+
+		const __m128d sum1 = _mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(mem_addr1, nBytes));
+		const __m128d average1 = _mm_div_pd(sum1, nElements);
+		const __m128d sum2 = _mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(mem_addr2, nBytes));
+		const __m128d average2 = _mm_div_pd(sum2, nElements);
+
+		return _mm_covar_epu8(mem_addr1, mem_addr2, nBytes, average1, average2);
+	}
+
 
 	namespace priv {
 

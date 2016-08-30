@@ -321,42 +321,42 @@ namespace hli {
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
-						std::cout << "INFO: test _mm_variance_epu8<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
-					}
-				}
-				{
-					timer::reset_and_start_timer();
-					const __m128d result = hli::_mm_corr_epu8<7>(mem_addr1, mem_addr2, nBytes);
-					min2 = std::min(min2, timer::get_elapsed_kcycles());
-
-					if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
-						std::cout << "INFO: test _mm_variance_epu8<7>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
+						std::cout << "INFO: test _mm_corr_epu8<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
 					}
 				}
 				{
 					timer::reset_and_start_timer();
 					const __m128d result = hli::_mm_corr_epu8<6>(mem_addr1, mem_addr2, nBytes);
-					min3 = std::min(min3, timer::get_elapsed_kcycles());
+					min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 					if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
-						std::cout << "INFO: test _mm_variance_epu8<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
+						std::cout << "INFO: test _mm_corr_epu8<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
 					}
 				}
 				{
 					timer::reset_and_start_timer();
-					const __m128d result = hli::_mm_corr_epu8<5>(mem_addr1, mem_addr2, nBytes);
+					const __m128d result = hli::_mm_corr_epu8_method2<8>(mem_addr1, mem_addr2, nBytes);
+					min3 = std::min(min3, timer::get_elapsed_kcycles());
+
+					if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
+						std::cout << "INFO: test _mm_corr_epu8_method2<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
+					}
+				}
+				{
+					timer::reset_and_start_timer();
+					const __m128d result = hli::_mm_corr_epu8_method2<6>(mem_addr1, mem_addr2, nBytes);
 					min4 = std::min(min4, timer::get_elapsed_kcycles());
 
 					if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
-						std::cout << "INFO: test _mm_variance_epu8<5>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
+						std::cout << "INFO: test _mm_corr_epu8_method2<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
 					}
 				}
 			}
-			printf("[_mm_variance_epu8 Ref]    : %2.5f Kcycles\n", min_ref);
-			printf("[_mm_variance_epu8<8>]     : %2.5f Kcycles; %2.3f times faster than ref\n", min1, min_ref / min1);
-			printf("[_mm_variance_epu8<7>]     : %2.5f Kcycles; %2.3f times faster than ref\n", min2, min_ref / min2);
-			printf("[_mm_variance_epu8<6>]     : %2.5f Kcycles; %2.3f times faster than ref\n", min3, min_ref / min3);
-			printf("[_mm_variance_epu8<5>]     : %2.5f Kcycles; %2.3f times faster than ref\n", min4, min_ref / min4);
+			printf("[_mm_corr_epu8 Ref]       : %2.5f Kcycles\n", min_ref);
+			printf("[_mm_corr_epu8<8>]        : %2.5f Kcycles; %2.3f times faster than ref\n", min1, min_ref / min1);
+			printf("[_mm_corr_epu8<6>]        : %2.5f Kcycles; %2.3f times faster than ref\n", min2, min_ref / min2);
+			printf("[_mm_corr_epu8<8> method2]: %2.5f Kcycles; %2.3f times faster than ref\n", min3, min_ref / min3);
+			printf("[_mm_corr_epu8<6> method2]: %2.5f Kcycles; %2.3f times faster than ref\n", min4, min_ref / min4);
 		}
 		_mm_free(mem_addr1);
 		_mm_free(mem_addr2);
@@ -375,7 +375,7 @@ int main()
 
 		//hli::test_mm_hadd_epu8(10010, 10000);
 		//hli::test_mm_variance_epu8(10010, 10000);
-		hli::test_mm_corr_epu8(10010, 10000);
+		hli::test_mm_corr_epu8(1010, 10000);
 
 		//hli::test_mm256_hadd_epu8(10010, 10000);
 
