@@ -136,6 +136,8 @@
     <ClInclude Include="timer.h" />
     <ClInclude Include="toString.h" />
     <ClInclude Include="_mm_permute_epu8.h" />
+    <ClInclude Include="_mm_rand_si128.h" />
+    <ClInclude Include="_mm_rescale_epu16.h" />
     <ClInclude Include="_mm_variance_epu8.h" />
   </ItemGroup>
   <ItemGroup>

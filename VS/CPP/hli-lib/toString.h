@@ -143,15 +143,7 @@ namespace hli {
 		stringStream << x;
 		return stringStream.str();
 	}
-	template <typename Alloc>
-	inline std::string toBinary(const std::vector<unsigned long long, Alloc>& v)
-	{
-		std::ostringstream stringStream;
-		for (size_t pos2 = 0; pos2 < v.size(); ++pos2) {
-			stringStream << tools::toBinary<64>(v[pos2]) << " ";
-		}
-		return stringStream.str();
-	}
+
 	inline std::string toBinary(const __m128i i) {
 		return toBinary_u8(i);
 	}
