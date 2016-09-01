@@ -130,6 +130,7 @@
     <ClInclude Include="getSet.h" />
     <ClInclude Include="_mm256_hadd_epu8.h" />
     <ClInclude Include="_mm_corr_epu8.h" />
+    <ClInclude Include="_mm_corr_perm_epu8.h" />
     <ClInclude Include="_mm_covar_epu8.h" />
     <ClInclude Include="_mm_hadd_epi8.h" />
     <ClInclude Include="_mm_hadd_epu8.h" />

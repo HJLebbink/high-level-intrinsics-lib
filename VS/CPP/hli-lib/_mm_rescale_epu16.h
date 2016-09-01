@@ -67,7 +67,7 @@ namespace hli {
 			if (showInfo) std::cout << "increment=" << toString_i32(increment) << std::endl;
 
 			for (size_t block = 0; block < nBlocks; ++block) {
-				const __m128i data = _mm_load_si128(&mem_addr[block]);
+				const __m128i data = mem_addr[block];
 				if (showInfo) std::cout << "input data=" << toString_u16(data) << std::endl;
 
 				const __m128i numbers1 = _mm_cvtepu16_epi32(data);
@@ -94,8 +94,7 @@ namespace hli {
 				if (showInfo) std::cout << "output short " << toString_u16(saturated) << std::endl;
 
 				if (showInfo) std::cout << std::endl;
-				_mm_store_si128(&mem_addr[block], saturated);
-				//std::cout << "rescaleVector: after: i=" << i << ":" << ptr[i] << std::endl;
+				mem_addr[block] = saturated;
 			}
 		}
 	}
