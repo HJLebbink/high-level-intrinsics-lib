@@ -110,10 +110,10 @@ namespace hli {
 				const __m128i * const mem_addr,
 				const size_t nBytes)
 			{
-				const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
+				const int nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 				__m128i sum = _mm_setzero_si128();
 
-				for (size_t block = 0; block < nBlocks; ++block) {
+				for (int block = 0; block < nBlocks; ++block) {
 					sum = _mm_add_epi64(sum, _mm_sad_epu8(_mm_load_si128(&mem_addr[block]), _mm_setzero_si128()));
 				}
 
@@ -158,12 +158,12 @@ namespace hli {
 				const __m128i * const mem_addr,
 				const size_t nBytes)
 			{
-				const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
+				const int nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 
 				__m128i sum = _mm_setzero_si128();
 				__m128i sum_p;
 
-				for (size_t block = 0; block < nBlocks - 3; block += 4)
+				for (int block = 0; block < (nBlocks - 3); block += 4)
 				{
 					sum_p = _mm_load_si128(&mem_addr[block]);
 					sum_p = _mm_add_epi8(sum_p, _mm_load_si128(&mem_addr[block + 1]));
@@ -171,9 +171,9 @@ namespace hli {
 					sum_p = _mm_add_epi8(sum_p, _mm_load_si128(&mem_addr[block + 3]));
 					sum = _mm_add_epi64(sum, _mm_sad_epu8(sum_p, _mm_setzero_si128()));
 				}
-				const size_t tail = nBlocks & 0b11;
+				const int tail = nBlocks & 0b11;
 				if (tail > 0) {
-					for (size_t block = (nBlocks - tail); block < nBlocks; ++block) {
+					for (int block = (nBlocks - tail); block < nBlocks; ++block) {
 						//std::cout << "INFO: hli:::_mm_hadd_epu8_method3: tail: block=" << block << std::endl;
 						sum = _mm_add_epi64(sum, _mm_sad_epu8(_mm_load_si128(&mem_addr[block]), _mm_setzero_si128()));
 					}
@@ -189,12 +189,12 @@ namespace hli {
 				const __m128i * const mem_addr,
 				const size_t nBytes)
 			{
-				const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
+				const int nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 
 				__m128i sum = _mm_setzero_si128();
 				__m128i sum_p;
 
-				for (size_t block = 0; block < nBlocks - 7; block += 8)
+				for (int block = 0; block < nBlocks - 7; block += 8)
 				{
 					sum_p = _mm_load_si128(&mem_addr[block]);
 					sum_p = _mm_add_epi8(sum_p, _mm_load_si128(&mem_addr[block + 1]));
@@ -207,11 +207,11 @@ namespace hli {
 					sum = _mm_add_epi64(sum, _mm_sad_epu8(sum_p, _mm_setzero_si128()));
 				}
 
-				const size_t tail = nBlocks & 0b111;
+				const int tail = nBlocks & 0b111;
 				if (tail > 0) {
-					size_t startTail = nBlocks - tail;
+					int startTail = nBlocks - tail;
 					sum_p = _mm_load_si128(&mem_addr[startTail]);
-					for (size_t block = startTail + 1; block < nBlocks; ++block) {
+					for (int block = startTail + 1; block < nBlocks; ++block) {
 						sum_p = _mm_add_epi8(sum_p, _mm_load_si128(&mem_addr[block]));
 					}
 					sum = _mm_add_epi64(sum, _mm_sad_epu8(sum_p, _mm_setzero_si128()));

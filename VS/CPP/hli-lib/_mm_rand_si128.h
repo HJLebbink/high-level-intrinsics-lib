@@ -84,7 +84,8 @@ namespace hli {
 		}
 	}
 
-	inline void _mm_rand_si128(
+
+	inline void _mm_lfsr32_epu32(
 		__m128i * const mem_addr,
 		const size_t nBytes,
 		__m128i& randInts)
@@ -93,6 +94,36 @@ namespace hli {
 		for (size_t block = 0; block < nBlocks; ++block) {
 			randInts = priv::lfsr32_galois(randInts);
 			mem_addr[block] = randInts;
+		}
+	}
+
+	template <int N_BITS>
+	void fillRand_epu8(__int8 * const mem_addr, const size_t nBytes)
+	{
+		const int mask = (1 << N_BITS) - 1;
+		for (size_t i = 0; i < nBytes; ++i) {
+			mem_addr[i] = static_cast<__int8>(mask & rand());
+		}
+	}
+
+	template <int N_BITS>
+	void fillRand_epu8(__m128i * const mem_addr, const size_t nBytes)
+	{
+		fillRand_epu8<N_BITS>(reinterpret_cast<__int8 * const>(mem_addr), nBytes);
+	}
+
+	template <int N_BITS>
+	void fillRand_epu8(__m256i * const mem_addr, const size_t nBytes)
+	{
+		fillRand_epu8<N_BITS>(reinterpret_cast<__int8 * const>(mem_addr), nBytes);
+	}
+
+	void fillRand_pd(__m128d * const mem_addr, const size_t nBytes)
+	{
+		double * const ptr = reinterpret_cast<double * const>(mem_addr);
+		const size_t nElements = nBytes >> 3;
+		for (size_t i = 0; i < nElements; ++i) {
+			ptr[i] = static_cast<double>(rand()) / rand();
 		}
 	}
 }

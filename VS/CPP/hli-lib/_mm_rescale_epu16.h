@@ -105,5 +105,9 @@ namespace hli {
 	{
 		//priv::_mm_rescale_epu16_ref(mem_addr, nBytes);
 		priv::_mm_rescale_epu16_method1(mem_addr, nBytes);
+
+		//for (size_t block = 0; block < (nBytes >> 4); ++block) {
+		//	std::cout << "INFO: _mm_rescale_epu16::_mm_rescale_epu16: block="<<block << ": " << toString_u16(mem_addr[block]) << std::endl;
+		//}
 	}
 }

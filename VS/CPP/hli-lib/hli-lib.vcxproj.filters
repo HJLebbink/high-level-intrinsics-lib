@@ -42,16 +42,19 @@
     <ClInclude Include="_mm_covar_epu8.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_mm_permute_epu8.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="_mm_rand_si128.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="_mm_rescale_epu16.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_mm_corr_perm_epu8.h">
+    <ClInclude Include="Equal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_mm_permute_array.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tools.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
