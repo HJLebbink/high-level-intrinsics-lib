@@ -63,11 +63,12 @@ namespace hli {
 		inline void _mm_permute_epu8_array_ref(
 			__m128i * const mem_addr,
 			const size_t nBytes,
+			__m128i * const swap_array,
+			const size_t swap_array_nBytes,
 			__m128i& randInts)
 		{
 			const size_t nElements = nBytes;
-			const size_t swap_array_nBytes = resizeNBytes(nElements << 1, 16);
-			__m128i * const swap_array = static_cast<__m128i * const>(_mm_malloc(swap_array_nBytes, 16));
+
 			_mm_rand_si128_ref(swap_array, swap_array_nBytes, randInts);
 			_mm_rescale_epu16_ref(swap_array, swap_array_nBytes);
 
@@ -75,17 +76,17 @@ namespace hli {
 			unsigned __int16 * const swap_array_int = reinterpret_cast<unsigned __int16 * const>(swap_array);
 
 			swapArray(data, swap_array_int, nElements);
-			_mm_free(swap_array);
 		}
 
 		inline void _mm_permute_epu8_array_method1(
 			__m128i * const mem_addr,
 			const size_t nBytes,
+			__m128i * const swap_array,
+			const size_t swap_array_nBytes,
 			__m128i& randInts)
 		{
 			const size_t nElements = nBytes;
-			const size_t swap_array_nBytes = resizeNBytes(nElements << 1, 16);
-			__m128i * const swap_array = static_cast<__m128i * const>(_mm_malloc(swap_array_nBytes, 16));
+
 			_mm_lfsr32_epu32(swap_array, swap_array_nBytes, randInts);
 			_mm_rescale_epu16(swap_array, swap_array_nBytes);
 
@@ -93,18 +94,17 @@ namespace hli {
 			unsigned __int16 * const swap_array_int = reinterpret_cast<unsigned __int16 * const>(swap_array);
 
 			swapArray(data, swap_array_int, nElements);
-			_mm_free(swap_array);
 		}
 
 		inline void _mm_permute_epu8_array_method2(
 			__m128i * const mem_addr,
 			const size_t nBytes,
+			__m128i * const swap_array,
+			const size_t swap_array_nBytes,
 			__m128i& randInts)
 		{
 			const size_t nElements = nBytes;
 			//std::cout << "INFO: _mm_permute_array::_mm_permute_epu8_array_method2: nElements=" << nElements << std::endl;
-			const size_t swap_array_nBytes = resizeNBytes(nElements << 1, 16);
-			__m128i * const swap_array = static_cast<__m128i * const>(_mm_malloc(swap_array_nBytes, 16));
 
 			const size_t nBlocks = nBytes >> 4;
 
@@ -141,18 +141,17 @@ namespace hli {
 				unsigned __int16 * const swap_array_int = reinterpret_cast<unsigned __int16 * const>(swap_array);
 				swapArray(data, swap_array_int, nElements);
 			}
-			_mm_free(swap_array);
 		}
 
 		inline void _mm_permute_dp_array_ref(
 			__m128d * const mem_addr,
 			const size_t nBytes,
+			__m128i * const swap_array,
+			const size_t swap_array_nBytes,
 			__m128i& randInts)
 		{
 			const size_t nElements = nBytes >> 3;
 			//std::cout << "INFO: _mm_permute_array::_mm_permute_dp_array_ref: nElements=" << nElements << std::endl;
-			const size_t swap_array_nBytes = resizeNBytes(nElements << 1, 16);
-			__m128i * const swap_array = static_cast<__m128i * const>(_mm_malloc(swap_array_nBytes, 16));
 
 			_mm_lfsr32_epu32(swap_array, swap_array_nBytes, randInts);
 			_mm_rescale_epu16(swap_array, swap_array_nBytes);
@@ -162,15 +161,16 @@ namespace hli {
 				unsigned __int16 * const swap_array_int = reinterpret_cast<unsigned __int16 * const>(swap_array);
 				swapArray(data, swap_array_int, nElements);
 			}
-			_mm_free(swap_array);
 		}
 
 		inline void _mm_permute_dp_array_method2(
 			__m128d * const mem_addr,
 			const size_t nBytes,
+			__m128i * const swap_array,
+			const size_t swap_array_nBytes,
 			__m128i& randInts)
 		{
-			_mm_permute_dp_array_ref(mem_addr, nBytes, randInts);
+			_mm_permute_dp_array_ref(mem_addr, nBytes, swap_array, swap_array_nBytes, randInts);
 		}
 	}
 
@@ -188,7 +188,11 @@ namespace hli {
 			__m128i * const mem_addr2 = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
 			__m128i * const mem_addr3 = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
 
-			const __m128i seed = _mm_set_epi32(rand(), rand(), rand(), rand());
+			const size_t nElements = nBytes;
+			const size_t swap_array_nBytes = nElements << 1;
+			__m128i * const swap_array = static_cast<__m128i * const>(_mm_malloc(swap_array_nBytes, 16));
+
+			const __m128i seed = _mm_set_epi16(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand());
 			__m128i randInt = seed;
 			__m128i randInt1 = seed;
 			__m128i randInt2 = seed;
@@ -204,13 +208,13 @@ namespace hli {
 
 				memcpy(mem_addr1, mem_addr, nBytes);
 				timer::reset_and_start_timer();
-				hli::priv::_mm_permute_epu8_array_ref(mem_addr1, nBytes, randInt);
+				hli::priv::_mm_permute_epu8_array_ref(mem_addr1, nBytes, swap_array, swap_array_nBytes, randInt);
 				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 				{
 					memcpy(mem_addr2, mem_addr, nBytes);
 					timer::reset_and_start_timer();
-					hli::priv::_mm_permute_epu8_array_method1(mem_addr2, nBytes, randInt1);
+					hli::priv::_mm_permute_epu8_array_method1(mem_addr2, nBytes, swap_array, swap_array_nBytes, randInt1);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -231,7 +235,7 @@ namespace hli {
 				{
 					memcpy(mem_addr3, mem_addr, nBytes);
 					timer::reset_and_start_timer();
-					hli::priv::_mm_permute_epu8_array_method2(mem_addr3, nBytes, randInt2);
+					hli::priv::_mm_permute_epu8_array_method2(mem_addr3, nBytes, swap_array, swap_array_nBytes, randInt2);
 					min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -271,6 +275,7 @@ namespace hli {
 			_mm_free(mem_addr1);
 			_mm_free(mem_addr2);
 			_mm_free(mem_addr3);
+			_mm_free(swap_array);
 		}
 		void test_mm_permute_dp_array(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 		{
@@ -283,6 +288,10 @@ namespace hli {
 			__m128d * const mem_addr = static_cast<__m128d *>(_mm_malloc(nBytes, 16));
 			__m128d * const mem_addr1 = static_cast<__m128d *>(_mm_malloc(nBytes, 16));
 			__m128d * const mem_addr2 = static_cast<__m128d *>(_mm_malloc(nBytes, 16));
+
+			const size_t nElements = nBytes >> 3;
+			const size_t swap_array_nBytes = nElements << 1;
+			__m128i * const swap_array = static_cast<__m128i * const>(_mm_malloc(swap_array_nBytes, 16));
 
 			const __m128i seed = _mm_set_epi32(rand(), rand(), rand(), rand());
 			__m128i randInt = seed;
@@ -298,13 +307,13 @@ namespace hli {
 			{
 				memcpy(mem_addr1, mem_addr, nBytes);
 				timer::reset_and_start_timer();
-				hli::priv::_mm_permute_dp_array_ref(mem_addr1, nBytes, randInt);
+				hli::priv::_mm_permute_dp_array_ref(mem_addr1, nBytes, swap_array, swap_array_nBytes, randInt);
 				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 				{
 					memcpy(mem_addr2, mem_addr, nBytes);
 					timer::reset_and_start_timer();
-					hli::priv::_mm_permute_dp_array_method2(mem_addr2, nBytes, randInt1);
+					hli::priv::_mm_permute_dp_array_method2(mem_addr2, nBytes, swap_array, swap_array_nBytes, randInt1);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -338,27 +347,32 @@ namespace hli {
 			_mm_free(mem_addr);
 			_mm_free(mem_addr1);
 			_mm_free(mem_addr2);
+			_mm_free(swap_array);
 		}
 	}
 
 	inline void _mm_permute_epu8_array(
 		__m128i * const mem_addr,
 		const size_t nBytes,
+		__m128i * const swap_array,
+		const size_t swap_array_nBytes,
 		__m128i& randInts)
 	{
 		//std::cout << "INFO: _mm_permute_array::_mm_permute_epu8_array: nBytes=" << nBytes << std::endl;
 		//priv::_mm_permute_epu8_array_ref(mem_addr, nBytes, randInts);
 		//priv::_mm_permute_epu8_array_method1(mem_addr, nBytes, randInts);
-		priv::_mm_permute_epu8_array_method2(mem_addr, nBytes, randInts);
+		priv::_mm_permute_epu8_array_method2(mem_addr, nBytes, swap_array, swap_array_nBytes, randInts);
 	}
 
 	inline void _mm_permute_dp_array(
 		__m128d * const mem_addr,
 		const size_t nBytes,
+		__m128i * const swap_array,
+		const size_t swap_array_nBytes,
 		__m128i& randInts)
 	{
 		//std::cout << "INFO: _mm_permute_array::_mm_permute_dp_array: nBytes=" << nBytes << std::endl;
-		//priv::_mm_permute_dp_array_ref(mem_addr, nBytes, randInts);
-		priv::_mm_permute_dp_array_method2(mem_addr, nBytes, randInts);
+		//priv::_mm_permute_dp_array_ref(mem_addr, nBytes, randInts, swap_array_nBytes, swap_array);
+		priv::_mm_permute_dp_array_method2(mem_addr, nBytes, swap_array, swap_array_nBytes, randInts);
 	}
 }

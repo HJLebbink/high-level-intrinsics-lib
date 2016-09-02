@@ -100,58 +100,6 @@ namespace stats {
 */
 namespace hli {
 
-	void test_endianess()
-	{
-		__m128i randSeed = _mm_set_epi16(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand());
-		__m128i randInt1 = randSeed;
-		__m128i randInt2 = randSeed;
-
-		__m128i * const data = static_cast<__m128i * const>(_mm_malloc(16, 16));
-		data[0] = _mm_set_epi8(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0);
-
-		__m128d * const data_double = static_cast<__m128d * const>(_mm_malloc(16 * 8, 16));
-		{
-			const __m128i d1 = _mm_cvtepu8_epi32(data[0]);
-			std::cout << "INFO: test_endianess: d1=" << toString_u32(d1) << std::endl;
-			data_double[0] = _mm_cvtepi32_pd(d1);
-			std::cout << "INFO: test_endianess: data_double[0]=" << toString_f64(data_double[0]) << std::endl;
-			data_double[1] = _mm_cvtepi32_pd(_mm_shuffle_epi32(d1, 0b01011110));
-			std::cout << "INFO: test_endianess: data_double[1]=" << toString_f64(data_double[1]) << std::endl;
-			const __m128i d2 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data[0], 0b01010101));
-			std::cout << "INFO: test_endianess: d2=" << toString_u32(d2) << std::endl;
-			data_double[2] = _mm_cvtepi32_pd(d2);
-			std::cout << "INFO: test_endianess: data_double[2]=" << toString_f64(data_double[2]) << std::endl;
-			data_double[3] = _mm_cvtepi32_pd(_mm_shuffle_epi32(d2, 0b01011110));
-			std::cout << "INFO: test_endianess: data_double[3]=" << toString_f64(data_double[3]) << std::endl;
-			const __m128i d3 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data[0], 0b10101010));
-			std::cout << "INFO: test_endianess: d3=" << toString_u32(d3) << std::endl;
-			data_double[4] = _mm_cvtepi32_pd(d3);
-			std::cout << "INFO: test_endianess: data_double[4]=" << toString_f64(data_double[4]) << std::endl;
-			data_double[5] = _mm_cvtepi32_pd(_mm_shuffle_epi32(d3, 0b01011110));
-			std::cout << "INFO: test_endianess: data_double[5]=" << toString_f64(data_double[5]) << std::endl;
-			const __m128i d4 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data[0], 0b11111111));
-			std::cout << "INFO: test_endianess: d4=" << toString_u32(d4) << std::endl;
-			data_double[6] = _mm_cvtepi32_pd(d4);
-			std::cout << "INFO: test_endianess: data_double[6]=" << toString_f64(data_double[6]) << std::endl;
-			data_double[7] = _mm_cvtepi32_pd(_mm_shuffle_epi32(d4, 0b01011110));
-			std::cout << "INFO: test_endianess: data_double[7]=" << toString_f64(data_double[7]) << std::endl;
-		}
-
-		_mm_permute_epu8_array(data, 16, randInt1);
-		_mm_permute_dp_array(data_double, 16 * 8, randInt2);
-
-		__int8 * const ptr2 = reinterpret_cast<__int8 * const>(data);
-		for (int i = 0; i < 16; ++i) {
-			std::cout << "INFO: test_endianess: __int8: i=" << i << "; ptr2[i]=" << static_cast<int>(ptr2[i]) << std::endl;
-		}
-
-		double * const ptr3 = reinterpret_cast<double * const>(data_double);
-		for (int i = 0; i < 16; ++i) {
-			std::cout << "INFO: test_endianess: double: i=" << i << "; ptr3[i]=" << ptr3[i] << std::endl;
-		}
-
-	}
-
 	void test_mm256_hadd_epu8(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 	{
 		const size_t nBytes = resizeNBytes(16 * nBlocks, 16);
@@ -582,7 +530,7 @@ namespace hli {
 
 	void test_mm_corr_perm_epu8(const size_t nBlocks, const size_t nPermutations, const size_t nExperiments, const bool doTests)
 	{
-		const double delta = 0.0000001;
+		const double delta = 0.000001;
 		const size_t nBytesData = resizeNBytes(16 * nBlocks, 16);
 		__m128i * const data1 = static_cast<__m128i *>(_mm_malloc(nBytesData, 16));
 		__m128i * const data2 = static_cast<__m128i *>(_mm_malloc(nBytesData, 16));
@@ -617,6 +565,11 @@ namespace hli {
 					timer::reset_and_start_timer();
 					hli::priv::_mm_corr_perm_epu8_method1<6>(data1, data2, nBytesData, results1, nPermutations, randInt1);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
+					
+					//for (size_t block = 0; block < (nBytesResults >> 4); ++block) {
+					//	std::cout << "WARNING: test_mm_corr_perm_epu8_ref<6>: results[" << block << "] =" << hli::toString_f64(results[block]) << std::endl;
+					//	std::cout << "WARNING: test_mm_corr_perm_epu8_ref<6>: results1[" << block << "]=" << hli::toString_f64(results1[block]) << std::endl;
+					//}
 
 					if (doTests) {
 						if (!equal(randInt, randInt1)) {
@@ -624,13 +577,15 @@ namespace hli {
 							return;
 						}
 						if (i == 0) {
-							for (size_t permutation = 0; permutation < nPermutations; permutation += 2) {
-								if (std::abs(results[permutation].m128d_f64[0] - results1[permutation].m128d_f64[0]) > delta) {
-									std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: permutation=" << permutation << "; result-ref=" << results[permutation].m128d_f64[0] << "; result1=" << results1[permutation].m128d_f64[0] << std::endl;
+							for (size_t block = 0; block < (nBytesResults >> 4); ++block) {
+								double diff = std::abs(results[block].m128d_f64[0] - results1[block].m128d_f64[0]);
+								if (diff > delta) {
+									std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: block=" << block << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << results[block].m128d_f64[0] << "; result1=" << results1[block].m128d_f64[0] << std::endl;
 									return;
 								}
-								if (std::abs(results[permutation].m128d_f64[1] - results1[permutation].m128d_f64[1]) > delta) {
-									std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: permutation=" << (permutation + 1) << "; result-ref=" << results[permutation].m128d_f64[1] << "; result1=" << results1[permutation].m128d_f64[1] << std::endl;
+								diff = std::abs(results[block].m128d_f64[1] - results1[block].m128d_f64[1]);
+								if (diff > delta) {
+									std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: block=" << block << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << results[block].m128d_f64[1] << "; result1=" << results1[block].m128d_f64[1] << std::endl;
 									return;
 								}
 							}
@@ -648,13 +603,15 @@ namespace hli {
 							return;
 						}
 						if (i == 0) {
-							for (size_t permutation = 0; permutation < nPermutations; permutation+=2) {
-								if (std::abs(results[permutation].m128d_f64[0] - results2[permutation].m128d_f64[0]) > delta) {
-									std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: permutation=" << permutation << "; result-ref=" << results[permutation].m128d_f64[0] << "; result2=" << results2[permutation].m128d_f64[0] << std::endl;
+							for (size_t block = 0; block < (nBytesResults >> 4); ++block) {
+								double diff = std::abs(results[block].m128d_f64[0] - results2[block].m128d_f64[0]);
+								if (diff > delta) {
+									std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: block=" << block << "; diff="<< std::setprecision(30) << "; result1=" << results1[block].m128d_f64[0] << diff<<"; result-ref=" << results[block].m128d_f64[0] << "; result2=" << results2[block].m128d_f64[0] << std::endl;
 									return;
 								}
-								if (std::abs(results[permutation].m128d_f64[1] - results2[permutation].m128d_f64[1]) > delta) {
-									std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: permutation=" << (permutation+1) << "; result-ref=" << results[permutation].m128d_f64[1] << "; result2=" << results2[permutation].m128d_f64[1] << std::endl;
+								diff = std::abs(results[block].m128d_f64[1] - results2[block].m128d_f64[1]);
+								if (diff > delta) {
+									std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: block=" << block << "; diff=" << std::setprecision(30) << "; result1=" << results1[block].m128d_f64[1] << diff << "; result-ref=" << results[block].m128d_f64[1] << "; result2=" << results2[block].m128d_f64[1] << std::endl;
 									return;
 								}
 							}
@@ -684,7 +641,7 @@ int main()
 	{
 		const auto start = std::chrono::system_clock::now();
 
-		const size_t nExperiments = 1000;
+		const size_t nExperiments = 1;
 		//hli::test_endianess();
 
 		//hli::test_mm_hadd_epu8(10010, nExperiments, true);
@@ -697,7 +654,7 @@ int main()
 		//hli::test::test_mm_permute_epu8_array(3102, nExperiments, true);
 		//hli::test::test_mm_permute_dp_array(3102, nExperiments, true);
 
-		hli::test_mm_corr_perm_epu8(1, 1000, nExperiments, true);
+		hli::test_mm_corr_perm_epu8(100, 1000000, nExperiments, true);
 
 
 		const auto diff = std::chrono::system_clock::now() - start;
