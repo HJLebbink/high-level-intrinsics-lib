@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>		// for cout
+#include <tuple>
 
 //#include "mmintrin.h"  // mmx
 #include "emmintrin.h"  // sse
@@ -121,6 +122,15 @@ namespace hli {
 	void fillRand_pd(__m128d * const mem_addr, const size_t nBytes)
 	{
 		double * const ptr = reinterpret_cast<double * const>(mem_addr);
+		const size_t nElements = nBytes >> 3;
+		for (size_t i = 0; i < nElements; ++i) {
+			ptr[i] = static_cast<double>(rand()) / rand();
+		}
+	}
+	void fillRand_pd(std::tuple<__m128d * const, const size_t> data)
+	{
+		const size_t nBytes = std::get<1>(data);
+		double * const ptr = reinterpret_cast<double * const>(std::get<0>(data));
 		const size_t nElements = nBytes >> 3;
 		for (size_t i = 0; i < nElements; ++i) {
 			ptr[i] = static_cast<double>(rand()) / rand();

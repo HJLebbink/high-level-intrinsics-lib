@@ -641,7 +641,7 @@ int main()
 	{
 		const auto start = std::chrono::system_clock::now();
 
-		const size_t nExperiments = 1;
+		const size_t nExperiments = 1000;
 		//hli::test_endianess();
 
 		//hli::test_mm_hadd_epu8(10010, nExperiments, true);
@@ -654,7 +654,7 @@ int main()
 		//hli::test::test_mm_permute_epu8_array(3102, nExperiments, true);
 		//hli::test::test_mm_permute_dp_array(3102, nExperiments, true);
 
-		hli::test_mm_corr_perm_epu8(100, 1000000, nExperiments, true);
+		hli::test_mm_corr_perm_epu8(100, 1000, nExperiments, true);
 
 
 		const auto diff = std::chrono::system_clock::now() - start;
