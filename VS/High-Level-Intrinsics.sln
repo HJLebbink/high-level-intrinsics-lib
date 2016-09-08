@@ -12,24 +12,30 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hli-main", "CPP\hli-main\hl
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{47507498-5B7E-4B3C-A9B1-7A9C5185223E}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{47507498-5B7E-4B3C-A9B1-7A9C5185223E}.Debug|x64.ActiveCfg = Debug|x64
 		{47507498-5B7E-4B3C-A9B1-7A9C5185223E}.Debug|x64.Build.0 = Debug|x64
 		{47507498-5B7E-4B3C-A9B1-7A9C5185223E}.Debug|x86.ActiveCfg = Debug|Win32
 		{47507498-5B7E-4B3C-A9B1-7A9C5185223E}.Debug|x86.Build.0 = Debug|Win32
+		{47507498-5B7E-4B3C-A9B1-7A9C5185223E}.Release|Any CPU.ActiveCfg = Release|Win32
 		{47507498-5B7E-4B3C-A9B1-7A9C5185223E}.Release|x64.ActiveCfg = Release|x64
 		{47507498-5B7E-4B3C-A9B1-7A9C5185223E}.Release|x64.Build.0 = Release|x64
 		{47507498-5B7E-4B3C-A9B1-7A9C5185223E}.Release|x86.ActiveCfg = Release|Win32
 		{47507498-5B7E-4B3C-A9B1-7A9C5185223E}.Release|x86.Build.0 = Release|Win32
+		{9B0D4058-E3D8-44D1-BDCD-3F6D1BAEAE8D}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{9B0D4058-E3D8-44D1-BDCD-3F6D1BAEAE8D}.Debug|x64.ActiveCfg = Debug|x64
 		{9B0D4058-E3D8-44D1-BDCD-3F6D1BAEAE8D}.Debug|x64.Build.0 = Debug|x64
 		{9B0D4058-E3D8-44D1-BDCD-3F6D1BAEAE8D}.Debug|x86.ActiveCfg = Debug|Win32
 		{9B0D4058-E3D8-44D1-BDCD-3F6D1BAEAE8D}.Debug|x86.Build.0 = Debug|Win32
+		{9B0D4058-E3D8-44D1-BDCD-3F6D1BAEAE8D}.Release|Any CPU.ActiveCfg = Release|Win32
 		{9B0D4058-E3D8-44D1-BDCD-3F6D1BAEAE8D}.Release|x64.ActiveCfg = Release|x64
 		{9B0D4058-E3D8-44D1-BDCD-3F6D1BAEAE8D}.Release|x64.Build.0 = Release|x64
 		{9B0D4058-E3D8-44D1-BDCD-3F6D1BAEAE8D}.Release|x86.ActiveCfg = Release|Win32

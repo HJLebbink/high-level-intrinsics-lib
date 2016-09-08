@@ -27,9 +27,6 @@
     <ClInclude Include="_mm_hadd_epu8.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_mm_hadd_epi8.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="_mm256_hadd_epu8.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -55,6 +52,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_mm_mi_epu8.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_mm_entropy_epu8.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_mm_hadd_epi64.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_mm_corr_dp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

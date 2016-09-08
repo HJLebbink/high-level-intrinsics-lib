@@ -131,12 +131,15 @@
     <ClInclude Include="getSet.h" />
     <ClInclude Include="tools.h" />
     <ClInclude Include="_mm256_hadd_epu8.h" />
+    <ClInclude Include="_mm_corr_dp.h" />
     <ClInclude Include="_mm_corr_epu8.h" />
     <ClInclude Include="_mm_covar_epu8.h" />
-    <ClInclude Include="_mm_hadd_epi8.h" />
+    <ClInclude Include="_mm_entropy_epu8.h" />
+    <ClInclude Include="_mm_hadd_epi64.h" />
     <ClInclude Include="_mm_hadd_epu8.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="toString.h" />
+    <ClInclude Include="_mm_mi_epu8.h" />
     <ClInclude Include="_mm_permute_array.h" />
     <ClInclude Include="_mm_rand_si128.h" />
     <ClInclude Include="_mm_rescale_epu16.h" />

@@ -1,9 +1,41 @@
 #pragma once
 
 #include <tuple>
-
+#include "emmintrin.h"
 
 namespace hli {
+
+	// shuffle: NO shuffle = _MM_SHUFFLE_EPI32_INT(3, 2, 1, 0)
+	constexpr int _MM_SHUFFLE_EPI32_INT(int d, int c, int b, int a)
+	{
+		return ((d & 0b11) << 6) | ((c & 0b11) << 4) | ((b & 0b11) << 2) | ((a & 0b11) << 0);
+	}
+
+	// NO shuffle = 3, 2, 1, 0
+	static const int _MM_SHUFFLE_EPI32_3210 = _MM_SHUFFLE_EPI32_INT(3, 2, 1, 0);
+
+
+
+	/*
+	Swap high 64-bits with low 64-bits
+	*/
+	inline __m128i _mm_swap_64(const __m128i d) {
+		return _mm_shuffle_epi32(d, _MM_SHUFFLE_EPI32_INT(1, 0, 3, 2));
+	}
+
+	/*
+	Swap high 64-bits with low 64-bits
+	*/
+	inline __m128d _mm_swap_64(const __m128d d) {
+		return _mm_castsi128_pd(_mm_swap_64(_mm_castpd_si128(d)));
+	}
+
+	/*
+	Swap high 64-bits with low 64-bits
+	*/
+	inline __m128 _mm_swap_64(const __m128 d) {
+		return _mm_castsi128_ps(_mm_swap_64(_mm_castps_si128(d)));
+	}
 
 	inline size_t resizeNBytes(size_t nBytes, size_t align)
 	{
@@ -40,6 +72,20 @@ namespace hli {
 		else {
 			return nBytes;
 		}
+	}
+
+	inline std::tuple<__m128d * const, const size_t> deepCopy(const std::tuple<__m128d * const, const size_t>& in) {
+		const size_t nBytes = std::get<1>(in);
+		__m128d * const copy = static_cast<__m128d * const>(_mm_malloc(nBytes, 16));
+		memcpy(copy, std::get<0>(in), nBytes);
+		return std::make_tuple(copy, nBytes);
+	}
+
+	inline std::tuple<__m128i * const, const size_t> deepCopy(const std::tuple<__m128i * const, const size_t>& in) {
+		const size_t nBytes = std::get<1>(in);
+		__m128i * const copy = static_cast<__m128i * const>(_mm_malloc(nBytes, 16));
+		memcpy(copy, std::get<0>(in), nBytes);
+		return std::make_tuple(copy, nBytes);
 	}
 
 	template <class T>
