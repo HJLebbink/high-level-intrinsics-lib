@@ -338,13 +338,13 @@ int main()
 	{
 		const auto start = std::chrono::system_clock::now();
 
-		const size_t nExperiments = 1000;
+		const size_t nExperiments = 10000;
 		//hli::test_endianess();
 
-		hli::test::test_mm_hadd_epu8(10010, nExperiments, true);
+		//hli::test::test_mm_hadd_epu8(10010, nExperiments, true);
 		//hli::test_mm256_hadd_epu8(10010, nExperiments, true);
 		//hli::test_mm_variance_epu8(10010, nExperiments, true);
-		//hli::test::test_mm_corr_epu8(1010, nExperiments, false);
+		hli::test::test_mm_corr_epu8(1010, nExperiments, true);
 
 		//hli::test_mm_rand_si128(1010, nExperiments, true);
 		//hli::test_mm_rescale_epu16(2010, nExperiments, true);

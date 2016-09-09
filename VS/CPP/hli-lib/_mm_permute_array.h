@@ -45,7 +45,7 @@ namespace hli {
 			const unsigned __int16 * const swap_array,
 			const size_t nElements)
 		{
-			for (int i = nElements - 1; i > 0; --i) {
+			for (int i = static_cast<int>(nElements) - 1; i > 0; --i) {
 #		if	_DEBUG 
 				if (i >= static_cast<int>(nElements)) {
 					std::cout << "ERROR: _mm_permutate_array:swapArray i=" << i << "; nElements=" << nElements << std::endl;
@@ -157,9 +157,9 @@ namespace hli {
 
 			{	// perform the swapping, cannot be done in a vectorized manner
 				__m128d * const tmp = std::get<0>(data);
-				double * const data = reinterpret_cast<double * const>(tmp);
+				double * const data2 = reinterpret_cast<double * const>(tmp);
 				unsigned __int16 * const swap_array_int = reinterpret_cast<unsigned __int16 * const>(std::get<0>(swap));
-				swapArray(data, swap_array_int, nElements);
+				swapArray(data2, swap_array_int, nElements);
 			}
 		}
 
@@ -177,9 +177,9 @@ namespace hli {
 
 			{	// perform the swapping, cannot be done in a vectorized manner
 				__m128d * const tmp = std::get<0>(data);
-				double * const data = reinterpret_cast<double * const>(tmp);
+				double * const data2 = reinterpret_cast<double * const>(tmp);
 				unsigned __int16 * const swap_array_int = reinterpret_cast<unsigned __int16 * const>(std::get<0>(swap));
-				swapArray(data, swap_array_int, nElements);
+				swapArray(data2, swap_array_int, nElements);
 			}
 		}
 	}
@@ -202,7 +202,7 @@ namespace hli {
 			const size_t swap_array_nBytes = nElements << 1;
 			__m128i * const swap_array = static_cast<__m128i * const>(_mm_malloc(swap_array_nBytes, 16));
 
-			const __m128i seed = _mm_set_epi16(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand());
+			const __m128i seed = _mm_set_epi32(rand() || rand() << 16, rand() || rand() << 16, rand() || rand() << 16, rand() || rand() << 16);
 			__m128i randInt = seed;
 			__m128i randInt1 = seed;
 			__m128i randInt2 = seed;
@@ -302,7 +302,7 @@ namespace hli {
 			const size_t nElements = nBytes >> 3;
 			auto swap = _mm_malloc_m128i(nElements << 1);
 
-			const __m128i seed = _mm_set_epi16(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand());
+			const __m128i seed = _mm_set_epi32(rand() || rand() << 16, rand() || rand() << 16, rand() || rand() << 16, rand() || rand() << 16);
 			__m128i randInt = seed;
 			__m128i randInt1 = seed;
 			const int N_BITS = 5;

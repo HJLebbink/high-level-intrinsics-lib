@@ -5,7 +5,7 @@ namespace hli {
 
 	inline bool equal(const __m128i a, const __m128i b)
 	{
-		return (a.m128i_i64[0] == b.m128i_u64[0]) && (a.m128i_i64[1] == b.m128i_u64[1]);
+		return (a.m128i_u64[0] == b.m128i_u64[0]) && (a.m128i_u64[1] == b.m128i_u64[1]);
 	}
 
 	inline bool equal(const __m128d a, const __m128d b)

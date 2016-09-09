@@ -6,10 +6,12 @@
 namespace hli {
 
 	// shuffle: NO shuffle = _MM_SHUFFLE_EPI32_INT(3, 2, 1, 0)
-	constexpr int _MM_SHUFFLE_EPI32_INT(int d, int c, int b, int a)
-	{
-		return ((d & 0b11) << 6) | ((c & 0b11) << 4) | ((b & 0b11) << 2) | ((a & 0b11) << 0);
-	}
+	//constexpr const int _MM_SHUFFLE_EPI32_INT(int d, int c, int b, int a)
+	//{
+	//	return ((d & 0b11) << 6) | ((c & 0b11) << 4) | ((b & 0b11) << 2) | ((a & 0b11) << 0);
+	//}
+#	define _MM_SHUFFLE_EPI32_INT(d, c, b, a) ((((d) & 0b11) << 6) | (((c) & 0b11) << 4) | (((b) & 0b11) << 2) | (((a) & 0b11) << 0))
+
 
 	// NO shuffle = 3, 2, 1, 0
 	static const int _MM_SHUFFLE_EPI32_3210 = _MM_SHUFFLE_EPI32_INT(3, 2, 1, 0);
@@ -37,24 +39,6 @@ namespace hli {
 		return _mm_castsi128_ps(_mm_swap_64(_mm_castps_si128(d)));
 	}
 
-	inline size_t resizeNBytes(size_t nBytes, size_t align)
-	{
-		if (align == 16) {
-			size_t result = nBytes + (((nBytes & 0b1111) == 0) ? 0 : (16 - (nBytes & 0b1111)));
-			//std::cout << "INFO: resizeNBytes: align=" << align << "; nBytes=" << nBytes << "; result=" << result << std::endl;
-			return result;
-		}
-		else if (align == 32) {
-			return nBytes + (((nBytes & 0b11111) == 0) ? 0 : (32 - (nBytes & 0b11111)));
-		}
-		else if (align == 64) {
-			return nBytes + (((nBytes & 0b111111) == 0) ? 0 : (64 - (nBytes & 0b111111)));
-		}
-		else {
-			return nBytes;
-		}
-	}
-
 	template <size_t ALIGN>
 	inline size_t resizeNBytes(size_t nBytes)
 	{
@@ -70,6 +54,17 @@ namespace hli {
 			return nBytes + (((nBytes & 0b111111) == 0) ? 0 : (64 - (nBytes & 0b111111)));
 		}
 		else {
+			return nBytes;
+		}
+	}
+
+	inline size_t resizeNBytes(size_t nBytes, size_t align)
+	{
+		switch (align) {
+		case 16: return resizeNBytes<16>(nBytes);
+		case 32: return resizeNBytes<32>(nBytes);
+		case 64: return resizeNBytes<64>(nBytes);
+		default:
 			return nBytes;
 		}
 	}
@@ -93,14 +88,63 @@ namespace hli {
 		_mm_free(std::get<0>(t));
 	}
 
+	inline std::tuple<__int8 * const, const size_t> _mm_malloc_xmm(size_t nBytes) {
+		const size_t nBytes2 = resizeNBytes<16>(nBytes);
+		return std::make_tuple(static_cast<__int8 * const>(_mm_malloc(nBytes2, 16)), nBytes2);
+	}
+	inline std::tuple<__m128d * const, const size_t> _mm_cast_m128d(std::tuple<__int8 * const, const size_t> data)
+	{
+		return std::make_tuple(reinterpret_cast<__m128d * const>(std::get<0>(data)), std::get<1>(data));
+	}
+	inline std::tuple<__m128i * const, const size_t> _mm_cast_m128i(std::tuple<__int8 * const, const size_t> data)
+	{
+		return std::make_tuple(reinterpret_cast<__m128i * const>(std::get<0>(data)), std::get<1>(data));
+	}
 	inline std::tuple<__m128d * const, const size_t> _mm_malloc_m128d(size_t nBytes)
 	{
-		const size_t nBytes2 = resizeNBytes<16>(nBytes);
-		return std::make_tuple(static_cast<__m128d * const>(_mm_malloc(nBytes2, 16)), nBytes2);
+		return _mm_cast_m128d(_mm_malloc_xmm(nBytes));
 	}
 	inline std::tuple<__m128i * const, const size_t> _mm_malloc_m128i(size_t nBytes)
 	{
-		const size_t nBytes2 = resizeNBytes<16>(nBytes);
-		return std::make_tuple(static_cast<__m128i * const>(_mm_malloc(nBytes2, 16)), nBytes2);
+		return _mm_cast_m128i(_mm_malloc_xmm(nBytes));
 	}
+
+
+	inline std::tuple<__m128d, __m128d, __m128d, __m128d, __m128d, __m128d, __m128d, __m128d> _mm_cvt_epu8_pd(__m128i data)
+	{
+		const __m128i d1 = _mm_cvtepu8_epi32(data);
+		const __m128d r0 = _mm_cvtepi32_pd(d1);
+		const __m128d r1 = _mm_cvtepi32_pd(_mm_swap_64(d1));
+
+		const __m128i d2 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data, _MM_SHUFFLE_EPI32_INT(1, 1, 1, 1)));
+		const __m128d r2 = _mm_cvtepi32_pd(d2);
+		const __m128d r3 = _mm_cvtepi32_pd(_mm_swap_64(d2));
+
+		const __m128i d3 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data, _MM_SHUFFLE_EPI32_INT(2, 2, 2, 2)));
+		const __m128d r4 = _mm_cvtepi32_pd(d3);
+		const __m128d r5 = _mm_cvtepi32_pd(_mm_swap_64(d3));
+
+		const __m128i d4 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data, _MM_SHUFFLE_EPI32_INT(3, 3, 3, 3)));
+		const __m128d r6 = _mm_cvtepi32_pd(d4);
+		const __m128d r7 = _mm_cvtepi32_pd(_mm_swap_64(d4));
+
+		return std::make_tuple(r0, r1, r2, r3, r4, r5, r6, r7);
+	}
+
+	inline std::tuple<__m128d, __m128d, __m128d, __m128d, __m128d, __m128d, __m128d, __m128d> _mm_sub_pd(
+		const std::tuple<__m128d, __m128d, __m128d, __m128d, __m128d, __m128d, __m128d, __m128d>& tup,
+		const __m128d value)
+	{
+		const __m128d r0 = _mm_sub_pd(std::get<0>(tup), value);
+		const __m128d r1 = _mm_sub_pd(std::get<1>(tup), value);
+		const __m128d r2 = _mm_sub_pd(std::get<2>(tup), value);
+		const __m128d r3 = _mm_sub_pd(std::get<3>(tup), value);
+		const __m128d r4 = _mm_sub_pd(std::get<4>(tup), value);
+		const __m128d r5 = _mm_sub_pd(std::get<5>(tup), value);
+		const __m128d r6 = _mm_sub_pd(std::get<6>(tup), value);
+		const __m128d r7 = _mm_sub_pd(std::get<7>(tup), value);
+		return std::make_tuple(r0, r1, r2, r3, r4, r5, r6, r7);
+	}
+
+
 }

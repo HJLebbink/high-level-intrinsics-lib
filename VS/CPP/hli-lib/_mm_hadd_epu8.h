@@ -1,6 +1,19 @@
 #pragma once
 
-#include <iostream>		// for cout
+#ifdef _MSC_VER
+#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+#if !defined(NOMINMAX)
+#define NOMINMAX 1 
+#endif
+#if !defined(_CRT_SECURE_NO_WARNINGS)
+#define _CRT_SECURE_NO_WARNINGS 1
+#endif
+#endif
+
+#include <limits>       // std::numeric_limits
+#include <iostream>		// std::cout
+#include <algorithm>	// std::min
+
 
 //#include "mmintrin.h"  // mmx
 #include "emmintrin.h"  // sse
@@ -144,7 +157,7 @@ namespace hli {
 			const __m128i * const mem_addr,
 			const size_t nBytes)
 		{
-			const int nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
+			const int nBlocks = static_cast<int>(nBytes >> 4); // divide by 16 to get the number of __m128i regs (blocks)
 
 			__m128i sum = _mm_setzero_si128();
 			__m128i sum_p;
@@ -171,7 +184,7 @@ namespace hli {
 			const __m128i * const mem_addr,
 			const size_t nBytes)
 		{
-			const int nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
+			const int nBlocks = static_cast<int>(nBytes >> 4); // divide by 16 to get the number of __m128i regs (blocks)
 
 			__m128i sum = _mm_setzero_si128();
 			__m128i sum_p;
@@ -338,7 +351,7 @@ namespace hli {
 	inline __m128i _mm_hadd_epu8(
 		const std::tuple<__m128i * const, const size_t> data)
 	{
-		return priv::_mm_hadd_epu8<N_BITS>(std::get<0>(data), std::get<1>(data));
+		return _mm_hadd_epu8<N_BITS>(std::get<0>(data), std::get<1>(data));
 		//return priv::_mm_hadd_epu8_method2<N_BITS>(mem_addr, nBytes);
 	}
 

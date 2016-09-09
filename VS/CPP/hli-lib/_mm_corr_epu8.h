@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tuple>
+#include <math.h>
 
 //#include "mmintrin.h"  // mmx
 #include "emmintrin.h"  // sse
@@ -38,6 +39,56 @@ namespace hli {
 		}
 
 		template <int N_BITS>
+		inline __m128d _mm_corr_epu8_method0(
+			const __m128i * const mem_addr1,
+			const __m128i * const mem_addr2,
+			const size_t nBytes,
+			const __m128d average1,
+			const __m128d average2)
+		{
+			double covar = 0;
+			double var1 = 0;
+			double var2 = 0;
+			const double a1 = average1.m128d_f64[0];
+			const double a2 = average2.m128d_f64[0];
+
+			const __int8 * const data1 = reinterpret_cast<const __int8 * const>(mem_addr1);
+			const __int8 * const data2 = reinterpret_cast<const __int8 * const>(mem_addr2);
+
+			const size_t nElements = nBytes;
+
+			for (size_t element = 0; element < nElements; ++element)
+			{
+				const double d1 = static_cast<double>(data1[element]) - a1;
+				const double d2 = static_cast<double>(data2[element]) - a2;
+
+				var1 += d1 * d1;
+				var2 += d2 * d2;
+				covar += d1 * d2;
+			}
+
+			var1 /= nElements;
+			var2 /= nElements;
+			covar /= nElements;
+
+			const double corr = covar / sqrt(var1 * var2);
+			return _mm_set1_pd(corr);
+		}
+
+		template <int N_BITS>
+		inline __m128d _mm_corr_epu8_method0(
+			const __m128i * const mem_addr1,
+			const __m128i * const mem_addr2,
+			const size_t nBytes)
+		{
+			const __m128d nElements = _mm_set1_pd(static_cast<double>(nBytes));
+			const __m128d average1 = _mm_div_pd(_mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(mem_addr1, nBytes)), nElements);
+			const __m128d average2 = _mm_div_pd(_mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(mem_addr2, nBytes)), nElements);
+
+			return _mm_corr_epu8_method0<N_BITS>(mem_addr1, mem_addr2, nBytes, average1, average2);
+		}
+
+		template <int N_BITS>
 		inline __m128d _mm_corr_epu8_method1(
 			const __m128i * const mem_addr1,
 			const __m128i * const mem_addr2,
@@ -50,74 +101,38 @@ namespace hli {
 			__m128d var2 = _mm_setzero_pd();
 
 			const size_t nBlocks = nBytes >> 4;
-			for (size_t block = 0; block < nBlocks; ++block) {
-				const __m128i data1 = mem_addr1[block];
-				const __m128i data2 = mem_addr2[block];
-				{
-					const __m128i d1 = _mm_cvtepu8_epi32(data1);
-					const __m128d d1a = _mm_sub_pd(_mm_cvtepi32_pd(d1), average1);
-					const __m128d d1b = _mm_sub_pd(_mm_cvtepi32_pd(_mm_swap_64(d1)), average1);
-					var1 = _mm_add_pd(var1, _mm_mul_pd(d1a, d1a));
-					var1 = _mm_add_pd(var1, _mm_mul_pd(d1b, d1b));
-					const __m128i d2 = _mm_cvtepu8_epi32(data2);
-					const __m128d d2a = _mm_sub_pd(_mm_cvtepi32_pd(d2), average2);
-					const __m128d d2b = _mm_sub_pd(_mm_cvtepi32_pd(_mm_swap_64(d2)), average2);
-					var2 = _mm_add_pd(var2, _mm_mul_pd(d2a, d2a));
-					var2 = _mm_add_pd(var2, _mm_mul_pd(d2b, d2b));
-					covar = _mm_add_pd(covar, _mm_mul_pd(d1a, d2a));
-					covar = _mm_add_pd(covar, _mm_mul_pd(d1b, d2b));
-					//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_method1: block=" << ((8 * block) + 0) << "; d1=" << toString_f64(d1a) << "; d2=" << toString_f64(d2a) << std::endl;
-					//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_method1: block=" << ((8 * block) + 1) << "; d1=" << toString_f64(d1b) << "; d2=" << toString_f64(d2b) << std::endl;
-				}
-				{
-					const __m128i d1 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data1, _MM_SHUFFLE_EPI32_INT(1, 1, 1, 1)));
-					const __m128d d1a = _mm_sub_pd(_mm_cvtepi32_pd(d1), average1);
-					const __m128d d1b = _mm_sub_pd(_mm_cvtepi32_pd(_mm_swap_64(d1)), average1);
-					var1 = _mm_add_pd(var1, _mm_mul_pd(d1a, d1a));
-					var1 = _mm_add_pd(var1, _mm_mul_pd(d1b, d1b));
-					const __m128i d2 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data2, _MM_SHUFFLE_EPI32_INT(1, 1, 1, 1)));
-					const __m128d d2a = _mm_sub_pd(_mm_cvtepi32_pd(d2), average2);
-					const __m128d d2b = _mm_sub_pd(_mm_cvtepi32_pd(_mm_swap_64(d2)), average2);
-					var2 = _mm_add_pd(var2, _mm_mul_pd(d2a, d2a));
-					var2 = _mm_add_pd(var2, _mm_mul_pd(d2b, d2b));
-					covar = _mm_add_pd(covar, _mm_mul_pd(d1a, d2a));
-					covar = _mm_add_pd(covar, _mm_mul_pd(d1b, d2b));
-					//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_method1: block=" << ((8 * block) + 2) << "; d1=" << toString_f64(d1a) << "; d2=" << toString_f64(d2a) << std::endl;
-					//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_method1: block=" << ((8 * block) + 3) << "; d1=" << toString_f64(d1b) << "; d2=" << toString_f64(d2b) << std::endl;
-				}
-				{
-					const __m128i d1 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data1, _MM_SHUFFLE_EPI32_INT(2, 2, 2, 2)));
-					const __m128d d1a = _mm_sub_pd(_mm_cvtepi32_pd(d1), average1);
-					const __m128d d1b = _mm_sub_pd(_mm_cvtepi32_pd(_mm_swap_64(d1)), average1);
-					var1 = _mm_add_pd(var1, _mm_mul_pd(d1a, d1a));
-					var1 = _mm_add_pd(var1, _mm_mul_pd(d1b, d1b));
-					const __m128i d2 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data2, _MM_SHUFFLE_EPI32_INT(2, 2, 2, 2)));
-					const __m128d d2a = _mm_sub_pd(_mm_cvtepi32_pd(d2), average2);
-					const __m128d d2b = _mm_sub_pd(_mm_cvtepi32_pd(_mm_swap_64(d2)), average2);
-					var2 = _mm_add_pd(var2, _mm_mul_pd(d2a, d2a));
-					var2 = _mm_add_pd(var2, _mm_mul_pd(d2b, d2b));
-					covar = _mm_add_pd(covar, _mm_mul_pd(d1a, d2a));
-					covar = _mm_add_pd(covar, _mm_mul_pd(d1b, d2b));
-					//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_method1: block=" << ((8 * block) + 4) << "; d1=" << toString_f64(d1a) << "; d2=" << toString_f64(d2a) << std::endl;
-					//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_method1: block=" << ((8 * block) + 5) << "; d1=" << toString_f64(d1b) << "; d2=" << toString_f64(d2b) << std::endl;
-				}
-				{
-					const __m128i d1 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data1, _MM_SHUFFLE_EPI32_INT(3, 3, 3, 3)));
-					const __m128d d1a = _mm_sub_pd(_mm_cvtepi32_pd(d1), average1);
-					const __m128d d1b = _mm_sub_pd(_mm_cvtepi32_pd(_mm_swap_64(d1)), average1);
-					var1 = _mm_add_pd(var1, _mm_mul_pd(d1a, d1a));
-					var1 = _mm_add_pd(var1, _mm_mul_pd(d1b, d1b));
-					const __m128i d2 = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data2, _MM_SHUFFLE_EPI32_INT(3, 3, 3, 3)));
-					const __m128d d2a = _mm_sub_pd(_mm_cvtepi32_pd(d2), average2);
-					const __m128d d2b = _mm_sub_pd(_mm_cvtepi32_pd(_mm_swap_64(d2)), average2);
-					var2 = _mm_add_pd(var2, _mm_mul_pd(d2a, d2a));
-					var2 = _mm_add_pd(var2, _mm_mul_pd(d2b, d2b));
-					covar = _mm_add_pd(covar, _mm_mul_pd(d1a, d2a));
-					covar = _mm_add_pd(covar, _mm_mul_pd(d1b, d2b));
-					//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_method1: block=" << ((8 * block) + 6) << "; d1=" << toString_f64(d1a) << "; d2=" << toString_f64(d2a) << std::endl;
-					//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_method1: block=" << ((8 * block) + 7) << "; d1=" << toString_f64(d1b) << "; d2=" << toString_f64(d2b) << std::endl;
-				}
-				//std::cout << "INFO: hli:::_mm_variance_epu8: data=" << toString_u8(data) << "; d1=" << toString_u32(d1) << "; d2=" << toString_u32(d2) << "; d3=" << toString_u32(d3) << "; d4=" << toString_u32(d4) << std::endl;
+			for (size_t block = 0; block < nBlocks; ++block) 
+			{
+				const auto data1 = _mm_sub_pd(_mm_cvt_epu8_pd(mem_addr1[block]), average1);
+
+				var1 = _mm_add_pd(var1, _mm_mul_pd(std::get<0>(data1), std::get<0>(data1)));
+				var1 = _mm_add_pd(var1, _mm_mul_pd(std::get<1>(data1), std::get<1>(data1)));
+				var1 = _mm_add_pd(var1, _mm_mul_pd(std::get<2>(data1), std::get<2>(data1)));
+				var1 = _mm_add_pd(var1, _mm_mul_pd(std::get<3>(data1), std::get<3>(data1)));
+				var1 = _mm_add_pd(var1, _mm_mul_pd(std::get<4>(data1), std::get<4>(data1)));
+				var1 = _mm_add_pd(var1, _mm_mul_pd(std::get<5>(data1), std::get<5>(data1)));
+				var1 = _mm_add_pd(var1, _mm_mul_pd(std::get<6>(data1), std::get<6>(data1)));
+				var1 = _mm_add_pd(var1, _mm_mul_pd(std::get<7>(data1), std::get<7>(data1)));
+
+				const auto data2 = _mm_sub_pd(_mm_cvt_epu8_pd(mem_addr2[block]), average2);
+
+				var2 = _mm_add_pd(var2, _mm_mul_pd(std::get<0>(data2), std::get<0>(data2)));
+				var2 = _mm_add_pd(var2, _mm_mul_pd(std::get<1>(data2), std::get<1>(data2)));
+				var2 = _mm_add_pd(var2, _mm_mul_pd(std::get<2>(data2), std::get<2>(data2)));
+				var2 = _mm_add_pd(var2, _mm_mul_pd(std::get<3>(data2), std::get<3>(data2)));
+				var2 = _mm_add_pd(var2, _mm_mul_pd(std::get<4>(data2), std::get<4>(data2)));
+				var2 = _mm_add_pd(var2, _mm_mul_pd(std::get<5>(data2), std::get<5>(data2)));
+				var2 = _mm_add_pd(var2, _mm_mul_pd(std::get<6>(data2), std::get<6>(data2)));
+				var2 = _mm_add_pd(var2, _mm_mul_pd(std::get<7>(data2), std::get<7>(data2)));
+
+				covar = _mm_add_pd(covar, _mm_mul_pd(std::get<0>(data1), std::get<0>(data2)));
+				covar = _mm_add_pd(covar, _mm_mul_pd(std::get<1>(data1), std::get<1>(data2)));
+				covar = _mm_add_pd(covar, _mm_mul_pd(std::get<2>(data1), std::get<2>(data2)));
+				covar = _mm_add_pd(covar, _mm_mul_pd(std::get<3>(data1), std::get<3>(data2)));
+				covar = _mm_add_pd(covar, _mm_mul_pd(std::get<4>(data1), std::get<4>(data2)));
+				covar = _mm_add_pd(covar, _mm_mul_pd(std::get<5>(data1), std::get<5>(data2)));
+				covar = _mm_add_pd(covar, _mm_mul_pd(std::get<6>(data1), std::get<6>(data2)));
+				covar = _mm_add_pd(covar, _mm_mul_pd(std::get<7>(data1), std::get<7>(data2)));
 			}
 			const __m128d nElements = _mm_set1_pd(static_cast<double>(nBytes));
 			covar = _mm_div_pd(_mm_hadd_pd(covar, covar), nElements);
@@ -167,7 +182,6 @@ namespace hli {
 			const __m128d average2 = _mm_div_pd(_mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(mem_addr2, nBytes)), nElements);
 			return _mm_corr_epu8_method2(mem_addr1, mem_addr2, nBytes, average1, average2);
 		}
-
 
 		template <int N_BITS>
 		inline __m128d calc_variance(
@@ -423,8 +437,10 @@ namespace hli {
 			double min4 = std::numeric_limits<double>::max();
 			double min5 = std::numeric_limits<double>::max();
 			double min6 = std::numeric_limits<double>::max();
+			double min7 = std::numeric_limits<double>::max();
+			double min8 = std::numeric_limits<double>::max();
 
-			__m128d result_ref, result1, result2, result3, result4, result5, result6;
+			__m128d result_ref, result1, result2, result3, result4, result5, result6, result7, result8;
 
 			for (size_t i = 0; i < nExperiments; ++i) {
 
@@ -434,84 +450,112 @@ namespace hli {
 
 				{
 					timer::reset_and_start_timer();
-					result1 = hli::priv::_mm_corr_epu8_method1<8>(mem_addr1, mem_addr2, nBytes);
+					result1 = hli::priv::_mm_corr_epu8_method0<8>(mem_addr1, mem_addr2, nBytes);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
 						if (std::abs(result_ref.m128d_f64[0] - result1.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method1<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result1) << std::endl;
+							std::cout << "WARNING: test _mm_corr_epu8_method0<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result1) << std::endl;
 							return;
 						}
 					}
 				}
 				{
 					timer::reset_and_start_timer();
-					result2 = hli::priv::_mm_corr_epu8_method1<6>(mem_addr1, mem_addr2, nBytes);
+					result2 = hli::priv::_mm_corr_epu8_method0<6>(mem_addr1, mem_addr2, nBytes);
 					min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 					if (doTests) {
 						if (std::abs(result_ref.m128d_f64[0] - result2.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method1<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result2) << std::endl;
+							std::cout << "WARNING: test _mm_corr_epu8_method0<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result2) << std::endl;
 							return;
 						}
 					}
 				}
+
 				{
 					timer::reset_and_start_timer();
-					result3 = hli::priv::_mm_corr_epu8_method2<8>(mem_addr1, mem_addr2, nBytes);
+					result3 = hli::priv::_mm_corr_epu8_method1<8>(mem_addr1, mem_addr2, nBytes);
 					min3 = std::min(min3, timer::get_elapsed_kcycles());
 
 					if (doTests) {
 						if (std::abs(result_ref.m128d_f64[0] - result3.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method2<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result3) << std::endl;
+							std::cout << "WARNING: test _mm_corr_epu8_method1<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result3) << std::endl;
 							return;
 						}
 					}
 				}
 				{
 					timer::reset_and_start_timer();
-					result4 = hli::priv::_mm_corr_epu8_method2<6>(mem_addr1, mem_addr2, nBytes);
+					result4 = hli::priv::_mm_corr_epu8_method1<6>(mem_addr1, mem_addr2, nBytes);
 					min4 = std::min(min4, timer::get_elapsed_kcycles());
 
 					if (doTests) {
 						if (std::abs(result_ref.m128d_f64[0] - result4.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method2<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result4) << std::endl;
+							std::cout << "WARNING: test _mm_corr_epu8_method1<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result4) << std::endl;
 							return;
 						}
 					}
 				}
+
 				{
 					timer::reset_and_start_timer();
-					result5 = hli::priv::_mm_corr_epu8_method3<8>(mem_addr1, mem_addr2, nBytes);
+					result5 = hli::priv::_mm_corr_epu8_method2<8>(mem_addr1, mem_addr2, nBytes);
 					min5 = std::min(min5, timer::get_elapsed_kcycles());
 
 					if (doTests) {
 						if (std::abs(result_ref.m128d_f64[0] - result5.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method3<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result5) << std::endl;
+							std::cout << "WARNING: test _mm_corr_epu8_method2<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result5) << std::endl;
 							return;
 						}
 					}
 				}
 				{
 					timer::reset_and_start_timer();
-					result6 = hli::priv::_mm_corr_epu8_method3<6>(mem_addr1, mem_addr2, nBytes);
+					result6 = hli::priv::_mm_corr_epu8_method0<6>(mem_addr1, mem_addr2, nBytes);
 					min6 = std::min(min6, timer::get_elapsed_kcycles());
 
 					if (doTests) {
 						if (std::abs(result_ref.m128d_f64[0] - result6.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method3<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result6) << std::endl;
+							std::cout << "WARNING: test _mm_corr_epu8_method2<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result6) << std::endl;
+							return;
+						}
+					}
+				}
+				{
+					timer::reset_and_start_timer();
+					result7 = hli::priv::_mm_corr_epu8_method3<8>(mem_addr1, mem_addr2, nBytes);
+					min7 = std::min(min7, timer::get_elapsed_kcycles());
+
+					if (doTests) {
+						if (std::abs(result_ref.m128d_f64[0] - result7.m128d_f64[0]) > delta) {
+							std::cout << "WARNING: test _mm_corr_epu8_method3<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result7) << std::endl;
+							return;
+						}
+					}
+				}
+				{
+					timer::reset_and_start_timer();
+					result8 = hli::priv::_mm_corr_epu8_method3<6>(mem_addr1, mem_addr2, nBytes);
+					min8 = std::min(min8, timer::get_elapsed_kcycles());
+
+					if (doTests) {
+						if (std::abs(result_ref.m128d_f64[0] - result8.m128d_f64[0]) > delta) {
+							std::cout << "WARNING: test _mm_corr_epu8_method3<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result8) << std::endl;
 							return;
 						}
 					}
 				}
 			}
 			printf("[_mm_corr_epu8 Ref]       : %2.5f Kcycles; %0.14f\n", min_ref, result_ref.m128d_f64[0]);
-			printf("[_mm_corr_epu8_method1<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min1, result1.m128d_f64[0], min_ref / min1);
-			printf("[_mm_corr_epu8_method1<6>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min2, result2.m128d_f64[0], min_ref / min2);
-			printf("[_mm_corr_epu8_method2<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min3, result3.m128d_f64[0], min_ref / min3);
-			printf("[_mm_corr_epu8_method2<6>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min4, result4.m128d_f64[0], min_ref / min4);
-			printf("[_mm_corr_epu8_method3<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min5, result3.m128d_f64[0], min_ref / min5);
-			printf("[_mm_corr_epu8_method3<6>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min6, result4.m128d_f64[0], min_ref / min6);
+			printf("[_mm_corr_epu8_method0<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min1, result1.m128d_f64[0], min_ref / min1);
+			printf("[_mm_corr_epu8_method0<6>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min2, result2.m128d_f64[0], min_ref / min2);
+			printf("[_mm_corr_epu8_method1<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min3, result3.m128d_f64[0], min_ref / min3);
+			printf("[_mm_corr_epu8_method1<6>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min4, result4.m128d_f64[0], min_ref / min4);
+			printf("[_mm_corr_epu8_method2<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min5, result5.m128d_f64[0], min_ref / min5);
+			printf("[_mm_corr_epu8_method2<6>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min6, result6.m128d_f64[0], min_ref / min6);
+			printf("[_mm_corr_epu8_method3<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min7, result7.m128d_f64[0], min_ref / min7);
+			printf("[_mm_corr_epu8_method3<6>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min8, result8.m128d_f64[0], min_ref / min8);
 
 			_mm_free(mem_addr1);
 			_mm_free(mem_addr2);
