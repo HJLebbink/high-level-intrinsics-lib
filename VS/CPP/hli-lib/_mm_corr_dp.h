@@ -15,9 +15,76 @@
 #include "_mm_covar_epu8.h"
 #include "_mm_permute_array.h"
 
+
 namespace hli {
 
 	namespace priv {
+
+		inline __m128d _mm_corr_pd_method0(
+			const std::tuple<__m128d * const, const size_t> data1,
+			const std::tuple<__m128d * const, const size_t> data2)
+		{
+			const size_t nBytes = std::get<1>(data1);
+			const size_t nElements =  nBytes >> 3;
+			const double * const ptr1 = reinterpret_cast<double * const>(std::get<0>(data1));
+			const double * const ptr2 = reinterpret_cast<double * const>(std::get<0>(data2));
+
+			double s12 = 0;
+			double s11 = 0;
+			double s22 = 0;
+			double s1 = 0;
+			double s2 = 0;
+
+			for (size_t i = 0; i < nElements; ++i)
+			{
+				const double d1 = ptr1[i];
+				const double d2 = ptr2[i];
+				s12 += d1 * d2;
+				s11 += d1 * d1;
+				s22 += d2 * d2;
+				s1 += d1;
+				s2 += d2;
+			}
+
+			double corr = ((nElements * s12) - (s1*s2)) / (sqrt((nElements*s11) - (s1*s1)) * sqrt((nElements * s22) - (s2*s2)));
+			return _mm_set1_pd(corr);
+		}
+
+		inline __m128d _mm_corr_pd_method1(
+			const std::tuple<__m128d * const, const size_t> data1,
+			const std::tuple<__m128d * const, const size_t> data2)
+		{
+			const size_t nBytes = std::get<1>(data1);
+			const size_t nBlocks = nBytes >> 4;
+
+			__m128d s12 = _mm_setzero_pd();
+			__m128d s11 = _mm_setzero_pd();
+			__m128d s22 = _mm_setzero_pd();
+			__m128d s1 = _mm_setzero_pd();
+			__m128d s2 = _mm_setzero_pd();
+
+			for (size_t i = 0; i < nBlocks; ++i)
+			{
+				const __m128d d1 = std::get<0>(data1)[i];
+				const __m128d d2 = std::get<0>(data2)[i];
+				
+				s12 = _mm_add_pd(s12, _mm_mul_pd(d1, d2));
+				s11 = _mm_add_pd(s11, _mm_mul_pd(d1, d1));
+				s22 = _mm_add_pd(s22, _mm_mul_pd(d2, d2));
+				s1 = _mm_add_pd(s1, d1);
+				s2 = _mm_add_pd(s2, d2);
+			}
+
+			const __m128d nElements = _mm_set1_pd(static_cast<double>(nBlocks << 1));
+			const __m128d s11_s22 = _mm_hadd_pd(s11, s22);
+			const __m128d s1_s2 = _mm_hadd_pd(s1, s2);
+			const __m128d s11_s22_s = _mm_sqrt_pd(_mm_sub_pd(_mm_mul_pd(s11_s22, nElements), _mm_mul_pd(s1_s2, s1_s2)));
+			const __m128d s11_s22_p = _mm_mul_pd(s11_s22_s, _mm_swap_64(s11_s22_s));
+			const __m128d covar = _mm_sub_pd(_mm_mul_pd(_mm_hadd_pd(s12, s12), nElements), _mm_mul_pd(s1_s2, _mm_swap_64(s1_s2)));
+			const __m128d corr = _mm_div_pd(covar, s11_s22_p);
+			//double corr = ((nElements*s12) - (s1*s2)) / (sqrt((nElements*s11) - (s1*s1)) * sqrt((nElements*s22) - (s2*s2)));
+			return corr;
+		}
 
 		inline __m128d _mm_corr_dp_method3(
 			const std::tuple<__m128d * const, const size_t> data1,
@@ -68,6 +135,59 @@ namespace hli {
 			//std::cout << "INFO: _mm_corr_epu8::_mm_corr_dp_method3: covar=" << covar.m128d_f64[0] << "; corr=" << corr.m128d_f64[0] << std::endl;
 			return corr;
 		}
-
 	}
+
+	namespace test {
+
+		void test_mm_corr_pd(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		{
+			const double delta = 0.0000001;
+
+			auto data1 = _mm_malloc_m128d(16 * nBlocks);
+			auto data2 = _mm_malloc_m128d(16 * nBlocks);
+			fillRand_pd(data1);
+			fillRand_pd(data2);
+
+			double min_0 = std::numeric_limits<double>::max();
+			double min_1 = std::numeric_limits<double>::max();
+
+			__m128d result_0, result_1;
+
+			for (size_t i = 0; i < nExperiments; ++i) {
+
+				timer::reset_and_start_timer();
+				result_0 = hli::priv::_mm_corr_pd_method0(data1, data2);
+				min_0 = std::min(min_0, timer::get_elapsed_kcycles());
+
+				{
+					timer::reset_and_start_timer();
+					result_1 = hli::priv::_mm_corr_pd_method1(data1, data2);
+					min_1 = std::min(min_1, timer::get_elapsed_kcycles());
+
+					if (doTests) {
+						if (std::abs(result_0.m128d_f64[0] - result_1.m128d_f64[0]) > delta) {
+							std::cout << "WARNING: test _mm_corr_epu8_method0<8>: result-ref=" << hli::toString_f64(result_0) << "; result=" << hli::toString_f64(result_1) << std::endl;
+							return;
+						}
+					}
+				}
+			}
+			printf("[_mm_corr_epu8_method0]: %2.5f Kcycles; %0.14f\n", min_0, result_0.m128d_f64[0]);
+			printf("[_mm_corr_epu8_method1]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min_1, result_1.m128d_f64[0], min_0 / min_1);
+
+			_mm_free2(data1);
+			_mm_free2(data2);
+		}
+	}
+
+	inline __m128d _mm_corr_pd(
+		const std::tuple<__m128d * const, const size_t> data1,
+		const std::tuple<__m128d * const, const size_t> data2)
+	{
+		return priv::_mm_corr_pd_method0(data1, data2);
+		//return priv::_mm_corr_pd_method1(data1, data2);
+	}
+
+
+
 }

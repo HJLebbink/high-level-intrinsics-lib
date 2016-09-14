@@ -33,6 +33,7 @@
 #include "..\hli-lib\_mm_rand_si128.h"
 #include "..\hli-lib\_mm_rescale_epu16.h"
 #include "..\hli-lib\_mm_permute_array.h"
+#include "..\hli-lib\_mm_entropy_epu8.h"
 
 
 /*
@@ -325,7 +326,6 @@ namespace hli {
 		_mm_free(mem_addr1);
 		_mm_free(mem_addr2);
 	}
-
 }
 
 int main()
@@ -338,13 +338,15 @@ int main()
 	{
 		const auto start = std::chrono::system_clock::now();
 
-		const size_t nExperiments = 10000;
+		const size_t nExperiments = 1000;
 		//hli::test_endianess();
 
 		//hli::test::test_mm_hadd_epu8(10010, nExperiments, true);
 		//hli::test_mm256_hadd_epu8(10010, nExperiments, true);
 		//hli::test_mm_variance_epu8(10010, nExperiments, true);
-		hli::test::test_mm_corr_epu8(1010, nExperiments, true);
+		//hli::test::test_mm_corr_epu8(1010, nExperiments, true);
+		hli::test::test_mm_corr_pd(1010, nExperiments, true);
+
 
 		//hli::test_mm_rand_si128(1010, nExperiments, true);
 		//hli::test_mm_rescale_epu16(2010, nExperiments, true);
@@ -352,7 +354,7 @@ int main()
 		//hli::test::test_mm_permute_dp_array(3102, nExperiments, true);
 
 		//hli::test::test_mm_corr_perm_epu8(100, 1000, nExperiments, true);
-
+		//hli::test::test_mm_entropy_epu8(100, nExperiments, true);
 
 		const auto diff = std::chrono::system_clock::now() - start;
 		std::cout << std::endl

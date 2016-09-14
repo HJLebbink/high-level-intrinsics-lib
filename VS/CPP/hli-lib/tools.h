@@ -84,7 +84,7 @@ namespace hli {
 	}
 
 	template <class T>
-	inline void _mm_free2(std::tuple<T * const, const size_t> t) {
+	inline void _mm_free2(const std::tuple<T * const, const size_t>& t) {
 		_mm_free(std::get<0>(t));
 	}
 

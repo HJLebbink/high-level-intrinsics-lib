@@ -119,6 +119,13 @@ namespace hli {
 		fillRand_epu8<N_BITS>(reinterpret_cast<__int8 * const>(mem_addr), nBytes);
 	}
 
+	template <int N_BITS>
+	void fillRand_epu8(const std::tuple<__m128i * const, const size_t>& data)
+	{
+		fillRand_epu8<N_BITS>(std::get<0>(data), std::get<1>(data));
+	}
+
+
 	void fillRand_pd(__m128d * const mem_addr, const size_t nBytes)
 	{
 		double * const ptr = reinterpret_cast<double * const>(mem_addr);
