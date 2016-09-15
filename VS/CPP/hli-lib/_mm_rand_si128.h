@@ -56,10 +56,12 @@ namespace hli {
 		}
 
 		inline void _mm_rand_si128_ref(
-			__m128i * const mem_addr,
-			const size_t nBytes,
+			const std::tuple<__m128i * const, const size_t>& data,
 			__m128i& randInts)
 		{
+			__m128i * const ptr = std::get<0>(data);
+			const size_t nBytes = std::get<1>(data);
+
 			unsigned int r0 = randInts.m128i_u32[0];
 			unsigned int r1 = randInts.m128i_u32[1];
 			unsigned int r2 = randInts.m128i_u32[2];
@@ -72,10 +74,10 @@ namespace hli {
 				r2 = nextRandInt(r2);
 				r3 = nextRandInt(r3);
 
-				mem_addr[block].m128i_u32[0] = r0;
-				mem_addr[block].m128i_u32[1] = r1;
-				mem_addr[block].m128i_u32[2] = r2;
-				mem_addr[block].m128i_u32[3] = r3;
+				ptr[block].m128i_u32[0] = r0;
+				ptr[block].m128i_u32[1] = r1;
+				ptr[block].m128i_u32[2] = r2;
+				ptr[block].m128i_u32[3] = r3;
 			}
 
 			randInts.m128i_u32[0] = r0;
@@ -85,16 +87,17 @@ namespace hli {
 		}
 	}
 
-
 	inline void _mm_lfsr32_epu32(
-		__m128i * const mem_addr,
-		const size_t nBytes,
+		const std::tuple<__m128i * const, const size_t>& data,
 		__m128i& randInts)
 	{
+		__m128i * const ptr = std::get<0>(data);
+		const size_t nBytes = std::get<1>(data);
+
 		const size_t nBlocks = nBytes >> 4;
 		for (size_t block = 0; block < nBlocks; ++block) {
 			randInts = priv::lfsr32_galois(randInts);
-			mem_addr[block] = randInts;
+			ptr[block] = randInts;
 		}
 	}
 

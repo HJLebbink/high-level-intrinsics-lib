@@ -17,8 +17,7 @@ namespace hli {
 	namespace priv {
 
 		inline void _mm_rescale_epu16_ref(
-			__m128i * const mem_addr,
-			const size_t nBytes)
+			const std::tuple<__m128i * const, const size_t>& data)
 		{
 			/*
 			const size_t length = vector.size();
@@ -37,27 +36,32 @@ namespace hli {
 			}
 			*/
 
+			__m128i * const ptr = std::get<0>(data);
+			const size_t nBytes = std::get<1>(data);
+
 			const size_t length = nBytes >> 1;
 			const bool showInfo = false;
-			unsigned __int16 * const ptr = reinterpret_cast<unsigned __int16 * const>(mem_addr);
+			unsigned __int16 * const ptr2 = reinterpret_cast<unsigned __int16 * const>(ptr);
 
 			for (size_t i = 0; i < length; ++i) {
-				if (showInfo) std::cout << "rescaleVector: before: i=" << i << ":" << ptr[i] << std::endl;
+				if (showInfo) std::cout << "rescaleVector: before: i=" << i << ":" << ptr2[i] << std::endl;
 
-				const unsigned __int16 original = ptr[i];
+				const unsigned __int16 original = ptr2[i];
 				const unsigned int product = original*static_cast<unsigned int>(i + 1);
 				const unsigned int f3 = product >> 16;
 				if (showInfo) std::cout << "rescaleVector_reference: i=" << i << "; original " << original << "; product " << product << "; f3 " << f3 << std::endl;
 
-				ptr[i] = static_cast<unsigned __int16>(f3);
+				ptr2[i] = static_cast<unsigned __int16>(f3);
 				//std::cout << "rescaleVector: after: i=" << i << ":" << ptr[i] << std::endl;
 			}
 		}
 
 		inline void _mm_rescale_epu16_method1(
-			__m128i * const mem_addr,
-			const size_t nBytes)
+			const std::tuple<__m128i * const, const size_t>& data)
 		{
+			__m128i * const ptr = std::get<0>(data);
+			const size_t nBytes = std::get<1>(data);
+
 			const bool showInfo = false;
 			const size_t nBlocks = nBytes >> 4;
 
@@ -67,7 +71,7 @@ namespace hli {
 			if (showInfo) std::cout << "increment=" << toString_i32(increment) << std::endl;
 
 			for (size_t block = 0; block < nBlocks; ++block) {
-				const __m128i data = mem_addr[block];
+				const __m128i data = ptr[block];
 				if (showInfo) std::cout << "input data=" << toString_u16(data) << std::endl;
 
 				const __m128i numbers1 = _mm_cvtepu16_epi32(data);
@@ -94,17 +98,16 @@ namespace hli {
 				if (showInfo) std::cout << "output short " << toString_u16(saturated) << std::endl;
 
 				if (showInfo) std::cout << std::endl;
-				mem_addr[block] = saturated;
+				ptr[block] = saturated;
 			}
 		}
 	}
 
 	inline void _mm_rescale_epu16(
-		__m128i * const mem_addr,
-		const size_t nBytes)
+		const std::tuple<__m128i * const, const size_t>& data)
 	{
-		//priv::_mm_rescale_epu16_ref(mem_addr, nBytes);
-		priv::_mm_rescale_epu16_method1(mem_addr, nBytes);
+		//priv::_mm_rescale_epu16_ref(data);
+		priv::_mm_rescale_epu16_method1(data);
 
 		//for (size_t block = 0; block < (nBytes >> 4); ++block) {
 		//	std::cout << "INFO: _mm_rescale_epu16::_mm_rescale_epu16: block="<<block << ": " << toString_u16(mem_addr[block]) << std::endl;

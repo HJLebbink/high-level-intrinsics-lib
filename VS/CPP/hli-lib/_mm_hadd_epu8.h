@@ -34,11 +34,9 @@ namespace hli {
 
 	namespace priv {
 
-		inline __m128i _mm_hadd_epu8_ref(
-			const __m128i * const mem_addr,
-			const size_t nBytes)
+		inline __m128i _mm_hadd_epu8_method0(
+			const std::tuple<const __m128i * const, const size_t>& data)
 		{
-
 			// AVX
 			// vpsrldq     xmm4, xmm3, 4
 			// vpmovzxbd   xmm2, xmm3
@@ -46,7 +44,8 @@ namespace hli {
 			// vpaddd      xmm1, xmm1, xmm2
 			// vpaddd      xmm0, xmm0, xmm4
 
-			const unsigned __int8 * const ptr = reinterpret_cast<const unsigned __int8 * const>(mem_addr);
+			const size_t nBytes = std::get<1>(data);
+			const unsigned __int8 * const ptr = reinterpret_cast<const unsigned __int8 * const>(std::get<0>(data));
 			unsigned __int32 sum = 0;
 			for (size_t i = 0; i < nBytes; ++i) {
 				sum += ptr[i];
@@ -55,33 +54,34 @@ namespace hli {
 			return _mm_set1_epi32(sum);
 		}
 
+
+		
 		template <int N_BITS>
 		inline __m128i _mm_hadd_epu8_method1(
-			const __m128i * const mem_addr,
-			const size_t nBytes)
+			const std::tuple<const __m128i * const, const size_t>& data)
 		{
 			static_assert((N_BITS > 0) && (N_BITS <= 8), "Number of bits must be in range 1 to 8.");
 #			pragma warning( disable: 280) 
 			switch (N_BITS) {
-			case 8: return _mm_hadd_epu8_method1_nBits8(mem_addr, nBytes);
-			case 7: return _mm_hadd_epu8_method1_nBits7(mem_addr, nBytes);
-			case 6: return _mm_hadd_epu8_method1_nBits6(mem_addr, nBytes);
+			case 8: return _mm_hadd_epu8_method1_nBits8(data);
+			case 7: return _mm_hadd_epu8_method1_nBits7(data);
+			case 6: return _mm_hadd_epu8_method1_nBits6(data);
 			case 5:
 			case 4:
 			case 3:
 			case 2:
-			case 1: return _mm_hadd_epu8_method1_nBits5(mem_addr, nBytes);
+			case 1: return _mm_hadd_epu8_method1_nBits5(data);
 			default:
 				return _mm_setzero_si128();
 			}
 		}
 
 		inline __m128i _mm_hadd_epu8_method2(
-			const __m128i * const mem_addr,
-			const size_t nBytes)
+			const std::tuple<const __m128i * const, const size_t>& data)
 		{
 			//assume (nBytes < 2 ^ (32 - 8))
 
+			const size_t nBytes = std::get<1>(data);
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 			const __m128i and_mask = _mm_set1_epi32(0b11111111);
 			//const __m128i shuffle_mask_0 = _mm_set_epi8(15, 14, 13, 12,   11, 10, 9, 8,   7, 6, 5, 4,   3, 2, 1, 0);
@@ -92,12 +92,11 @@ namespace hli {
 			__m128i sum = _mm_setzero_si128();
 
 			for (size_t block = 0; block < nBlocks; ++block) {
-				const __m128i d = _mm_load_si128(&mem_addr[block]);
-
-				sum = _mm_add_epi32(sum, _mm_and_si128(d, and_mask));
-				sum = _mm_add_epi32(sum, _mm_and_si128(_mm_shuffle_epi8(d, shuffle_mask_1), and_mask));
-				sum = _mm_add_epi32(sum, _mm_and_si128(_mm_shuffle_epi8(d, shuffle_mask_2), and_mask));
-				sum = _mm_add_epi32(sum, _mm_and_si128(_mm_shuffle_epi8(d, shuffle_mask_3), and_mask));
+				const __m128i data_Block = std::get<0>(data)[block];
+				sum = _mm_add_epi32(sum, _mm_and_si128(data_Block, and_mask));
+				sum = _mm_add_epi32(sum, _mm_and_si128(_mm_shuffle_epi8(data_Block, shuffle_mask_1), and_mask));
+				sum = _mm_add_epi32(sum, _mm_and_si128(_mm_shuffle_epi8(data_Block, shuffle_mask_2), and_mask));
+				sum = _mm_add_epi32(sum, _mm_and_si128(_mm_shuffle_epi8(data_Block, shuffle_mask_3), and_mask));
 			}
 
 			const __m128i sum2 = _mm_cvtepi32_epi64(_mm_hadd_epi32(sum, sum));
@@ -105,41 +104,41 @@ namespace hli {
 		}
 
 		inline __m128i _mm_hadd_epu8_method3(
-			const __m128i * const mem_addr,
-			const size_t nBytes)
+			const std::tuple<const __m128i * const, const size_t>& data)
 		{
+			const size_t nBytes = std::get<1>(data);
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 			__m128i sum = _mm_setzero_si128();
 			for (size_t block = 0; block < nBlocks; ++block) {
-				sum = _mm_add_epi64(sum, _mm_sad_epu8(mem_addr[block], _mm_setzero_si128()));
+				sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
 			}
 			return _mm_hadd_epi64(sum);
 		}
 
 		inline __m128i _mm_hadd_epu8_method1_nBits8(
-			const __m128i * const mem_addr,
-			const size_t nBytes)
+			const std::tuple<const __m128i * const, const size_t>& data)
 		{
+			const size_t nBytes = std::get<1>(data);
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 			__m128i sum = _mm_setzero_si128();
 
 			for (size_t block = 0; block < nBlocks; ++block) {
-				sum = _mm_add_epi64(sum, _mm_sad_epu8(mem_addr[block], _mm_setzero_si128()));
+				sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
 			}
 			return _mm_hadd_epi64(sum);
 		}
 
 		inline __m128i _mm_hadd_epu8_method1_nBits7(
-			const __m128i * const mem_addr,
-			const size_t nBytes)
+			const std::tuple<const __m128i * const, const size_t>& data)
 		{
+			const size_t nBytes = std::get<1>(data);
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 
 			__m128i sum = _mm_setzero_si128();
 
 			for (size_t block = 0; block < nBlocks - 1; block += 2)
 			{
-				__m128i sum_p = _mm_add_epi8(mem_addr[block], mem_addr[block + 1]);
+				__m128i sum_p = _mm_add_epi8(std::get<0>(data)[block], std::get<0>(data)[block + 1]);
 				sum = _mm_add_epi64(sum, _mm_sad_epu8(sum_p, _mm_setzero_si128()));
 			}
 
@@ -147,16 +146,16 @@ namespace hli {
 			if (tail > 0) {
 				for (size_t block = (nBlocks - tail); block < nBlocks; ++block) {
 					//std::cout << "INFO: hli::_mm_hadd_epu8_class<7>: tail=" << tail << "; block=" << block << std::endl;
-					sum = _mm_add_epi64(sum, _mm_sad_epu8(mem_addr[block], _mm_setzero_si128()));
+					sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
 				}
 			}
 			return _mm_hadd_epi64(sum);
 		}
 
 		inline __m128i _mm_hadd_epu8_method1_nBits6(
-			const __m128i * const mem_addr,
-			const size_t nBytes)
+			const std::tuple<const __m128i * const, const size_t>& data)
 		{
+			const size_t nBytes = std::get<1>(data);
 			const int nBlocks = static_cast<int>(nBytes >> 4); // divide by 16 to get the number of __m128i regs (blocks)
 
 			__m128i sum = _mm_setzero_si128();
@@ -164,26 +163,26 @@ namespace hli {
 
 			for (int block = 0; block < (nBlocks - 3); block += 4)
 			{
-				sum_p = mem_addr[block];
-				sum_p = _mm_add_epi8(sum_p, mem_addr[block + 1]);
-				sum_p = _mm_add_epi8(sum_p, mem_addr[block + 2]);
-				sum_p = _mm_add_epi8(sum_p, mem_addr[block + 3]);
+				sum_p = std::get<0>(data)[block];
+				sum_p = _mm_add_epi8(sum_p, std::get<0>(data)[block + 1]);
+				sum_p = _mm_add_epi8(sum_p, std::get<0>(data)[block + 2]);
+				sum_p = _mm_add_epi8(sum_p, std::get<0>(data)[block + 3]);
 				sum = _mm_add_epi64(sum, _mm_sad_epu8(sum_p, _mm_setzero_si128()));
 			}
 			const int tail = nBlocks & 0b11;
 			if (tail > 0) {
 				for (int block = (nBlocks - tail); block < nBlocks; ++block) {
 					//std::cout << "INFO: hli:::_mm_hadd_epu8_method3: tail: block=" << block << std::endl;
-					sum = _mm_add_epi64(sum, _mm_sad_epu8(mem_addr[block], _mm_setzero_si128()));
+					sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
 				}
 			}
 			return _mm_hadd_epi64(sum);
 		}
 
 		inline __m128i _mm_hadd_epu8_method1_nBits5(
-			const __m128i * const mem_addr,
-			const size_t nBytes)
+			const std::tuple<const __m128i * const, const size_t>& data)
 		{
+			const size_t nBytes = std::get<1>(data);
 			const int nBlocks = static_cast<int>(nBytes >> 4); // divide by 16 to get the number of __m128i regs (blocks)
 
 			__m128i sum = _mm_setzero_si128();
@@ -191,23 +190,23 @@ namespace hli {
 
 			for (int block = 0; block < nBlocks - 7; block += 8)
 			{
-				sum_p = mem_addr[block];
-				sum_p = _mm_add_epi8(sum_p, mem_addr[block + 1]);
-				sum_p = _mm_add_epi8(sum_p, mem_addr[block + 2]);
-				sum_p = _mm_add_epi8(sum_p, mem_addr[block + 3]);
-				sum_p = _mm_add_epi8(sum_p, mem_addr[block + 4]);
-				sum_p = _mm_add_epi8(sum_p, mem_addr[block + 5]);
-				sum_p = _mm_add_epi8(sum_p, mem_addr[block + 6]);
-				sum_p = _mm_add_epi8(sum_p, mem_addr[block + 7]);
+				sum_p = std::get<0>(data)[block];
+				sum_p = _mm_add_epi8(sum_p, std::get<0>(data)[block + 1]);
+				sum_p = _mm_add_epi8(sum_p, std::get<0>(data)[block + 2]);
+				sum_p = _mm_add_epi8(sum_p, std::get<0>(data)[block + 3]);
+				sum_p = _mm_add_epi8(sum_p, std::get<0>(data)[block + 4]);
+				sum_p = _mm_add_epi8(sum_p, std::get<0>(data)[block + 5]);
+				sum_p = _mm_add_epi8(sum_p, std::get<0>(data)[block + 6]);
+				sum_p = _mm_add_epi8(sum_p, std::get<0>(data)[block + 7]);
 				sum = _mm_add_epi64(sum, _mm_sad_epu8(sum_p, _mm_setzero_si128()));
 			}
 
 			const int tail = nBlocks & 0b111;
 			if (tail > 0) {
 				int startTail = nBlocks - tail;
-				sum_p = mem_addr[startTail];
+				sum_p = std::get<0>(data)[startTail];
 				for (int block = startTail + 1; block < nBlocks; ++block) {
-					sum_p = _mm_add_epi8(sum_p, mem_addr[block]);
+					sum_p = _mm_add_epi8(sum_p, std::get<0>(data)[block]);
 				}
 				sum = _mm_add_epi64(sum, _mm_sad_epu8(sum_p, _mm_setzero_si128()));
 			}
@@ -219,9 +218,9 @@ namespace hli {
 
 		void test_mm_hadd_epu8(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 		{
-			const size_t nBytes = resizeNBytes(16 * nBlocks, 16);
-			__m128i * const mem_addr = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
-			fillRand_epu8<5>(mem_addr, nBytes);
+			auto data_r = _mm_malloc_m128i(16 * nBlocks);
+			fillRand_epu8<5>(data_r);
+			const std::tuple<const __m128i * const, const size_t> data = data_r; // make a new variable that is const
 
 			{
 				double min_ref = std::numeric_limits<double>::max();
@@ -235,12 +234,12 @@ namespace hli {
 				for (size_t i = 0; i < nExperiments; ++i) 
 				{
 					timer::reset_and_start_timer();
-					const __m128i result_ref = hli::priv::_mm_hadd_epu8_ref(mem_addr, nBytes);
+					const __m128i result_ref = hli::priv::_mm_hadd_epu8_method0(data);
 					min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 					{
 						timer::reset_and_start_timer();
-						const __m128i result = hli::priv::_mm_hadd_epu8_method1<8>(mem_addr, nBytes);
+						const __m128i result = hli::priv::_mm_hadd_epu8_method1<8>(data);
 						min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -252,7 +251,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const __m128i result = hli::priv::_mm_hadd_epu8_method1<7>(mem_addr, nBytes);
+						const __m128i result = hli::priv::_mm_hadd_epu8_method1<7>(data);
 						min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -264,7 +263,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const __m128i result = hli::priv::_mm_hadd_epu8_method1<6>(mem_addr, nBytes);
+						const __m128i result = hli::priv::_mm_hadd_epu8_method1<6>(data);
 						min3 = std::min(min3, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -276,7 +275,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const __m128i result = hli::priv::_mm_hadd_epu8_method1<5>(mem_addr, nBytes);
+						const __m128i result = hli::priv::_mm_hadd_epu8_method1<5>(data);
 						min4 = std::min(min4, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -288,7 +287,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const __m128i result = hli::priv::_mm_hadd_epu8_method2(mem_addr, nBytes);
+						const __m128i result = hli::priv::_mm_hadd_epu8_method2(data);
 						min5 = std::min(min5, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -300,7 +299,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const __m128i result = hli::priv::_mm_hadd_epu8_method3(mem_addr, nBytes);
+						const __m128i result = hli::priv::_mm_hadd_epu8_method3(data);
 						min6 = std::min(min6, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -320,7 +319,7 @@ namespace hli {
 				printf("[_mm_hadd_epu8_method3]:    %2.5f Kcycles; %2.3f times faster than ref\n", min6, min_ref / min6);
 			}
 
-			_mm_free(mem_addr);
+			_mm_free2(data);
 		}
 	}
 
@@ -333,26 +332,9 @@ namespace hli {
 	// dst[127:96] := tmp
 	template <int N_BITS>
 	inline __m128i _mm_hadd_epu8(
-		const __m128i * const mem_addr,
-		const size_t nBytes)
+		const std::tuple<const __m128i * const, const size_t>& data)
 	{
-		return priv::_mm_hadd_epu8_method1<N_BITS>(mem_addr, nBytes);
-		//return priv::_mm_hadd_epu8_method2<N_BITS>(mem_addr, nBytes);
+		return priv::_mm_hadd_epu8_method1<N_BITS>(data);
+		//return priv::_mm_hadd_epu8_method2<N_BITS>(data);
 	}
-
-	// Horizontally add all 8-bit integers in mem_addr (with nBytes).
-	// Operation:
-	// tmp := sum(mem_addr)
-	// dst[31:0] := tmp
-	// dst[63:32] := tmp
-	// dst[95:64] := tmp
-	// dst[127:96] := tmp
-	template <int N_BITS>
-	inline __m128i _mm_hadd_epu8(
-		const std::tuple<__m128i * const, const size_t> data)
-	{
-		return _mm_hadd_epu8<N_BITS>(std::get<0>(data), std::get<1>(data));
-		//return priv::_mm_hadd_epu8_method2<N_BITS>(mem_addr, nBytes);
-	}
-
 }

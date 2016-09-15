@@ -69,14 +69,23 @@ namespace hli {
 		}
 	}
 
-	inline std::tuple<__m128d * const, const size_t> deepCopy(const std::tuple<__m128d * const, const size_t>& in) {
+	template <class T>
+	inline void copy(
+		const std::tuple<const T * const, const size_t>& src,
+		const std::tuple<T * const, const size_t>& dst) 
+	{
+		memcpy(std::get<0>(dst), std::get<0>(src), std::get<1>(dst));
+	}
+
+
+	inline std::tuple<__m128d * const, const size_t> deepCopy(const std::tuple<const __m128d * const, const size_t>& in) {
 		const size_t nBytes = std::get<1>(in);
 		__m128d * const copy = static_cast<__m128d * const>(_mm_malloc(nBytes, 16));
 		memcpy(copy, std::get<0>(in), nBytes);
 		return std::make_tuple(copy, nBytes);
 	}
 
-	inline std::tuple<__m128i * const, const size_t> deepCopy(const std::tuple<__m128i * const, const size_t>& in) {
+	inline std::tuple<__m128i * const, const size_t> deepCopy(const std::tuple<const __m128i * const, const size_t>& in) {
 		const size_t nBytes = std::get<1>(in);
 		__m128i * const copy = static_cast<__m128i * const>(_mm_malloc(nBytes, 16));
 		memcpy(copy, std::get<0>(in), nBytes);
@@ -85,7 +94,8 @@ namespace hli {
 
 	template <class T>
 	inline void _mm_free2(const std::tuple<T * const, const size_t>& t) {
-		_mm_free(std::get<0>(t));
+		const void * const ptr = reinterpret_cast<const void *>(std::get<0>(t));
+		_mm_free(const_cast<void *>(ptr));
 	}
 
 	inline std::tuple<__int8 * const, const size_t> _mm_malloc_xmm(size_t nBytes) {
@@ -146,5 +156,11 @@ namespace hli {
 		return std::make_tuple(r0, r1, r2, r3, r4, r5, r6, r7);
 	}
 
-
+	inline double getDouble(
+		const std::tuple<const __m128d * const, const size_t>& data,
+		const size_t i) 
+	{
+		const double * const ptr = reinterpret_cast<const double * const>(std::get<0>(data));
+		return ptr[i];
+	}
 }

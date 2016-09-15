@@ -137,9 +137,8 @@ namespace hli {
 	void test_mm_variance_epu8(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 	{
 		const double delta = 0.0000001;
-		const size_t nBytes = resizeNBytes(16 * nBlocks, 16);
-		__m128i * const mem_addr = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
-		fillRand_epu8<5>(mem_addr, nBytes);
+		auto data = _mm_malloc_m128i(16 * nBlocks);
+		fillRand_epu8<5>(data);
 
 		{
 			double min_ref = std::numeric_limits<double>::max();
@@ -151,12 +150,12 @@ namespace hli {
 			for (size_t i = 0; i < nExperiments; ++i) {
 
 				timer::reset_and_start_timer();
-				const __m128d result_ref = hli::priv::_mm_variance_epu8_ref(mem_addr, nBytes);
+				const __m128d result_ref = hli::priv::_mm_variance_epu8_method0(data);
 				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 				{
 					timer::reset_and_start_timer();
-					const __m128d result = hli::_mm_variance_epu8<8>(mem_addr, nBytes);
+					const __m128d result = hli::_mm_variance_epu8<8>(data);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -168,7 +167,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					const __m128d result = hli::_mm_variance_epu8<7>(mem_addr, nBytes);
+					const __m128d result = hli::_mm_variance_epu8<7>(data);
 					min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -180,7 +179,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					const __m128d result = hli::_mm_variance_epu8<6>(mem_addr, nBytes);
+					const __m128d result = hli::_mm_variance_epu8<6>(data);
 					min3 = std::min(min3, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -192,7 +191,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					const __m128d result = hli::_mm_variance_epu8<5>(mem_addr, nBytes);
+					const __m128d result = hli::_mm_variance_epu8<5>(data);
 					min4 = std::min(min4, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -210,16 +209,14 @@ namespace hli {
 			printf("[_mm_variance_epu8<5>]     : %2.5f Kcycles; %2.3f times faster than ref\n", min4, min_ref / min4);
 		}
 
-		_mm_free(mem_addr);
+		_mm_free2(data);
 	}
 
 	void test_mm_rand_si128(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 	{
-		const size_t nBytes = resizeNBytes(16 * nBlocks, 16);
-		__m128i * const mem_addr1 = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
-		__m128i * const mem_addr2 = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
-		const __m128i randSeeds = _mm_set_epi32(rand(), rand(), rand(), rand());
-
+		auto data1 = _mm_malloc_m128i(16 * nBlocks);
+		auto data2 = _mm_malloc_m128i(16 * nBlocks);
+		const __m128i randSeeds = _mm_set_epi16(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand());
 		__m128i randInts1 = randSeeds;
 		__m128i randInts2 = randSeeds;
 
@@ -229,12 +226,12 @@ namespace hli {
 		for (size_t i = 0; i < nExperiments; ++i) {
 
 			timer::reset_and_start_timer();
-			hli::priv::_mm_rand_si128_ref(mem_addr1, nBytes, randInts1);
+			hli::priv::_mm_rand_si128_ref(data1, randInts1);
 			min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 			{
 				timer::reset_and_start_timer();
-				hli::_mm_lfsr32_epu32(mem_addr2, nBytes, randInts2);
+				hli::_mm_lfsr32_epu32(data2, randInts2);
 				min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 				if (doTests) {
@@ -246,8 +243,8 @@ namespace hli {
 					}
 					for (size_t block = 0; block < nBlocks; ++block) {
 						for (size_t j = 0; j < 4; ++j) {
-							if (std::abs(mem_addr1[block].m128i_u32[j] != mem_addr2[block].m128i_u32[j])) {
-								std::cout << "WARNING: test _mm_rand_si128: result-ref=" << hli::toString_u32(mem_addr1[block]) << "; result=" << hli::toString_u32(mem_addr2[block]) << std::endl;
+							if (std::abs(std::get<0>(data1)[block].m128i_u32[j] != std::get<0>(data2)[block].m128i_u32[j])) {
+								std::cout << "WARNING: test _mm_rand_si128: result-ref=" << hli::toString_u32(std::get<0>(data1)[block]) << "; result=" << hli::toString_u32(std::get<0>(data2)[block]) << std::endl;
 								return;
 							}
 						}
@@ -258,46 +255,47 @@ namespace hli {
 		printf("[_mm_rand_si128 Ref] : %2.5f Kcycles\n", min_ref);
 		printf("[_mm_rand_si128]     : %2.5f Kcycles; %2.3f times faster than ref\n", min1, min_ref / min1);
 
-		_mm_free(mem_addr1);
-		_mm_free(mem_addr2);
+		_mm_free2(data1);
+		_mm_free2(data2);
 	}
 
 	void test_mm_rescale_epu16(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 	{
 		if ((nBlocks * 8) > 0xFFFF) {
-			std::cout << "WARNING: test mm_rescale_epu16: too many blocks=" << nBlocks << std::endl;
+			std::cout << "WARNING: test_mm_rescale_epu16: too many blocks=" << nBlocks << std::endl;
 			return;
 		}
 
-		const size_t nBytes = resizeNBytes(16 * nBlocks, 16);
-		__m128i * const mem_addr = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
-		__m128i * const mem_addr1 = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
-		__m128i * const mem_addr2 = static_cast<__m128i *>(_mm_malloc(nBytes, 16));
-		const __m128i seed = _mm_set_epi32(rand(), rand(), rand(), rand());
+		auto data0_r = _mm_malloc_m128i(16 * nBlocks);
+		auto data1 = _mm_malloc_m128i(16 * nBlocks);
+		auto data2 = _mm_malloc_m128i(16 * nBlocks);
+
+		const __m128i seed = _mm_set_epi16(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand());
 		__m128i randInt = seed;
-		hli::_mm_lfsr32_epu32(mem_addr, nBytes, randInt);
+		hli::_mm_lfsr32_epu32(data0_r, randInt);
+		const std::tuple<const __m128i * const, const size_t> data0 = data0_r;
 
 		double min_ref = std::numeric_limits<double>::max();
 		double min1 = std::numeric_limits<double>::max();
 
-		for (size_t i = 0; i < nExperiments; ++i) {
-
-			memcpy(mem_addr1, mem_addr, nBytes);
+		for (size_t i = 0; i < nExperiments; ++i) 
+		{
+			copy(data0, data1);
 			timer::reset_and_start_timer();
-			hli::priv::_mm_rescale_epu16_ref(mem_addr1, nBytes);
+			hli::priv::_mm_rescale_epu16_ref(data1);
 			min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 			{
-				memcpy(mem_addr2, mem_addr, nBytes);
+				copy(data0, data2);
 				timer::reset_and_start_timer();
-				hli::_mm_rescale_epu16(mem_addr2, nBytes);
+				hli::_mm_rescale_epu16(data2);
 				min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 				if (doTests) {
 					for (size_t block = 0; block < nBlocks; ++block) {
 						for (size_t j = 0; j < 8; ++j) {
-							if (std::abs(mem_addr1[block].m128i_u16[j] != mem_addr2[block].m128i_u16[j])) {
-								std::cout << "WARNING: test mm_rescale_epu16: result-ref=" << hli::toString_u16(mem_addr1[block]) << "; result=" << hli::toString_u16(mem_addr2[block]) << std::endl;
+							if (std::abs(std::get<0>(data1)[block].m128i_u16[j] != std::get<0>(data2)[block].m128i_u16[j])) {
+								std::cout << "WARNING: test mm_rescale_epu16: result-ref=" << hli::toString_u16(std::get<0>(data1)[block]) << "; result=" << hli::toString_u16(std::get<0>(data2)[block]) << std::endl;
 								return;
 							}
 						}
@@ -309,8 +307,8 @@ namespace hli {
 			__int16 k = 0;
 			for (size_t block = 0; block < nBlocks; ++block) {
 				for (size_t j = 0; j < 8; ++j) {
-					if (mem_addr1[block].m128i_u16[j] > k) {
-						std::cout << "WARNING: test mm_rescale_epu16: position " << k << " has value " << mem_addr1[block].m128i_u16[j] << " which is too large" << std::endl;
+					if (std::get<0>(data1)[block].m128i_u16[j] > k) {
+						std::cout << "WARNING: test mm_rescale_epu16: position " << k << " has value " << std::get<0>(data1)[block].m128i_u16[j] << " which is too large" << std::endl;
 						return;
 					}
 					k++;
@@ -322,9 +320,9 @@ namespace hli {
 		printf("[_mm_rescale_epu16 Ref] : %2.5f Kcycles\n", min_ref);
 		printf("[_mm_rescale_epu16]     : %2.5f Kcycles; %2.3f times faster than ref\n", min1, min_ref / min1);
 
-		_mm_free(mem_addr);
-		_mm_free(mem_addr1);
-		_mm_free(mem_addr2);
+		_mm_free2(data0);
+		_mm_free2(data1);
+		_mm_free2(data2);
 	}
 }
 
@@ -345,13 +343,13 @@ int main()
 		//hli::test_mm256_hadd_epu8(10010, nExperiments, true);
 		//hli::test_mm_variance_epu8(10010, nExperiments, true);
 		//hli::test::test_mm_corr_epu8(1010, nExperiments, true);
-		hli::test::test_mm_corr_pd(1010, nExperiments, true);
+		//hli::test::test_mm_corr_pd(1010, nExperiments, true);
 
 
 		//hli::test_mm_rand_si128(1010, nExperiments, true);
 		//hli::test_mm_rescale_epu16(2010, nExperiments, true);
-		//hli::test::test_mm_permute_epu8_array(3102, nExperiments, true);
-		//hli::test::test_mm_permute_dp_array(3102, nExperiments, true);
+		hli::test::test_mm_permute_epu8_array(3102, nExperiments, true);
+		hli::test::test_mm_permute_dp_array(3102, nExperiments, true);
 
 		//hli::test::test_mm_corr_perm_epu8(100, 1000, nExperiments, true);
 		//hli::test::test_mm_entropy_epu8(100, nExperiments, true);
