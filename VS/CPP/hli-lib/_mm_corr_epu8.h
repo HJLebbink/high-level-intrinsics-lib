@@ -181,6 +181,49 @@ namespace hli {
 			return _mm_corr_epu8_method2(data1, data2, average1, average2);
 		}
 
+		inline __m128d _mm_corr_epu8_method3(
+			const std::tuple<const __m128i * const, const size_t>& data1,
+			const std::tuple<const __m128i * const, const size_t>& data2)
+		{
+			const size_t nBytes = std::get<1>(data1);
+			const size_t nBlocks = nBytes >> 4;
+			const size_t nElements = nBytes; //TODO: what if we want number of elements not a multiple of 16?
+
+			if (nElements > 0xFFFF) {
+				std::cout << "WARNING: _mm_corr_epu8: _mm_corr_epu8_method3: nElements=" << nElements << " which is larger than 0xFFFF." << std::endl;
+			}
+
+			const __int8 * const ptr1 = reinterpret_cast<const __int8 * const>(std::get<0>(data1));
+			const __int8 * const ptr2 = reinterpret_cast<const __int8 * const>(std::get<0>(data2));
+
+			__int32 s12 = 0;
+			__int32 s11 = 0;
+			__int32 s22 = 0;
+			__int32 s1 = 0;
+			__int32 s2 = 0;
+
+			for (size_t i = 0; i < nElements; ++i)
+			{
+				const unsigned __int8 d1 = ptr1[i];
+				const unsigned __int8 d2 = ptr2[i];
+
+				s12 += d1 * d2;
+				s11 += d1 * d1;
+				s22 += d2 * d2;
+				s1 += d1;
+				s2 += d2;
+			}
+
+			const double s12d = static_cast<double>(s12);
+			const double s11d = static_cast<double>(s11);
+			const double s22d = static_cast<double>(s22);
+			const double s1d = static_cast<double>(s1);
+			const double s2d = static_cast<double>(s2);
+
+			double corr = ((nElements * s12d) - (s1d*s2d)) / (sqrt((nElements*s11d) - (s1d*s1d)) * sqrt((nElements * s22d) - (s2d*s2d)));
+			return _mm_set1_pd(corr);
+		}
+
 		template <int N_BITS>
 		inline __m128d calc_variance(
 			const std::tuple<const __m128i * const, const size_t>& data1,
@@ -248,7 +291,7 @@ namespace hli {
 		}
 
 		template <int N_BITS>
-		inline __m128d _mm_corr_epu8_method3(
+		inline __m128d _mm_corr_epu8_method4(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2)
 		{
@@ -266,57 +309,6 @@ namespace hli {
 
 			_mm_free2(data1_d);
 			_mm_free2(data2_d);
-			return corr;
-		}
-
-		template <int N_BITS>
-		inline __m128d _mm_corr_epu8_method4(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2)
-		{
-			static_assert(N_BITS < 7, "only works if N_BITS is smaller than 7");
-
-			const size_t nBytes = std::get<1>(data1);
-			const size_t nBlocks = nBytes >> 4;
-			if (nBlocks == 0) return _mm_setzero_pd();
-
-			__m128i sum1 = _mm_setzero_si128();
-			__m128i sum2 = _mm_setzero_si128();
-			__m128i sumProd12 = _mm_setzero_si128();
-			__m128i sumProd11 = _mm_setzero_si128();
-			__m128i sumProd22 = _mm_setzero_si128();
-
-			for (size_t block = 0; block < nBlocks; ++block) {
-				const __m128i d1 = std::get<0>(data1)[block];
-				const __m128i d2 = std::get<0>(data2)[block];
-
-				sum1 = _mm_add_epi64(sum1, _mm_sad_epu8(d1, _mm_setzero_si128()));
-				sum2 = _mm_add_epi64(sum2, _mm_sad_epu8(d2, _mm_setzero_si128()));
-				{
-					const __m128i prod = _mm_maddubs_epi16(d1, d2);
-					sumProd12 = _mm_add_epi64(_mm_and_si128(prod, _mm_set1_epi64x(0xFFFF)));
-					sumProd12 = _mm_add_epi64(_mm_and_si128(_mm_shuffle_ (prod, 16), _mm_set1_epi64x(0xFFFF)));
-					sumProd12 = _mm_add_epi64(_mm_and_si128(prod, _mm_set1_epi64x(0xFFFF)));
-					sumProd12 = _mm_add_epi64(_mm_and_si128(prod, _mm_set1_epi64x(0xFFFF)));
-				}
-				{
-					const __m128i prod = _mm_maddubs_epi16(d1, d1);
-					sumProd11 = _mm_add_epi32(sumProd11, _mm_unpacklo_epi16(_mm_setzero_si128(), prod));
-					sumProd11 = _mm_add_epi32(sumProd11, _mm_unpackhi_epi16(_mm_setzero_si128(), prod));
-				}
-				{
-					const __m128i prod = _mm_maddubs_epi16(d2, d2);
-					sumProd22 = _mm_add_epi32(sumProd22, _mm_unpacklo_epi16(_mm_setzero_si128(), prod));
-					sumProd22 = _mm_add_epi32(sumProd22, _mm_unpackhi_epi16(_mm_setzero_si128(), prod));
-				}
-			}
-
-			sum1 = _mm_hadd_epi64(sum1);
-			sum2 = _mm_hadd_epi64(sum2);
-
-			const __m128d covar = _mm_sub_epi64(_mm_mul_epu64(sumProd12, n) __mm_mul_epi64(sum1, sum2));
-
-			const __m128d corr = _mm_setzero_pd();
 			return corr;
 		}
 
@@ -376,7 +368,7 @@ namespace hli {
 			}
 
 			template <int N_BITS>
-			inline void _mm_corr_perm_epu8_method3(
+			inline void _mm_corr_perm_epu8_method2(
 				const std::tuple<const __m128i * const, const size_t>& data1,
 				const std::tuple<const __m128i * const, const size_t>& data2,
 				const std::tuple<__m128d * const, const size_t>& results,
@@ -405,12 +397,81 @@ namespace hli {
 				_mm_free2(data2_Double);
 				_mm_free2(swap);
 			}
+
+			inline void _mm_corr_perm_epu8_method3(
+				const std::tuple<const __m128i * const, const size_t>& data1,
+				const std::tuple<const __m128i * const, const size_t>& data2,
+				const std::tuple<__m128d * const, const size_t>& results,
+				const size_t nPermutations,
+				__m128i& randInts)
+			{
+				const size_t nBytes = std::get<1>(data1);
+				const size_t nBlocks = nBytes >> 4;
+				const size_t nElements = nBytes; //TODO: what if we want number of elements not a multiple of 16?
+
+				if (nElements > 0xFFFF) {
+					std::cout << "WARNING: _mm_corr_epu8: _mm_corr_epu8_method3: nElements=" << nElements << " which is larger than 0xFFFF." << std::endl;
+				}
+
+				const __int8 * const ptr1 = reinterpret_cast<const __int8 * const>(std::get<0>(data1));
+				const __int8 * const ptr2 = reinterpret_cast<const __int8 * const>(std::get<0>(data2));
+
+				__int32 s11 = 0;
+				__int32 s22 = 0;
+				__int32 s1 = 0;
+				__int32 s2 = 0;
+
+				for (size_t i = 0; i < nElements; ++i)
+				{
+					const unsigned __int8 d1 = ptr1[i];
+					const unsigned __int8 d2 = ptr2[i];
+					s11 += d1 * d1;
+					s22 += d2 * d2;
+					s1 += d1;
+					s2 += d2;
+				}
+
+				const double s11d = static_cast<double>(s11);
+				const double s22d = static_cast<double>(s22);
+				const double s1d = static_cast<double>(s1);
+				const double s2d = static_cast<double>(s2);
+
+
+				const size_t swap_array_nBytes = nBytes << 1;
+				auto swap = _mm_malloc_m128i(swap_array_nBytes);
+				auto data3 = deepCopy(data2);
+
+				__int32 s12 = 0;
+
+				double * const results_Double = reinterpret_cast<double * const>(std::get<1>(results));
+
+				for (size_t permutation = 0; permutation < nPermutations; ++permutation) {
+
+					_mm_permute_epu8_array(data3, swap, randInts);
+
+					for (size_t i = 0; i < nElements; ++i)
+					{
+						const unsigned __int8 d1 = ptr1[i];
+						const unsigned __int8 d2 = ptr2[i];
+						s12 += d1 * d2;
+					}
+					const double s12d = static_cast<double>(s12);
+
+					double corr = ((nElements * s12d) - (s1d*s2d)) / (sqrt((nElements*s11d) - (s1d*s1d)) * sqrt((nElements * s22d) - (s2d*s2d)));
+					results_Double[permutation] = corr;
+				}
+				_mm_free2(data3);
+				_mm_free2(swap);
+			}
 		}
 	}
 
 	namespace test {
 
-		void test_mm_corr_epu8(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		void test_mm_corr_epu8(
+			const size_t nBlocks, 
+			const size_t nExperiments, 
+			const bool doTests)
 		{
 			const double delta = 0.0000001;
 
@@ -432,8 +493,8 @@ namespace hli {
 
 			__m128d result_ref, result1, result2, result3, result4, result5, result6, result7, result8;
 
-			for (size_t i = 0; i < nExperiments; ++i) {
-
+			for (size_t i = 0; i < nExperiments; ++i)
+			{
 				timer::reset_and_start_timer();
 				result_ref = hli::priv::_mm_corr_epu8_ref(data1, data2);
 				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
@@ -445,7 +506,7 @@ namespace hli {
 
 					if (doTests) {
 						if (std::abs(result_ref.m128d_f64[0] - result1.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method0<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result1) << std::endl;
+							std::cout << "WARNING: test _mm_corr_epu8_method0<8>: result-ref=" << hli::toString_f64(result_ref) << "; result0=" << hli::toString_f64(result1) << std::endl;
 							return;
 						}
 					}
@@ -457,7 +518,7 @@ namespace hli {
 
 					if (doTests) {
 						if (std::abs(result_ref.m128d_f64[0] - result2.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method0<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result2) << std::endl;
+							std::cout << "WARNING: test _mm_corr_epu8_method0<6>: result-ref=" << hli::toString_f64(result_ref) << "; result0=" << hli::toString_f64(result2) << std::endl;
 							return;
 						}
 					}
@@ -470,7 +531,7 @@ namespace hli {
 
 					if (doTests) {
 						if (std::abs(result_ref.m128d_f64[0] - result3.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method1<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result3) << std::endl;
+							std::cout << "WARNING: test _mm_corr_epu8_method1<8>: result-ref=" << hli::toString_f64(result_ref) << "; result1=" << hli::toString_f64(result3) << std::endl;
 							return;
 						}
 					}
@@ -482,7 +543,7 @@ namespace hli {
 
 					if (doTests) {
 						if (std::abs(result_ref.m128d_f64[0] - result4.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method1<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result4) << std::endl;
+							std::cout << "WARNING: test _mm_corr_epu8_method1<6>: result-ref=" << hli::toString_f64(result_ref) << "; result1=" << hli::toString_f64(result4) << std::endl;
 							return;
 						}
 					}
@@ -495,7 +556,7 @@ namespace hli {
 
 					if (doTests) {
 						if (std::abs(result_ref.m128d_f64[0] - result5.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method2<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result5) << std::endl;
+							std::cout << "WARNING: test _mm_corr_epu8_method2<8>: result-ref=" << hli::toString_f64(result_ref) << "; result2=" << hli::toString_f64(result5) << std::endl;
 							return;
 						}
 					}
@@ -507,31 +568,31 @@ namespace hli {
 
 					if (doTests) {
 						if (std::abs(result_ref.m128d_f64[0] - result6.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method2<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result6) << std::endl;
+							std::cout << "WARNING: test _mm_corr_epu8_method2<6>: result-ref=" << hli::toString_f64(result_ref) << "; result2=" << hli::toString_f64(result6) << std::endl;
 							return;
 						}
 					}
 				}
 				{
 					timer::reset_and_start_timer();
-					result7 = hli::priv::_mm_corr_epu8_method3<8>(data1, data2);
+					result7 = hli::priv::_mm_corr_epu8_method3(data1, data2);
 					min7 = std::min(min7, timer::get_elapsed_kcycles());
 
 					if (doTests) {
 						if (std::abs(result_ref.m128d_f64[0] - result7.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method3<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result7) << std::endl;
+							std::cout << "WARNING: test _mm_corr_epu8_method3<8>: result-ref=" << hli::toString_f64(result_ref) << "; result3=" << hli::toString_f64(result7) << std::endl;
 							return;
 						}
 					}
 				}
 				{
 					timer::reset_and_start_timer();
-					result8 = hli::priv::_mm_corr_epu8_method3<6>(data1, data2);
+					result8 = hli::priv::_mm_corr_epu8_method4<8>(data1, data2);
 					min8 = std::min(min8, timer::get_elapsed_kcycles());
 
 					if (doTests) {
 						if (std::abs(result_ref.m128d_f64[0] - result8.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method3<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result8) << std::endl;
+							std::cout << "WARNING: test _mm_corr_epu8_method4<8>: result-ref=" << hli::toString_f64(result_ref) << "; result4=" << hli::toString_f64(result8) << std::endl;
 							return;
 						}
 					}
@@ -544,14 +605,18 @@ namespace hli {
 			printf("[_mm_corr_epu8_method1<6>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min4, result4.m128d_f64[0], min_ref / min4);
 			printf("[_mm_corr_epu8_method2<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min5, result5.m128d_f64[0], min_ref / min5);
 			printf("[_mm_corr_epu8_method2<6>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min6, result6.m128d_f64[0], min_ref / min6);
-			printf("[_mm_corr_epu8_method3<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min7, result7.m128d_f64[0], min_ref / min7);
-			printf("[_mm_corr_epu8_method3<6>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min8, result8.m128d_f64[0], min_ref / min8);
+			printf("[_mm_corr_epu8_method3]   : %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min7, result7.m128d_f64[0], min_ref / min7);
+			printf("[_mm_corr_epu8_method4<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min8, result8.m128d_f64[0], min_ref / min8);
 
 			_mm_free2(data1);
 			_mm_free2(data2);
 		}
 
-		void test_mm_corr_perm_epu8(const size_t nBlocks, const size_t nPermutations, const size_t nExperiments, const bool doTests)
+		void test_mm_corr_perm_epu8(
+			const size_t nBlocks, 
+			const size_t nPermutations, 
+			const size_t nExperiments, 
+			const bool doTests)
 		{
 			const double delta = 0.000001;
 			auto data1 = _mm_malloc_m128i(16 * nBlocks);
@@ -562,11 +627,13 @@ namespace hli {
 			auto results = _mm_malloc_m128d(nBytesResults);
 			auto results1 = _mm_malloc_m128d(nBytesResults);
 			auto results2 = _mm_malloc_m128d(nBytesResults);
+			auto results3 = _mm_malloc_m128d(nBytesResults);
 
 			const __m128i seed = _mm_set_epi16(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand());
 			__m128i randInt = seed;
 			__m128i randInt1 = seed;
 			__m128i randInt2 = seed;
+			__m128i randInt3 = seed;
 
 			const int N_BITS = 5;
 			fillRand_epu8<N_BITS>(data1);
@@ -574,11 +641,13 @@ namespace hli {
 
 			{
 				double min_ref = std::numeric_limits<double>::max();
+				double min0 = std::numeric_limits<double>::max();
 				double min1 = std::numeric_limits<double>::max();
 				double min2 = std::numeric_limits<double>::max();
+				double min3 = std::numeric_limits<double>::max();
 
-				for (size_t i = 0; i < nExperiments; ++i) {
-
+				for (size_t i = 0; i < nExperiments; ++i) 
+				{
 					timer::reset_and_start_timer();
 					hli::priv::perm::_mm_corr_perm_epu8_ref(data1, data2, results, nPermutations, randInt);
 					min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
@@ -595,14 +664,14 @@ namespace hli {
 
 						if (doTests) {
 							if (!equal(randInt, randInt1)) {
-								std::cout << "WARNING: test_mm_corr_perm_epu8_ref<6>: randInt=" << hli::toString_u32(randInt) << "; randInt1=" << hli::toString_u32(randInt1) << std::endl;
+								std::cout << "WARNING: test_mm_corr_perm_epu8_ref: randInt=" << hli::toString_u32(randInt) << "; randInt1=" << hli::toString_u32(randInt1) << std::endl;
 								return;
 							}
 							if (i == 0) {
 								for (size_t i = 0; i < (nBytesResults >> 3); ++i) {
 									double diff = std::abs(getDouble(results, i) - getDouble(results1, i));
 									if (diff > delta) {
-										std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: i=" << i << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results, i) << "; result1=" << getDouble(results1, i) << std::endl;
+										std::cout << "WARNING: _mm_corr_perm_epu8_method1<6>: i=" << i << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results, i) << "; result1=" << getDouble(results1, i) << std::endl;
 										return;
 									}
 								}
@@ -611,12 +680,12 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						hli::priv::perm::_mm_corr_perm_epu8_method3<5>(data1, data2, results2, nPermutations, randInt2);
+						hli::priv::perm::_mm_corr_perm_epu8_method2<5>(data1, data2, results2, nPermutations, randInt2);
 						min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 						if (doTests) {
 							if (!equal(randInt, randInt2)) {
-								std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: randInt=" << hli::toString_u32(randInt) << "; randInt2=" << hli::toString_u32(randInt2) << std::endl;
+								std::cout << "WARNING: _mm_corr_perm_epu8_method2<6>: randInt=" << hli::toString_u32(randInt) << "; randInt2=" << hli::toString_u32(randInt2) << std::endl;
 								return;
 							}
 							if (i == 0) {
@@ -630,16 +699,39 @@ namespace hli {
 							}
 						}
 					}
+					{
+						timer::reset_and_start_timer();
+						hli::priv::perm::_mm_corr_perm_epu8_method3(data1, data2, results3, nPermutations, randInt3);
+						min3 = std::min(min3, timer::get_elapsed_kcycles());
+
+						if (doTests) {
+							if (!equal(randInt, randInt3)) {
+								std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: randInt=" << hli::toString_u32(randInt) << "; randInt2=" << hli::toString_u32(randInt2) << std::endl;
+								return;
+							}
+							if (i == 0) {
+								for (size_t i = 0; i < (nBytesResults >> 3); ++i) {
+									double diff = std::abs(getDouble(results, i) - getDouble(results3, i));
+									if (diff > delta) {
+										std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: i=" << i << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results, i) << "; result3=" << getDouble(results3, i) << std::endl;
+										return;
+									}
+								}
+							}
+						}
+					}
 				}
 				printf("[_mm_corr_perm_epu8 Ref]       : %2.5f Kcycles\n", min_ref);
 				printf("[_mm_corr_perm_epu8_method1<8>]: %2.5f Kcycles; %2.3f times faster than ref\n", min1, min_ref / min1);
 				printf("[_mm_corr_perm_epu8_method2<8>]: %2.5f Kcycles; %2.3f times faster than ref\n", min2, min_ref / min2);
+				printf("[_mm_corr_perm_epu8_method3]   : %2.5f Kcycles; %2.3f times faster than ref\n", min3, min_ref / min3);
 			}
 			_mm_free2(data1);
 			_mm_free2(data2);
 			_mm_free2(results);
 			_mm_free2(results1);
 			_mm_free2(results2);
+			_mm_free2(results3);
 		}
 	}
 
@@ -648,7 +740,7 @@ namespace hli {
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2)
 	{
-		return priv::_mm_corr_epu8_method1<N_BITS>(data1, data2);
+		return priv::_mm_corr_epu8_method3<N_BITS>(data1, data2);
 	}
 
 	template <int N_BITS>
@@ -659,7 +751,6 @@ namespace hli {
 		const size_t nPermutations,
 		__m128i& randInts)
 	{
-		//return priv::_mm_corr_perm_epu8_method1(mem_addr1, mem_addr2, nBytes, results, nPermutations, randInts);
 		return priv::_mm_corr_perm_epu8_method3(data1, data2, results, nPermutations, randInts);
 	}
 }

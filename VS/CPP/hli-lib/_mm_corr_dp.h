@@ -21,13 +21,13 @@ namespace hli {
 	namespace priv {
 
 		inline __m128d _mm_corr_pd_method0(
-			const std::tuple<__m128d * const, const size_t> data1,
-			const std::tuple<__m128d * const, const size_t> data2)
+			const std::tuple<const __m128d * const, const size_t> data1,
+			const std::tuple<const __m128d * const, const size_t> data2)
 		{
 			const size_t nBytes = std::get<1>(data1);
 			const size_t nElements =  nBytes >> 3;
-			const double * const ptr1 = reinterpret_cast<double * const>(std::get<0>(data1));
-			const double * const ptr2 = reinterpret_cast<double * const>(std::get<0>(data2));
+			const double * const ptr1 = reinterpret_cast<const double * const>(std::get<0>(data1));
+			const double * const ptr2 = reinterpret_cast<const double * const>(std::get<0>(data2));
 
 			double s12 = 0;
 			double s11 = 0;
@@ -51,8 +51,8 @@ namespace hli {
 		}
 
 		inline __m128d _mm_corr_pd_method1(
-			const std::tuple<__m128d * const, const size_t> data1,
-			const std::tuple<__m128d * const, const size_t> data2)
+			const std::tuple<const __m128d * const, const size_t> data1,
+			const std::tuple<const __m128d * const, const size_t> data2)
 		{
 			const size_t nBytes = std::get<1>(data1);
 			const size_t nBlocks = nBytes >> 4;
@@ -87,8 +87,8 @@ namespace hli {
 		}
 
 		inline __m128d _mm_corr_dp_method3(
-			const std::tuple<__m128d * const, const size_t> data1,
-			const std::tuple<__m128d * const, const size_t> data2,
+			const std::tuple<const __m128d * const, const size_t> data1,
+			const std::tuple<const __m128d * const, const size_t> data2,
 			const __m128d var1_2)
 		{
 			const size_t nBytes = std::get<1>(data1);
@@ -148,32 +148,32 @@ namespace hli {
 			fillRand_pd(data1);
 			fillRand_pd(data2);
 
-			double min_0 = std::numeric_limits<double>::max();
-			double min_1 = std::numeric_limits<double>::max();
+			double min0 = std::numeric_limits<double>::max();
+			double min1 = std::numeric_limits<double>::max();
 
-			__m128d result_0, result_1;
+			__m128d result0, result1;
 
 			for (size_t i = 0; i < nExperiments; ++i) {
 
 				timer::reset_and_start_timer();
-				result_0 = hli::priv::_mm_corr_pd_method0(data1, data2);
-				min_0 = std::min(min_0, timer::get_elapsed_kcycles());
+				result0 = hli::priv::_mm_corr_pd_method0(data1, data2);
+				min0 = std::min(min0, timer::get_elapsed_kcycles());
 
 				{
 					timer::reset_and_start_timer();
-					result_1 = hli::priv::_mm_corr_pd_method1(data1, data2);
-					min_1 = std::min(min_1, timer::get_elapsed_kcycles());
+					result1 = hli::priv::_mm_corr_pd_method1(data1, data2);
+					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
-						if (std::abs(result_0.m128d_f64[0] - result_1.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_epu8_method0<8>: result-ref=" << hli::toString_f64(result_0) << "; result=" << hli::toString_f64(result_1) << std::endl;
+						if (std::abs(result0.m128d_f64[0] - result1.m128d_f64[0]) > delta) {
+							std::cout << "WARNING: test _mm_corr_pd_method0<8>: result0=" << hli::toString_f64(result0) << "; result1=" << hli::toString_f64(result1) << std::endl;
 							return;
 						}
 					}
 				}
 			}
-			printf("[_mm_corr_epu8_method0]: %2.5f Kcycles; %0.14f\n", min_0, result_0.m128d_f64[0]);
-			printf("[_mm_corr_epu8_method1]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min_1, result_1.m128d_f64[0], min_0 / min_1);
+			printf("[_mm_corr_pd_method0]: %2.5f Kcycles; %0.14f\n", min0, result0.m128d_f64[0]);
+			printf("[_mm_corr_pd_method1]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min1, result1.m128d_f64[0], min0 / min1);
 
 			_mm_free2(data1);
 			_mm_free2(data2);

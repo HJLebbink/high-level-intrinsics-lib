@@ -360,11 +360,11 @@ namespace hli {
 				}
 
 			}
-			printf("[_mm_corr_epu8_ref<2>]    : %2.5f Kcycles; %0.14f\n", min_ref, result_ref.m128d_f64[0]);
-			printf("[_mm_corr_epu8_method0<2>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min1, result1.m128d_f64[0], min_ref / min1);
-			printf("[_mm_corr_epu8_method0<3>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min2, result2.m128d_f64[0], min_ref / min2);
-			printf("[_mm_corr_epu8_method1<2>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min3, result3.m128d_f64[0], min_ref / min3);
-			printf("[_mm_corr_epu8_method1<3>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min4, result4.m128d_f64[0], min_ref / min4);
+			printf("[_mm_entropy_epu8_ref<2>]    : %2.5f Kcycles; %0.14f\n", min_ref, result_ref.m128d_f64[0]);
+			printf("[_mm_entropy_epu8_method0<2>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min1, result1.m128d_f64[0], min_ref / min1);
+			printf("[_mm_entropy_epu8_method0<3>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min2, result2.m128d_f64[0], min_ref / min2);
+			printf("[_mm_entropy_epu8_method1<2>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min3, result3.m128d_f64[0], min_ref / min3);
+			printf("[_mm_entropy_epu8_method1<3>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min4, result4.m128d_f64[0], min_ref / min4);
 		
 			_mm_free2(data1);
 			_mm_free2(data2);

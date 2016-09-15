@@ -59,8 +59,8 @@ int main()
 		//hli::test::test_mm_permute_epu8_array(3102, nExperiments, true);
 		//hli::test::test_mm_permute_dp_array(3102, nExperiments, true);
 
-		//hli::test::test_mm_corr_perm_epu8(100, 1000, nExperiments, true);
-		hli::test::test_mm_entropy_epu8(100, nExperiments, true);
+		hli::test::test_mm_corr_perm_epu8(100, 100, nExperiments, true);
+		//hli::test::test_mm_entropy_epu8(100, nExperiments, true);
 
 		const auto diff = std::chrono::system_clock::now() - start;
 		std::cout << std::endl
