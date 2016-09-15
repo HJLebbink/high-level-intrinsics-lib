@@ -85,20 +85,77 @@ namespace hli {
 			randInts.m128i_u32[2] = r2;
 			randInts.m128i_u32[3] = r3;
 		}
+
+		inline void _mm_lfsr32_epu32_method1(
+			const std::tuple<__m128i * const, const size_t>& data,
+			__m128i& randInts)
+		{
+			__m128i * const ptr = std::get<0>(data);
+			const size_t nBytes = std::get<1>(data);
+
+			const size_t nBlocks = nBytes >> 4;
+			for (size_t block = 0; block < nBlocks; ++block) {
+				randInts = priv::lfsr32_galois(randInts);
+				ptr[block] = randInts;
+			}
+		}
+	}
+
+	namespace test {
+
+		void test_mm_rand_si128(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		{
+			auto data1 = _mm_malloc_m128i(16 * nBlocks);
+			auto data2 = _mm_malloc_m128i(16 * nBlocks);
+			const __m128i randSeeds = _mm_set_epi16(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand());
+			__m128i randInts1 = randSeeds;
+			__m128i randInts2 = randSeeds;
+
+			double min_ref = std::numeric_limits<double>::max();
+			double min1 = std::numeric_limits<double>::max();
+
+			for (size_t i = 0; i < nExperiments; ++i) {
+
+				timer::reset_and_start_timer();
+				hli::priv::_mm_rand_si128_ref(data1, randInts1);
+				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
+
+				{
+					timer::reset_and_start_timer();
+					hli::priv::_mm_lfsr32_epu32_method1(data2, randInts2);
+					min1 = std::min(min1, timer::get_elapsed_kcycles());
+
+					if (doTests) {
+						for (size_t j = 0; j < 4; ++j) {
+							if (randInts1.m128i_u32[j] != randInts2.m128i_u32[j]) {
+								std::cout << "WARNING: test _mm_rand_si128: randInts1=" << hli::toString_u32(randInts1) << "; randInts2=" << hli::toString_u32(randInts2) << std::endl;
+								return;
+							}
+						}
+						for (size_t block = 0; block < nBlocks; ++block) {
+							for (size_t j = 0; j < 4; ++j) {
+								if (std::abs(std::get<0>(data1)[block].m128i_u32[j] != std::get<0>(data2)[block].m128i_u32[j])) {
+									std::cout << "WARNING: test _mm_rand_si128: result-ref=" << hli::toString_u32(std::get<0>(data1)[block]) << "; result=" << hli::toString_u32(std::get<0>(data2)[block]) << std::endl;
+									return;
+								}
+							}
+						}
+					}
+				}
+			}
+			printf("[_mm_rand_si128 Ref] : %2.5f Kcycles\n", min_ref);
+			printf("[_mm_rand_si128]     : %2.5f Kcycles; %2.3f times faster than ref\n", min1, min_ref / min1);
+
+			_mm_free2(data1);
+			_mm_free2(data2);
+		}
 	}
 
 	inline void _mm_lfsr32_epu32(
 		const std::tuple<__m128i * const, const size_t>& data,
 		__m128i& randInts)
 	{
-		__m128i * const ptr = std::get<0>(data);
-		const size_t nBytes = std::get<1>(data);
-
-		const size_t nBlocks = nBytes >> 4;
-		for (size_t block = 0; block < nBlocks; ++block) {
-			randInts = priv::lfsr32_galois(randInts);
-			ptr[block] = randInts;
-		}
+		priv::_mm_lfsr32_epu32_method1(data, randInts);
 	}
 
 	template <int N_BITS>

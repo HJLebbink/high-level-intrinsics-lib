@@ -103,6 +103,76 @@ namespace hli {
 		}
 	}
 
+	namespace test {
+
+		void test_mm_rescale_epu16(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		{
+			if ((nBlocks * 8) > 0xFFFF) {
+				std::cout << "WARNING: test_mm_rescale_epu16: too many blocks=" << nBlocks << std::endl;
+				return;
+			}
+
+			auto data0_r = _mm_malloc_m128i(16 * nBlocks);
+			auto data1 = _mm_malloc_m128i(16 * nBlocks);
+			auto data2 = _mm_malloc_m128i(16 * nBlocks);
+
+			const __m128i seed = _mm_set_epi16(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand());
+			__m128i randInt = seed;
+			hli::_mm_lfsr32_epu32(data0_r, randInt);
+			const std::tuple<const __m128i * const, const size_t> data0 = data0_r;
+
+			double min_ref = std::numeric_limits<double>::max();
+			double min1 = std::numeric_limits<double>::max();
+
+			for (size_t i = 0; i < nExperiments; ++i)
+			{
+				copy(data0, data1);
+				timer::reset_and_start_timer();
+				hli::priv::_mm_rescale_epu16_ref(data1);
+				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
+
+				{
+					copy(data0, data2);
+					timer::reset_and_start_timer();
+					hli::priv::_mm_rescale_epu16_method1(data2);
+					min1 = std::min(min1, timer::get_elapsed_kcycles());
+
+					if (doTests) {
+						for (size_t block = 0; block < nBlocks; ++block) {
+							for (size_t j = 0; j < 8; ++j) {
+								if (std::abs(std::get<0>(data1)[block].m128i_u16[j] != std::get<0>(data2)[block].m128i_u16[j])) {
+									std::cout << "WARNING: test mm_rescale_epu16: result-ref=" << hli::toString_u16(std::get<0>(data1)[block]) << "; result=" << hli::toString_u16(std::get<0>(data2)[block]) << std::endl;
+									return;
+								}
+							}
+						}
+					}
+				}
+			}
+			if (doTests) {
+				__int16 k = 0;
+				for (size_t block = 0; block < nBlocks; ++block) {
+					for (size_t j = 0; j < 8; ++j) {
+						if (std::get<0>(data1)[block].m128i_u16[j] > k) {
+							std::cout << "WARNING: test mm_rescale_epu16: position " << k << " has value " << std::get<0>(data1)[block].m128i_u16[j] << " which is too large" << std::endl;
+							return;
+						}
+						k++;
+					}
+					//std::cout << "INFO: test mm_rescale_epu16: block=" << block << "; result=" << hli::toString_u16(mem_addr1[block]) << std::endl;
+				}
+			}
+
+			printf("[_mm_rescale_epu16 Ref] : %2.5f Kcycles\n", min_ref);
+			printf("[_mm_rescale_epu16]     : %2.5f Kcycles; %2.3f times faster than ref\n", min1, min_ref / min1);
+
+			_mm_free2(data0);
+			_mm_free2(data1);
+			_mm_free2(data2);
+		}
+
+	}
+
 	inline void _mm_rescale_epu16(
 		const std::tuple<__m128i * const, const size_t>& data)
 	{
