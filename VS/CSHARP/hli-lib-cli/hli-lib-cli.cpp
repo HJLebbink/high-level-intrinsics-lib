@@ -79,18 +79,20 @@ namespace StatsLibCli {
 
 #	pragma unmanaged
 	int _mm_hadd_epu8_unmanaged(
-		const std::tuple<const __int8 * const, const size_t>& data)
+		const std::tuple<const __int8 * const, const size_t>& data,
+		const size_t nElements)
 	{
-		return _mm_cvtsi128_si32(hli::_mm_hadd_epu8<8>(hli::_mm_cast_m128i(data)));
+		return _mm_cvtsi128_si32(hli::_mm_hadd_epu8<8>(hli::_mm_cast_m128i(data), nElements));
 	}
 
 #	pragma managed
 	int Class1::_mm_hadd_epu8(
 		List<Byte>^ data)
 	{
-		auto data_x = hli::_mm_malloc_xmm(data->Count);
+		int nElement = data->Count;
+		auto data_x = hli::_mm_malloc_xmm(nElement);
 		priv::copy_data(data, data_x);
-		int result = _mm_hadd_epu8_unmanaged(data_x);
+		int result = _mm_hadd_epu8_unmanaged(data_x, nElement);
 		hli::_mm_free2(data_x);
 		return result;
 	}
@@ -98,9 +100,10 @@ namespace StatsLibCli {
 #	pragma unmanaged
 	double _mm_corr_pd_unmanaged(
 		const std::tuple<const __int8 * const, const size_t>& data1,
-		const std::tuple<const __int8 * const, const size_t>& data2)
+		const std::tuple<const __int8 * const, const size_t>& data2,
+		const int nElements)
 	{
-		return _mm_cvtsd_f64(hli::_mm_corr_pd(hli::_mm_cast_m128d(data1), hli::_mm_cast_m128d(data2)));
+		return _mm_cvtsd_f64(hli::_mm_corr_pd(hli::_mm_cast_m128d(data1), hli::_mm_cast_m128d(data2), nElements));
 	}
 
 #	pragma managed
@@ -108,11 +111,12 @@ namespace StatsLibCli {
 		List<Double>^ data1, 
 		List<Double>^ data2)
 	{
-		auto data1_x = hli::_mm_malloc_xmm(data1->Count * 8);
-		auto data2_x = hli::_mm_malloc_xmm(data2->Count * 8);
+		int nElements = data1->Count;
+		auto data1_x = hli::_mm_malloc_xmm(nElements * 8);
+		auto data2_x = hli::_mm_malloc_xmm(nElements * 8);
 		priv::copy_data(data1, data1_x);
 		priv::copy_data(data2, data2_x);
-		double result = _mm_corr_pd_unmanaged(data1_x, data2_x);
+		double result = _mm_corr_pd_unmanaged(data1_x, data2_x, nElements);
 		hli::_mm_free2(data1_x);
 		hli::_mm_free2(data2_x);
 		return result;
@@ -121,9 +125,10 @@ namespace StatsLibCli {
 #	pragma unmanaged
 	double _mm_corr_epu8_unmanaged(
 		const std::tuple<const __int8 * const, const size_t>& data1,
-		const std::tuple<const __int8 * const, const size_t>& data2)
+		const std::tuple<const __int8 * const, const size_t>& data2,
+		const int nElements)
 	{
-		return _mm_cvtsd_f64(hli::_mm_corr_epu8<8>(hli::_mm_cast_m128i(data1), hli::_mm_cast_m128i(data2)));
+		return _mm_cvtsd_f64(hli::_mm_corr_epu8<8>(hli::_mm_cast_m128i(data1), hli::_mm_cast_m128i(data2), nElements));
 	}
 
 #	pragma managed
@@ -131,11 +136,12 @@ namespace StatsLibCli {
 		List<Byte>^ data1, 
 		List<Byte>^ data2)
 	{
-		auto data1_x = hli::_mm_malloc_xmm(data1->Count);
-		auto data2_x = hli::_mm_malloc_xmm(data2->Count);
+		int nElements = data1->Count;
+		auto data1_x = hli::_mm_malloc_xmm(nElements);
+		auto data2_x = hli::_mm_malloc_xmm(nElements);
 		priv::copy_data(data1, data1_x);
 		priv::copy_data(data2, data2_x);
-		double result = _mm_corr_epu8_unmanaged(data1_x, data2_x);
+		double result = _mm_corr_epu8_unmanaged(data1_x, data2_x, nElements);
 		hli::_mm_free2(data1_x);
 		hli::_mm_free2(data2_x);
 		return result;

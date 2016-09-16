@@ -22,10 +22,9 @@ namespace hli {
 
 		inline __m128d _mm_corr_pd_method0(
 			const std::tuple<const __m128d * const, const size_t>& data1,
-			const std::tuple<const __m128d * const, const size_t>& data2)
+			const std::tuple<const __m128d * const, const size_t>& data2,
+			const size_t nElements)
 		{
-			const size_t nBytes = std::get<1>(data1);
-			const size_t nElements =  nBytes >> 3;
 			const double * const ptr1 = reinterpret_cast<const double * const>(std::get<0>(data1));
 			const double * const ptr2 = reinterpret_cast<const double * const>(std::get<0>(data2));
 
@@ -52,7 +51,8 @@ namespace hli {
 
 		inline __m128d _mm_corr_pd_method1(
 			const std::tuple<const __m128d * const, const size_t>& data1,
-			const std::tuple<const __m128d * const, const size_t>& data2)
+			const std::tuple<const __m128d * const, const size_t>& data2,
+			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data1);
 			const size_t nBlocks = nBytes >> 4;
@@ -75,12 +75,12 @@ namespace hli {
 				s2 = _mm_add_pd(s2, d2);
 			}
 
-			const __m128d nElements = _mm_set1_pd(static_cast<double>(nBlocks << 1));
+			const __m128d nElementsD = _mm_set1_pd(static_cast<double>(nElements));
 			const __m128d s11_s22 = _mm_hadd_pd(s11, s22);
 			const __m128d s1_s2 = _mm_hadd_pd(s1, s2);
-			const __m128d s11_s22_s = _mm_sqrt_pd(_mm_sub_pd(_mm_mul_pd(s11_s22, nElements), _mm_mul_pd(s1_s2, s1_s2)));
+			const __m128d s11_s22_s = _mm_sqrt_pd(_mm_sub_pd(_mm_mul_pd(s11_s22, nElementsD), _mm_mul_pd(s1_s2, s1_s2)));
 			const __m128d s11_s22_p = _mm_mul_pd(s11_s22_s, _mm_swap_64(s11_s22_s));
-			const __m128d covar = _mm_sub_pd(_mm_mul_pd(_mm_hadd_pd(s12, s12), nElements), _mm_mul_pd(s1_s2, _mm_swap_64(s1_s2)));
+			const __m128d covar = _mm_sub_pd(_mm_mul_pd(_mm_hadd_pd(s12, s12), nElementsD), _mm_mul_pd(s1_s2, _mm_swap_64(s1_s2)));
 			const __m128d corr = _mm_div_pd(covar, s11_s22_p);
 			//double corr = ((nElements*s12) - (s1*s2)) / (sqrt((nElements*s11) - (s1*s1)) * sqrt((nElements*s22) - (s2*s2)));
 			return corr;
@@ -89,6 +89,7 @@ namespace hli {
 		inline __m128d _mm_corr_dp_method3(
 			const std::tuple<const __m128d * const, const size_t>& data1,
 			const std::tuple<const __m128d * const, const size_t>& data2,
+			const size_t nElements,
 			const __m128d var1_2)
 		{
 			const size_t nBytes = std::get<1>(data1);
@@ -129,8 +130,8 @@ namespace hli {
 				}
 			}
 
-			const __m128d nElements = _mm_set1_pd(static_cast<double>(nBytes >> 3));
-			covar = _mm_div_pd(_mm_hadd_pd(covar, covar), nElements);
+			const __m128d nElementsD = _mm_set1_pd(static_cast<double>(nElements));
+			covar = _mm_div_pd(_mm_hadd_pd(covar, covar), nElementsD);
 			const __m128d corr = _mm_div_pd(covar, var1_2);
 			//std::cout << "INFO: _mm_corr_epu8::_mm_corr_dp_method3: covar=" << covar.m128d_f64[0] << "; corr=" << corr.m128d_f64[0] << std::endl;
 			return corr;
@@ -143,8 +144,9 @@ namespace hli {
 		{
 			const double delta = 0.0000001;
 
-			auto data1 = _mm_malloc_m128d(16 * nBlocks);
-			auto data2 = _mm_malloc_m128d(16 * nBlocks);
+			const size_t nElements = nBlocks * 16;
+			auto data1 = _mm_malloc_m128d(nElements);
+			auto data2 = _mm_malloc_m128d(nElements);
 			fillRand_pd(data1);
 			fillRand_pd(data2);
 
@@ -156,12 +158,12 @@ namespace hli {
 			for (size_t i = 0; i < nExperiments; ++i) {
 
 				timer::reset_and_start_timer();
-				result0 = hli::priv::_mm_corr_pd_method0(data1, data2);
+				result0 = hli::priv::_mm_corr_pd_method0(data1, data2, nElements);
 				min0 = std::min(min0, timer::get_elapsed_kcycles());
 
 				{
 					timer::reset_and_start_timer();
-					result1 = hli::priv::_mm_corr_pd_method1(data1, data2);
+					result1 = hli::priv::_mm_corr_pd_method1(data1, data2, nElements);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -182,9 +184,10 @@ namespace hli {
 
 	inline __m128d _mm_corr_pd(
 		const std::tuple<const __m128d * const, const size_t>& data1,
-		const std::tuple<const __m128d * const, const size_t>& data2)
+		const std::tuple<const __m128d * const, const size_t>& data2,
+		const size_t nElements)
 	{
-		return priv::_mm_corr_pd_method0(data1, data2);
+		return priv::_mm_corr_pd_method0(data1, data2, nElements);
 		//return priv::_mm_corr_pd_method1(data1, data2);
 	}
 }

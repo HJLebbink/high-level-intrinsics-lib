@@ -35,7 +35,8 @@ namespace hli {
 	namespace priv {
 
 		inline __m128i _mm_hadd_epu8_method0(
-			const std::tuple<const __m128i * const, const size_t>& data)
+			const std::tuple<const __m128i * const, const size_t>& data,
+			const size_t nElements)
 		{
 			// AVX
 			// vpsrldq     xmm4, xmm3, 4
@@ -44,10 +45,9 @@ namespace hli {
 			// vpaddd      xmm1, xmm1, xmm2
 			// vpaddd      xmm0, xmm0, xmm4
 
-			const size_t nBytes = std::get<1>(data);
 			const unsigned __int8 * const ptr = reinterpret_cast<const unsigned __int8 * const>(std::get<0>(data));
 			unsigned __int32 sum = 0;
-			for (size_t i = 0; i < nBytes; ++i) {
+			for (size_t i = 0; i < nElements; ++i) {
 				sum += ptr[i];
 				//std::cout << "INFO: hli::priv::_mm_hadd_epu8_ref: i=" << i << "; sum="<<sum << std::endl;
 			}
@@ -58,26 +58,28 @@ namespace hli {
 		
 		template <int N_BITS>
 		inline __m128i _mm_hadd_epu8_method1(
-			const std::tuple<const __m128i * const, const size_t>& data)
+			const std::tuple<const __m128i * const, const size_t>& data,
+			const size_t nElements)
 		{
 			static_assert((N_BITS > 0) && (N_BITS <= 8), "Number of bits must be in range 1 to 8.");
 #			pragma warning( disable: 280) 
 			switch (N_BITS) {
-			case 8: return _mm_hadd_epu8_method1_nBits8(data);
-			case 7: return _mm_hadd_epu8_method1_nBits7(data);
-			case 6: return _mm_hadd_epu8_method1_nBits6(data);
+			case 8: return _mm_hadd_epu8_method1_nBits8(data, nElements);
+			case 7: return _mm_hadd_epu8_method1_nBits7(data, nElements);
+			case 6: return _mm_hadd_epu8_method1_nBits6(data, nElements);
 			case 5:
 			case 4:
 			case 3:
 			case 2:
-			case 1: return _mm_hadd_epu8_method1_nBits5(data);
+			case 1: return _mm_hadd_epu8_method1_nBits5(data, nElements);
 			default:
 				return _mm_setzero_si128();
 			}
 		}
 
 		inline __m128i _mm_hadd_epu8_method2(
-			const std::tuple<const __m128i * const, const size_t>& data)
+			const std::tuple<const __m128i * const, const size_t>& data,
+			const size_t nElements)
 		{
 			//assume (nBytes < 2 ^ (32 - 8))
 
@@ -104,7 +106,8 @@ namespace hli {
 		}
 
 		inline __m128i _mm_hadd_epu8_method3(
-			const std::tuple<const __m128i * const, const size_t>& data)
+			const std::tuple<const __m128i * const, const size_t>& data,
+			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data);
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
@@ -116,7 +119,8 @@ namespace hli {
 		}
 
 		inline __m128i _mm_hadd_epu8_method1_nBits8(
-			const std::tuple<const __m128i * const, const size_t>& data)
+			const std::tuple<const __m128i * const, const size_t>& data,
+			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data);
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
@@ -129,7 +133,8 @@ namespace hli {
 		}
 
 		inline __m128i _mm_hadd_epu8_method1_nBits7(
-			const std::tuple<const __m128i * const, const size_t>& data)
+			const std::tuple<const __m128i * const, const size_t>& data,
+			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data);
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
@@ -153,7 +158,8 @@ namespace hli {
 		}
 
 		inline __m128i _mm_hadd_epu8_method1_nBits6(
-			const std::tuple<const __m128i * const, const size_t>& data)
+			const std::tuple<const __m128i * const, const size_t>& data,
+			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data);
 			const int nBlocks = static_cast<int>(nBytes >> 4); // divide by 16 to get the number of __m128i regs (blocks)
@@ -180,7 +186,8 @@ namespace hli {
 		}
 
 		inline __m128i _mm_hadd_epu8_method1_nBits5(
-			const std::tuple<const __m128i * const, const size_t>& data)
+			const std::tuple<const __m128i * const, const size_t>& data,
+			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data);
 			const int nBlocks = static_cast<int>(nBytes >> 4); // divide by 16 to get the number of __m128i regs (blocks)
@@ -218,7 +225,8 @@ namespace hli {
 
 		void test_mm_hadd_epu8(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 		{
-			auto data_r = _mm_malloc_m128i(16 * nBlocks);
+			const size_t nElements = nBlocks * 16;
+			auto data_r = _mm_malloc_m128i(nElements);
 			fillRand_epu8<5>(data_r);
 			const std::tuple<const __m128i * const, const size_t> data = data_r; // make a new variable that is const
 
@@ -234,12 +242,12 @@ namespace hli {
 				for (size_t i = 0; i < nExperiments; ++i) 
 				{
 					timer::reset_and_start_timer();
-					const __m128i result_ref = hli::priv::_mm_hadd_epu8_method0(data);
+					const __m128i result_ref = hli::priv::_mm_hadd_epu8_method0(data, nElements);
 					min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 					{
 						timer::reset_and_start_timer();
-						const __m128i result = hli::priv::_mm_hadd_epu8_method1<8>(data);
+						const __m128i result = hli::priv::_mm_hadd_epu8_method1<8>(data, nElements);
 						min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -251,7 +259,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const __m128i result = hli::priv::_mm_hadd_epu8_method1<7>(data);
+						const __m128i result = hli::priv::_mm_hadd_epu8_method1<7>(data, nElements);
 						min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -263,7 +271,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const __m128i result = hli::priv::_mm_hadd_epu8_method1<6>(data);
+						const __m128i result = hli::priv::_mm_hadd_epu8_method1<6>(data, nElements);
 						min3 = std::min(min3, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -275,7 +283,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const __m128i result = hli::priv::_mm_hadd_epu8_method1<5>(data);
+						const __m128i result = hli::priv::_mm_hadd_epu8_method1<5>(data, nElements);
 						min4 = std::min(min4, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -287,7 +295,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const __m128i result = hli::priv::_mm_hadd_epu8_method2(data);
+						const __m128i result = hli::priv::_mm_hadd_epu8_method2(data, nElements);
 						min5 = std::min(min5, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -299,7 +307,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const __m128i result = hli::priv::_mm_hadd_epu8_method3(data);
+						const __m128i result = hli::priv::_mm_hadd_epu8_method3(data, nElements);
 						min6 = std::min(min6, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -332,9 +340,10 @@ namespace hli {
 	// dst[127:96] := tmp
 	template <int N_BITS>
 	inline __m128i _mm_hadd_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data)
+		const std::tuple<const __m128i * const, const size_t>& data,
+		const size_t nElements)
 	{
-		return priv::_mm_hadd_epu8_method1<N_BITS>(data);
+		return priv::_mm_hadd_epu8_method1<N_BITS>(data, nElements);
 		//return priv::_mm_hadd_epu8_method2<N_BITS>(data);
 	}
 }

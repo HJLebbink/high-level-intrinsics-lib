@@ -18,11 +18,12 @@ namespace hli {
 		// Variance population reference
 		inline __m128d _mm_covar_epu8_ref(
 			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2)
+			const std::tuple<const __m128i * const, const size_t>& data2,
+			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data1);
-			const double average1 = static_cast<double>(_mm_hadd_epu8_method0(data1).m128i_u32[0]) / nBytes;
-			const double average2 = static_cast<double>(_mm_hadd_epu8_method0(data2).m128i_u32[0]) / nBytes;
+			const double average1 = static_cast<double>(_mm_hadd_epu8_method0(data1, nElements).m128i_u32[0]) / nBytes;
+			const double average2 = static_cast<double>(_mm_hadd_epu8_method0(data2, nElements).m128i_u32[0]) / nBytes;
 
 			const unsigned __int8 * const ptr1 = reinterpret_cast<const unsigned __int8 * const>(std::get<0>(data1));
 			const unsigned __int8 * const ptr2 = reinterpret_cast<const unsigned __int8 * const>(std::get<0>(data2));
@@ -41,6 +42,7 @@ namespace hli {
 	inline __m128d _mm_covar_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2,
+		const size_t nElements,
 		const __m128d average1,
 		const __m128d average2)
 	{
@@ -95,22 +97,23 @@ namespace hli {
 			//std::cout << "INFO: hli:::_mm_variance_epu8: data=" << toString_u8(data) << "; d1=" << toString_u32(d1) << "; d2=" << toString_u32(d2) << "; d3=" << toString_u32(d3) << "; d4=" << toString_u32(d4) << std::endl;
 		}
 		result_a = _mm_add_pd(result_a, result_b);
-		const __m128d nElements = _mm_set1_pd(static_cast<double>(nBytes));
-		return _mm_div_pd(_mm_hadd_pd(result_a, result_a), nElements);
+		const __m128d nElementsD = _mm_set1_pd(static_cast<double>(nElements));
+		return _mm_div_pd(_mm_hadd_pd(result_a, result_a), nElementsD);
 	}
 
 	template <int N_BITS>
 	inline __m128d _mm_covar_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data1,
-		const std::tuple<const __m128i * const, const size_t>& data2)
+		const std::tuple<const __m128i * const, const size_t>& data2,
+		const size_t nElements)
 	{
 		const size_t nBytes = std::get<1>(data1);
-		const __m128d nElements = _mm_set1_pd(static_cast<double>(nBytes));
+		const __m128d nElementsD = _mm_set1_pd(static_cast<double>(nElements));
 
-		const __m128d sum1 = _mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(data1));
-		const __m128d average1 = _mm_div_pd(sum1, nElements);
-		const __m128d sum2 = _mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(data2));
-		const __m128d average2 = _mm_div_pd(sum2, nElements);
+		const __m128d sum1 = _mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(data1, nElements));
+		const __m128d average1 = _mm_div_pd(sum1, nElementsD);
+		const __m128d sum2 = _mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(data2, nElements));
+		const __m128d average2 = _mm_div_pd(sum2, nElementsD);
 
 		return _mm_covar_epu8(mem_addr1, mem_addr2, nBytes, average1, average2);
 	}

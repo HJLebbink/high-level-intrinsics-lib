@@ -262,9 +262,9 @@ namespace hli {
 			}
 			if (doTests)
 			{
-				const __m128i sum1 = hli::_mm_hadd_epu8<N_BITS>(data1);
-				const __m128i sum2 = hli::_mm_hadd_epu8<N_BITS>(data2);
-				const __m128i sum3 = hli::_mm_hadd_epu8<N_BITS>(data3);
+				const __m128i sum1 = hli::_mm_hadd_epu8<N_BITS>(data1, nElements);
+				const __m128i sum2 = hli::_mm_hadd_epu8<N_BITS>(data2, nElements);
+				const __m128i sum3 = hli::_mm_hadd_epu8<N_BITS>(data3, nElements);
 				if (sum1.m128i_u32[0] != sum2.m128i_u32[0]) {
 					std::cout << "WARNING: test_mm_permute_epu8: sums are unequal: sum1=" << sum1.m128i_u32[0] << "; sum2=" << sum2.m128i_u32[0] << std::endl;
 				}
