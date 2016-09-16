@@ -443,10 +443,10 @@ namespace hli {
 
 				__int32 s12 = 0;
 
-				double * const results_Double = reinterpret_cast<double * const>(std::get<1>(results));
+				double * const results_Double = reinterpret_cast<double * const>(std::get<0>(results));
 
-				for (size_t permutation = 0; permutation < nPermutations; ++permutation) {
-
+				for (size_t permutation = 0; permutation < nPermutations; ++permutation) 
+				{
 					_mm_permute_epu8_array(data3, swap, randInts);
 
 					for (size_t i = 0; i < nElements; ++i)
@@ -475,11 +475,29 @@ namespace hli {
 		{
 			const double delta = 0.0000001;
 
-			auto data1 = _mm_malloc_m128i(16 * nBlocks);
-			auto data2 = _mm_malloc_m128i(16 * nBlocks);
-			
-			fillRand_epu8<5>(data1);
-			fillRand_epu8<5>(data2);
+			auto data1_r = _mm_malloc_m128i(16 * nBlocks);
+			auto data2_r = _mm_malloc_m128i(16 * nBlocks);
+			auto data1_D_r = _mm_malloc_m128d((16 * nBlocks) * 8);
+			auto data2_D_r = _mm_malloc_m128d((16 * nBlocks)*8);
+
+			{	// initialize data
+				fillRand_epu8<5>(data1_r);
+				fillRand_epu8<5>(data2_r);
+
+				__int8 * const ptr1i = reinterpret_cast<__int8 * const>(std::get<0>(data1_r));
+				double * const ptr1d = reinterpret_cast<double * const>(std::get<0>(data1_D_r));
+				__int8 * const ptr2i = reinterpret_cast<__int8 * const>(std::get<0>(data2_r));
+				double * const ptr2d = reinterpret_cast<double * const>(std::get<0>(data2_D_r));
+				for (size_t i = 0; i < std::get<1>(data1_r); ++i) {
+					ptr1d[i] = static_cast<double>(ptr1i[i]);
+					ptr2d[i] = static_cast<double>(ptr2i[i]);
+				}
+			}
+
+			const std::tuple<const __m128i * const, const size_t> data1 = data1_r;
+			const std::tuple<const __m128i * const, const size_t> data2 = data2_r;
+			const std::tuple<const __m128d * const, const size_t> data1_D = data1_D_r;
+			const std::tuple<const __m128d * const, const size_t> data2_D = data2_D_r;
 
 			double min_ref = std::numeric_limits<double>::max();
 			double min1 = std::numeric_limits<double>::max();
@@ -490,8 +508,9 @@ namespace hli {
 			double min6 = std::numeric_limits<double>::max();
 			double min7 = std::numeric_limits<double>::max();
 			double min8 = std::numeric_limits<double>::max();
+			double min9 = std::numeric_limits<double>::max();
 
-			__m128d result_ref, result1, result2, result3, result4, result5, result6, result7, result8;
+			__m128d result_ref, result1, result2, result3, result4, result5, result6, result7, result8, result9;
 
 			for (size_t i = 0; i < nExperiments; ++i)
 			{
@@ -597,6 +616,18 @@ namespace hli {
 						}
 					}
 				}
+				{
+					timer::reset_and_start_timer();
+					result9 = hli::priv::_mm_corr_pd_method0(data1_D, data2_D);
+					min9 = std::min(min9, timer::get_elapsed_kcycles());
+
+					if (doTests) {
+						if (std::abs(result_ref.m128d_f64[0] - result9.m128d_f64[0]) > delta) {
+							std::cout << "WARNING: test _mm_corr_pd_method0<8>: result-ref=" << hli::toString_f64(result_ref) << "; result4=" << hli::toString_f64(result9) << std::endl;
+							return;
+						}
+					}
+				}
 			}
 			printf("[_mm_corr_epu8 Ref]       : %2.5f Kcycles; %0.14f\n", min_ref, result_ref.m128d_f64[0]);
 			printf("[_mm_corr_epu8_method0<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min1, result1.m128d_f64[0], min_ref / min1);
@@ -607,6 +638,7 @@ namespace hli {
 			printf("[_mm_corr_epu8_method2<6>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min6, result6.m128d_f64[0], min_ref / min6);
 			printf("[_mm_corr_epu8_method3]   : %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min7, result7.m128d_f64[0], min_ref / min7);
 			printf("[_mm_corr_epu8_method4<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min8, result8.m128d_f64[0], min_ref / min8);
+			printf("[_mm_corr_pd_method0]     : %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min9, result9.m128d_f64[0], min_ref / min9);
 
 			_mm_free2(data1);
 			_mm_free2(data2);
@@ -619,8 +651,8 @@ namespace hli {
 			const bool doTests)
 		{
 			const double delta = 0.000001;
-			auto data1 = _mm_malloc_m128i(16 * nBlocks);
-			auto data2 = _mm_malloc_m128i(16 * nBlocks);
+			auto data1_r = _mm_malloc_m128i(16 * nBlocks);
+			auto data2_r = _mm_malloc_m128i(16 * nBlocks);
 
 			const size_t nBytesResults = resizeNBytes(8 * nPermutations, 16);
 			//std::cout << "INFO: test_mm_corr_perm_epu8: nPermutations=" << nPermutations << "; nBytesResults=" << nBytesResults << std::endl;
@@ -636,8 +668,11 @@ namespace hli {
 			__m128i randInt3 = seed;
 
 			const int N_BITS = 5;
-			fillRand_epu8<N_BITS>(data1);
-			fillRand_epu8<N_BITS>(data2);
+			fillRand_epu8<N_BITS>(data1_r);
+			fillRand_epu8<N_BITS>(data2_r);
+
+			const std::tuple<const __m128i * const, const size_t> data1 = data1_r;
+			const std::tuple<const __m128i * const, const size_t> data2 = data2_r;
 
 			{
 				double min_ref = std::numeric_limits<double>::max();
@@ -706,7 +741,7 @@ namespace hli {
 
 						if (doTests) {
 							if (!equal(randInt, randInt3)) {
-								std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: randInt=" << hli::toString_u32(randInt) << "; randInt2=" << hli::toString_u32(randInt2) << std::endl;
+								std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: randInt=" << hli::toString_u32(randInt) << "; randInt3=" << hli::toString_u32(randInt3) << std::endl;
 								return;
 							}
 							if (i == 0) {
