@@ -15,7 +15,7 @@
 #include "_mm_variance_epu8.h"
 #include "_mm_covar_epu8.h"
 #include "_mm_permute_array.h"
-#include "_mm_corr_dp.h"
+#include "_mm_corr_pd.h"
 
 namespace hli {
 
@@ -314,7 +314,7 @@ namespace hli {
 
 		namespace perm {
 
-			inline void _mm_corr_perm_epu8_ref(
+			inline void _mm_corr_perm_epu8_method0(
 				const std::tuple<const __m128i * const, const size_t>& data1,
 				const std::tuple<const __m128i * const, const size_t>& data2,
 				const std::tuple<__m128d * const, const size_t>& results,
@@ -325,8 +325,7 @@ namespace hli {
 
 				const size_t nBytes = std::get<1>(data1);
 				const size_t nElements = nBytes;
-				const size_t swap_array_nBytes = nElements << 1;
-				auto swap = _mm_malloc_m128i(swap_array_nBytes);
+				auto swap = _mm_malloc_m128i(nElements << 1);
 
 				double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
 				for (size_t permutation = 0; permutation < nPermutations; ++permutation)
@@ -436,27 +435,25 @@ namespace hli {
 				const double s1d = static_cast<double>(s1);
 				const double s2d = static_cast<double>(s2);
 
-
 				const size_t swap_array_nBytes = nBytes << 1;
 				auto swap = _mm_malloc_m128i(swap_array_nBytes);
 				auto data3 = deepCopy(data2);
 
-				__int32 s12 = 0;
-
+				const __int8 * const ptr3 = reinterpret_cast<const __int8 * const>(std::get<0>(data3));
 				double * const results_Double = reinterpret_cast<double * const>(std::get<0>(results));
 
 				for (size_t permutation = 0; permutation < nPermutations; ++permutation) 
 				{
 					_mm_permute_epu8_array(data3, swap, randInts);
 
+					__int32 s12 = 0;
 					for (size_t i = 0; i < nElements; ++i)
 					{
 						const unsigned __int8 d1 = ptr1[i];
-						const unsigned __int8 d2 = ptr2[i];
+						const unsigned __int8 d2 = ptr3[i];
 						s12 += d1 * d2;
 					}
 					const double s12d = static_cast<double>(s12);
-
 					double corr = ((nElements * s12d) - (s1d*s2d)) / (sqrt((nElements*s11d) - (s1d*s1d)) * sqrt((nElements * s22d) - (s2d*s2d)));
 					results_Double[permutation] = corr;
 				}
@@ -684,7 +681,7 @@ namespace hli {
 				for (size_t i = 0; i < nExperiments; ++i) 
 				{
 					timer::reset_and_start_timer();
-					hli::priv::perm::_mm_corr_perm_epu8_ref(data1, data2, results, nPermutations, randInt);
+					hli::priv::perm::_mm_corr_perm_epu8_method0(data1, data2, results, nPermutations, randInt);
 					min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 					{
@@ -775,7 +772,8 @@ namespace hli {
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2)
 	{
-		return priv::_mm_corr_epu8_method3<N_BITS>(data1, data2);
+//		return priv::_mm_corr_epu8_method2<N_BITS>(data1, data2);
+		return priv::_mm_corr_epu8_method3(data1, data2);
 	}
 
 	template <int N_BITS>

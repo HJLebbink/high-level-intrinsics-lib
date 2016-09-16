@@ -78,8 +78,8 @@ namespace hli {
 		}
 
 		inline void _mm_permute_epu8_array_method1(
-			std::tuple<__m128i * const, const size_t>& data,
-			std::tuple<__m128i * const, const size_t>& swap,
+			const std::tuple<__m128i * const, const size_t>& data,
+			const std::tuple<__m128i * const, const size_t>& swap,
 			__m128i& randInts)
 		{
 			const size_t nBytes = std::get<1>(data);
@@ -95,8 +95,8 @@ namespace hli {
 		}
 
 		inline void _mm_permute_epu8_array_method2(
-			std::tuple<__m128i * const, const size_t>& data,
-			std::tuple<__m128i * const, const size_t>& swap,
+			const std::tuple<__m128i * const, const size_t>& data,
+			const std::tuple<__m128i * const, const size_t>& swap,
 			__m128i& randInts)
 		{
 			const size_t nBytes = std::get<1>(data);
@@ -181,7 +181,10 @@ namespace hli {
 	}
 
 	namespace test {
-		void test_mm_permute_epu8_array(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		void test_mm_permute_epu8_array(
+			const size_t nBlocks, 
+			const size_t nExperiments, 
+			const bool doTests)
 		{
 			if ((nBlocks * 8) > 0xFFFF) {
 				std::cout << "WARNING: t test_mm_permute_epu8: too many blocks=" << nBlocks << std::endl;
@@ -280,7 +283,10 @@ namespace hli {
 			_mm_free2(data3);
 			_mm_free2(swap);
 		}
-		void test_mm_permute_dp_array(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		void test_mm_permute_dp_array(
+			const size_t nBlocks, 
+			const size_t nExperiments, 
+			const bool doTests)
 		{
 			if ((nBlocks * 8) > 0xFFFF) {
 				std::cout << "WARNING: t test_mm_permute_epu8: too many blocks=" << nBlocks << std::endl;
@@ -352,8 +358,8 @@ namespace hli {
 	}
 
 	inline void _mm_permute_epu8_array(
-		std::tuple<__m128i * const, const size_t>& data,
-		std::tuple<__m128i * const, const size_t>& swap,
+		const std::tuple<__m128i * const, const size_t>& data,
+		const std::tuple<__m128i * const, const size_t>& swap,
 		__m128i& randInts)
 	{
 		//std::cout << "INFO: _mm_permute_array::_mm_permute_epu8_array: nBytes=" << nBytes << std::endl;
@@ -363,8 +369,8 @@ namespace hli {
 	}
 
 	inline void _mm_permute_dp_array(
-		std::tuple<__m128d * const, const size_t> data, 
-		std::tuple<__m128i * const, const size_t> swap,
+		const std::tuple<__m128d * const, const size_t> data, 
+		const std::tuple<__m128i * const, const size_t> swap,
 		__m128i& randInts)
 	{
 		//std::cout << "INFO: _mm_permute_array::_mm_permute_dp_array: nBytes=" << nBytes << std::endl;

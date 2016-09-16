@@ -21,8 +21,8 @@ namespace hli {
 	namespace priv {
 
 		inline __m128d _mm_corr_pd_method0(
-			const std::tuple<const __m128d * const, const size_t> data1,
-			const std::tuple<const __m128d * const, const size_t> data2)
+			const std::tuple<const __m128d * const, const size_t>& data1,
+			const std::tuple<const __m128d * const, const size_t>& data2)
 		{
 			const size_t nBytes = std::get<1>(data1);
 			const size_t nElements =  nBytes >> 3;
@@ -51,8 +51,8 @@ namespace hli {
 		}
 
 		inline __m128d _mm_corr_pd_method1(
-			const std::tuple<const __m128d * const, const size_t> data1,
-			const std::tuple<const __m128d * const, const size_t> data2)
+			const std::tuple<const __m128d * const, const size_t>& data1,
+			const std::tuple<const __m128d * const, const size_t>& data2)
 		{
 			const size_t nBytes = std::get<1>(data1);
 			const size_t nBlocks = nBytes >> 4;
@@ -87,8 +87,8 @@ namespace hli {
 		}
 
 		inline __m128d _mm_corr_dp_method3(
-			const std::tuple<const __m128d * const, const size_t> data1,
-			const std::tuple<const __m128d * const, const size_t> data2,
+			const std::tuple<const __m128d * const, const size_t>& data1,
+			const std::tuple<const __m128d * const, const size_t>& data2,
 			const __m128d var1_2)
 		{
 			const size_t nBytes = std::get<1>(data1);
@@ -181,13 +181,10 @@ namespace hli {
 	}
 
 	inline __m128d _mm_corr_pd(
-		const std::tuple<__m128d * const, const size_t> data1,
-		const std::tuple<__m128d * const, const size_t> data2)
+		const std::tuple<const __m128d * const, const size_t>& data1,
+		const std::tuple<const __m128d * const, const size_t>& data2)
 	{
 		return priv::_mm_corr_pd_method0(data1, data2);
 		//return priv::_mm_corr_pd_method1(data1, data2);
 	}
-
-
-
 }

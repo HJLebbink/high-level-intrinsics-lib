@@ -26,7 +26,6 @@
 #include "..\hli-lib\tools.h"
 
 #include "..\hli-lib\_mm_hadd_epu8.h"
-#include "..\hli-lib\_mm256_hadd_epu8.h"
 #include "..\hli-lib\_mm_variance_epu8.h"
 #include "..\hli-lib\_mm_corr_epu8.h"
 
@@ -45,12 +44,12 @@ int main()
 	{
 		const auto start = std::chrono::system_clock::now();
 
-		const size_t nExperiments = 1;
+		const size_t nExperiments = 1000;
 		//hli::test_endianess();
 
 		//hli::test::test_mm_hadd_epu8(10010, nExperiments, true);
 		//hli::test::test_mm_variance_epu8(10010, nExperiments, true);
-		hli::test::test_mm_corr_epu8(1010, nExperiments, true);
+		//hli::test::test_mm_corr_epu8(1010, nExperiments, true);
 		//hli::test::test_mm_corr_pd(1010, nExperiments, true);
 
 
@@ -59,7 +58,7 @@ int main()
 		//hli::test::test_mm_permute_epu8_array(3102, nExperiments, true);
 		//hli::test::test_mm_permute_dp_array(3102, nExperiments, true);
 
-		//hli::test::test_mm_corr_perm_epu8(1, 1, nExperiments, true);
+		hli::test::test_mm_corr_perm_epu8(110, 1000, nExperiments, true);
 		//hli::test::test_mm_entropy_epu8(100, nExperiments, true);
 
 		const auto diff = std::chrono::system_clock::now() - start;

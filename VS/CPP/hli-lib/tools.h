@@ -102,13 +102,21 @@ namespace hli {
 		const size_t nBytes2 = resizeNBytes<16>(nBytes);
 		return std::make_tuple(static_cast<__int8 * const>(_mm_malloc(nBytes2, 16)), nBytes2);
 	}
-	inline std::tuple<__m128d * const, const size_t> _mm_cast_m128d(std::tuple<__int8 * const, const size_t> data)
+	inline std::tuple<__m128d * const, const size_t> _mm_cast_m128d(const std::tuple<__int8 * const, const size_t>& data)
 	{
 		return std::make_tuple(reinterpret_cast<__m128d * const>(std::get<0>(data)), std::get<1>(data));
 	}
-	inline std::tuple<__m128i * const, const size_t> _mm_cast_m128i(std::tuple<__int8 * const, const size_t> data)
+	inline std::tuple<const __m128d * const, const size_t> _mm_cast_m128d(const std::tuple<const __int8 * const, const size_t>& data)
+	{
+		return std::make_tuple(reinterpret_cast<const __m128d * const>(std::get<0>(data)), std::get<1>(data));
+	}
+	inline std::tuple<__m128i * const, const size_t> _mm_cast_m128i(const std::tuple<__int8 * const, const size_t>& data)
 	{
 		return std::make_tuple(reinterpret_cast<__m128i * const>(std::get<0>(data)), std::get<1>(data));
+	}
+	inline std::tuple<const __m128i * const, const size_t> _mm_cast_m128i(const std::tuple<const __int8 * const, const size_t>& data)
+	{
+		return std::make_tuple(reinterpret_cast<const __m128i * const>(std::get<0>(data)), std::get<1>(data));
 	}
 	inline std::tuple<__m128d * const, const size_t> _mm_malloc_m128d(size_t nBytes)
 	{
