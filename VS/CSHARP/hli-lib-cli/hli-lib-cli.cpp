@@ -4,6 +4,8 @@
 #include "intrin.h"
 #include <vector>
 #include <tuple>
+#include <array>
+
 
 #include "StatsLibCli.h"
 
@@ -20,20 +22,22 @@ namespace StatsLibCli {
 	namespace priv {
 
 #		pragma managed
-		void copy_data(List<Byte>^ data, const std::tuple<__int8 * const, const size_t>& data2)
+		void copy_data(
+			List<Byte>^ src, 
+			const std::tuple<__int8 * const, const size_t>& dst)
 		{
-			__int8 * const ptr = std::get<0>(data2);
+			__int8 * const dst2 = std::get<0>(dst);
 
 			if (true) {
-				int nElements = data->Count;
+				int nElements = src->Count;
 				for (int i = 0; i < nElements; ++i) {
-					ptr[i] = data[i];
+					dst2[i] = src[i];
 				}
-				size_t nBytes = std::get<1>(data2);
+				size_t nBytes = std::get<1>(dst);
 				int nElements2 = static_cast<int>(nBytes);
 				int tail = nElements2 - nElements;
 				for (int i = nElements2 - tail; i < nElements2; ++i) {
-					ptr[i] = 0;
+					dst2[i] = 0;
 				}
 			} else {
 
@@ -41,40 +45,41 @@ namespace StatsLibCli {
 		}
 
 #		pragma managed
-		void copy_data(List<Double>^ data, const std::tuple<__int8 * const, const size_t>& data2)
+		void copy_data(
+			List<Double>^ src, 
+			const std::tuple<__int8 * const, const size_t>& dst)
 		{
-			double * const ptr = reinterpret_cast<double * const>(std::get<0>(data2));
+			double * const dst2 = reinterpret_cast<double * const>(std::get<0>(dst));
 
 			if (true) {
-				int nElements = data->Count;
+				int nElements = src->Count;
 
 				for (int i = 0; i < nElements; ++i) {
-					ptr[i] = data[i];
+					dst2[i] = src[i];
 				}
 			} else {
 
 			}
 		}
-	}
 
-#	pragma managed
-	array<Double>^ Class1::test2_managed(
-		List<Byte> data, 
-		const Int64 nPermutations)
-	{
-		const size_t size_data = data.Count;// TODO create proper size
-		__m128i * const data2 = static_cast<__m128i * const>(_mm_malloc(size_data, 16));
-		__m128d * const results_raw = static_cast<__m128d * const>(_mm_malloc(nPermutations * 64, 16));
+#		pragma managed
+		void copy_data(
+			std::tuple<__int8 * const, const size_t>& src, 
+			List<Double>^ dst)
+		{
+			double * const src2 = reinterpret_cast<double * const>(std::get<0>(src));
 
+			if (true) {
+				int nElements = dst->Count;
 
-		array<Double>^ result = gcnew array<Double>(static_cast<int>(nPermutations));
-		double * const resultsRawDouble = reinterpret_cast<double * const>(results_raw);
-		for (int permutation = 0; permutation < static_cast<int>(nPermutations); ++permutation) {
-			result[permutation] = resultsRawDouble[permutation];
+				for (int i = 0; i < nElements; ++i) {
+					dst[i] = src2[i];
+				}
+			}
+			else {
+
+			}
 		}
-
-		_mm_free(data2);
-		return result;
 	}
 
 #	pragma unmanaged
@@ -101,7 +106,7 @@ namespace StatsLibCli {
 	double _mm_corr_pd_unmanaged(
 		const std::tuple<const __int8 * const, const size_t>& data1,
 		const std::tuple<const __int8 * const, const size_t>& data2,
-		const int nElements)
+		const size_t nElements)
 	{
 		return _mm_cvtsd_f64(hli::_mm_corr_pd(hli::_mm_cast_m128d(data1), hli::_mm_cast_m128d(data2), nElements));
 	}
@@ -126,7 +131,7 @@ namespace StatsLibCli {
 	double _mm_corr_epu8_unmanaged(
 		const std::tuple<const __int8 * const, const size_t>& data1,
 		const std::tuple<const __int8 * const, const size_t>& data2,
-		const int nElements)
+		const size_t nElements)
 	{
 		return _mm_cvtsd_f64(hli::_mm_corr_epu8<8>(hli::_mm_cast_m128i(data1), hli::_mm_cast_m128i(data2), nElements));
 	}
@@ -145,5 +150,60 @@ namespace StatsLibCli {
 		hli::_mm_free2(data1_x);
 		hli::_mm_free2(data2_x);
 		return result;
+	}
+
+#	pragma unmanaged
+	void _mm_corr_perm_epu8_unmanaged(
+		const std::tuple<const __int8 * const, const size_t>& data1,
+		const std::tuple<const __int8 * const, const size_t>& data2,
+		const size_t nElements,
+		const std::tuple<__int8 * const, const size_t>& results,
+		const size_t nPermutations,
+		std::array<UInt32, 4>& randInts)
+	{
+		__m128i randInts2 = _mm_set_epi32(randInts[3], randInts[2], randInts[1], randInts[0]);
+
+		hli::_mm_corr_perm_epu8<8>(
+			hli::_mm_cast_m128i(data1),
+			hli::_mm_cast_m128i(data2),
+			nElements,
+			hli::_mm_cast_m128d(results),
+			nPermutations,
+			randInts2);
+
+		randInts[3] = randInts2.m128i_u32[3];
+		randInts[2] = randInts2.m128i_u32[2];
+		randInts[1] = randInts2.m128i_u32[1];
+		randInts[0] = randInts2.m128i_u32[0];
+	}
+
+#	pragma managed
+	void Class1::_mm_corr_perm_epu8(
+		List<Byte>^ data1,
+		List<Byte>^ data2,
+		List<Double>^ results,
+		array<UInt32>^ randInts)
+	{
+		int nElements = data1->Count;
+		auto data1_x = hli::_mm_malloc_xmm(nElements);
+		auto data2_x = hli::_mm_malloc_xmm(nElements);
+		priv::copy_data(data1, data1_x);
+		priv::copy_data(data2, data2_x);
+
+		int nPermutations = results->Count;
+		auto results_x = hli::_mm_malloc_xmm(nPermutations * 8);
+
+		std::array<UInt32, 4> randInts2 = { randInts[3], randInts[2], randInts[1], randInts[0] };
+		_mm_corr_perm_epu8_unmanaged(data1_x, data2_x, nElements, results_x, nPermutations, randInts2);
+		
+		randInts[0] = randInts2[0];
+		randInts[1] = randInts2[1];
+		randInts[2] = randInts2[2];
+		randInts[3] = randInts2[3];
+
+		priv::copy_data(results_x, results);
+		hli::_mm_free2(data1_x);
+		hli::_mm_free2(data2_x);
+		hli::_mm_free2(results_x);
 	}
 }

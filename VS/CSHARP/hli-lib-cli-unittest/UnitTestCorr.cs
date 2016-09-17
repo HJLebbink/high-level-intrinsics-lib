@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace hli_lib_cli_unittest
 {
     [TestClass]
-    public class UnitTest1
+    public class UnitTestCorr
     {
 
         [TestMethod]

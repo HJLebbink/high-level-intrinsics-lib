@@ -24,7 +24,7 @@ namespace hli {
 		inline __m128d _mm_corr_epu8_ref(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
-			const int nElements)
+			const size_t nElements)
 		{
 			//const double std_dev_d1 = sqrt(var_pop_ref(data1, nElements));
 			//const double std_dev_d2 = sqrt(var_pop_ref(data1, nElements));
@@ -42,7 +42,7 @@ namespace hli {
 		inline __m128d _mm_corr_epu8_method0(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
-			const int nElements,
+			const size_t nElements,
 			const __m128d average1,
 			const __m128d average2)
 		{
@@ -79,7 +79,7 @@ namespace hli {
 		inline __m128d _mm_corr_epu8_method0(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
-			const int nElements)
+			const size_t nElements)
 		{
 			const __m128d nElementsD = _mm_set1_pd(static_cast<double>(nElements));
 			const __m128d average1 = _mm_div_pd(_mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(data1, nElements)), nElementsD);
@@ -92,7 +92,7 @@ namespace hli {
 		inline __m128d _mm_corr_epu8_method1(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
-			const int nElements,
+			const size_t nElements,
 			const __m128d average1,
 			const __m128d average2)
 		{
@@ -148,7 +148,7 @@ namespace hli {
 		inline __m128d _mm_corr_epu8_method1(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
-			const int nElements)
+			const size_t nElements)
 		{
 			const __m128d nElementsD = _mm_set1_pd(static_cast<double>(nElements));
 			const __m128d average1 = _mm_div_pd(_mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(data1, nElements)), nElementsD);
@@ -160,7 +160,7 @@ namespace hli {
 		inline __m128d _mm_corr_epu8_method2(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
-			const int nElements,
+			const size_t nElements,
 			const __m128d average1,
 			const __m128d average2)
 		{
@@ -176,7 +176,7 @@ namespace hli {
 		inline __m128d _mm_corr_epu8_method2(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
-			const int nElements)
+			const size_t nElements)
 		{
 			const __m128d nElementsD = _mm_set1_pd(static_cast<double>(nElements));
 			const __m128d average1 = _mm_div_pd(_mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(data1, nElements)), nElementsD);
@@ -187,7 +187,7 @@ namespace hli {
 		inline __m128d _mm_corr_epu8_method3(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
-			const int nElements)
+			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data1);
 			const size_t nBlocks = nBytes >> 4;
@@ -298,7 +298,7 @@ namespace hli {
 		inline __m128d _mm_corr_epu8_method4(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
-			const int nElements)
+			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data1);
 			const size_t nBlocksInput = nBytes >> 4;
@@ -778,7 +778,7 @@ namespace hli {
 	inline __m128d _mm_corr_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2,
-		const int nElements)
+		const size_t nElements)
 	{
 //		return priv::_mm_corr_epu8_method2<N_BITS>(data1, data2, nElements);
 		return priv::_mm_corr_epu8_method3(data1, data2, nElements);
@@ -788,10 +788,11 @@ namespace hli {
 	inline void _mm_corr_perm_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2,
-		const __m128d * const results,
+		const size_t nElements,
+		const std::tuple<__m128d * const, const size_t>& results,
 		const size_t nPermutations,
 		__m128i& randInts)
 	{
-		return priv::_mm_corr_perm_epu8_method3(data1, data2, results, nPermutations, randInts);
+		return priv::perm::_mm_corr_perm_epu8_method3(data1, data2, nElements, results, nPermutations, randInts);
 	}
 }
