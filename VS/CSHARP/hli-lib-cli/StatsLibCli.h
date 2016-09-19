@@ -29,5 +29,14 @@ namespace StatsLibCli {
 			List<Double>^ results,
 			array<UInt32>^ randInts);
 
+		static double _mm_mi_epu8(
+			List<Byte>^ data1,
+			List<Byte>^ data2);
+
+		static void _mm_mi_perm_epu8(
+			List<Byte>^ data1,
+			List<Byte>^ data2,
+			List<Double>^ results,
+			array<UInt32>^ randInts);
 	};
 }

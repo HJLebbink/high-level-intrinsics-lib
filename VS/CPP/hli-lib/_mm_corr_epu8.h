@@ -793,6 +793,14 @@ namespace hli {
 		const size_t nPermutations,
 		__m128i& randInts)
 	{
-		return priv::perm::_mm_corr_perm_epu8_method3(data1, data2, nElements, results, nPermutations, randInts);
+		priv::perm::_mm_corr_perm_epu8_method3(data1, data2, nElements, results, nPermutations, randInts);
+#		if _DEBUG
+		const double * const ptr = reinterpret_cast<double * const>(std::get<0>(results));
+		for (size_t i = 0; i < nPermutations; ++i) {
+			if ((ptr[i] < -1) || (ptr[i] > 1)) {
+				std::cout << "WARNING: _mm_corr_epu8: _mm_corr_perm_epu8: permutation " << i << " has an invalid correlation value " << ptr[i] << std::endl;
+			}
+		}
+#		endif
 	}
 }

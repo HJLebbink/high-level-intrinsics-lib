@@ -24,6 +24,10 @@ namespace hli {
 
 	namespace priv {
 
+		inline __m128d _mm_log2_pd(__m128d a) {
+			return _mm_set_pd(log2(a.m128d_f64[1]), log2(a.m128d_f64[0]));
+		}
+
 		inline __m128d freq_2bits_to_entropy_ref(
 			const __m128i freq)
 		{
@@ -88,32 +92,32 @@ namespace hli {
 				const __m128i d2 = ptr[block + 2];
 				const __m128i d3 = ptr[block + 3];
 
-				const int nBits0 = _popcnt64(
+				const int nBits0 = static_cast<int>(__popcnt64(
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask0))) ||
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d1, mask0)) << 2) ||
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d2, mask0)) << 4) ||
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d3, mask0)) << 5));
+					(_mm_movemask_epi8(_mm_cmpeq_epi8(d3, mask0)) << 5)));
 
-				const int nBits1 = _popcnt64(
+				const int nBits1 = static_cast<int>(__popcnt64(
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask1))) ||
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d1, mask1)) << 2) ||
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d2, mask1)) << 4) ||
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d3, mask1)) << 5));
+					(_mm_movemask_epi8(_mm_cmpeq_epi8(d3, mask1)) << 5)));
 
-				const int nBits2 = _popcnt64(
+				const int nBits2 = static_cast<int>(__popcnt64(
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask2))) ||
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d1, mask2)) << 2) ||
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d2, mask2)) << 4) ||
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d3, mask2)) << 6));
+					(_mm_movemask_epi8(_mm_cmpeq_epi8(d3, mask2)) << 6)));
 
 				freq = _mm_add_epi32(freq, _mm_set_epi32(nBits0, nBits1, nBits2, 0));
 			}
 
 			for (; block < nBlocks; ++block) {
 				const __m128i d0 = ptr[block];
-				const int nBits0 = _popcnt64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask0)));
-				const int nBits1 = _popcnt64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask1)));
-				const int nBits2 = _popcnt64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask2)));
+				const int nBits0 = static_cast<int>(__popcnt64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask0))));
+				const int nBits1 = static_cast<int>(__popcnt64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask1))));
+				const int nBits2 = static_cast<int>(__popcnt64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask2))));
 				freq = _mm_add_epi32(freq, _mm_set_epi32(nBits0, nBits1, nBits2, 0));
 			}
 
@@ -241,7 +245,7 @@ namespace hli {
 			const __int8 * const ptr2 = reinterpret_cast<const __int8 * const>(std::get<0>(data2));
 
 			std::map<__int16, int> freq;
-			int nMissingValues = 0;
+			size_t nMissingValues = 0;
 
 			for (size_t element = 0; element < nElements; ++element) {
 				if ((ptr1[element] == 0xFF) || (ptr2[element] == 0xFF)) {
@@ -255,7 +259,7 @@ namespace hli {
 					}
 				}
 			}
-			int nValues_noMissing = nElements - nMissingValues;
+			size_t nValues_noMissing = nElements - nMissingValues;
 
 			double h = 0;
 
@@ -383,7 +387,7 @@ namespace hli {
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2)
 	{
-		return priv::_mm_entropy_epu8_ref<N_BITS>(data1, data2);
+		return priv::_mm_entropy_epu8_ref(data1, data2);
 	}
 
 }
