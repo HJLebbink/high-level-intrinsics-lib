@@ -62,12 +62,10 @@ namespace hli {
 
 		inline void _mm_permute_epu8_array_ref(
 			const std::tuple<__m128i * const, const size_t>& data,
+			const size_t nElements,
 			const std::tuple<__m128i * const, const size_t>& swap,
 			__m128i& randInts)
 		{
-			const size_t nBytes = std::get<1>(data);
-			const size_t nElements = nBytes;
-
 			_mm_rand_si128_ref(swap, randInts);
 			_mm_rescale_epu16_ref(swap);
 
@@ -79,12 +77,10 @@ namespace hli {
 
 		inline void _mm_permute_epu8_array_method1(
 			const std::tuple<__m128i * const, const size_t>& data,
+			const size_t nElements,
 			const std::tuple<__m128i * const, const size_t>& swap,
 			__m128i& randInts)
 		{
-			const size_t nBytes = std::get<1>(data);
-			const size_t nElements = nBytes;
-
 			_mm_lfsr32_epu32(swap, randInts);
 			_mm_rescale_epu16(swap);
 
@@ -96,11 +92,11 @@ namespace hli {
 
 		inline void _mm_permute_epu8_array_method2(
 			const std::tuple<__m128i * const, const size_t>& data,
+			const size_t nElements,
 			const std::tuple<__m128i * const, const size_t>& swap,
 			__m128i& randInts)
 		{
 			const size_t nBytes = std::get<1>(data);
-			const size_t nElements = nBytes;
 			//std::cout << "INFO: _mm_permute_array::_mm_permute_epu8_array_method2: nElements=" << nElements << std::endl;
 
 			const size_t nBlocks = nBytes >> 4;
@@ -141,13 +137,10 @@ namespace hli {
 
 		inline void _mm_permute_dp_array_ref(
 			const std::tuple<__m128d * const, const size_t>& data,
+			const size_t nElements,
 			const std::tuple<__m128i * const, const size_t>& swap,
 			__m128i& randInts)
 		{
-			const size_t nBytes = std::get<1>(data);
-			const size_t nElements = nBytes >> 3;
-			//std::cout << "INFO: _mm_permute_array::_mm_permute_dp_array_ref: nElements=" << nElements << std::endl;
-
 			_mm_lfsr32_epu32(swap, randInts);
 			_mm_rescale_epu16_ref(swap);
 
@@ -161,13 +154,10 @@ namespace hli {
 
 		inline void _mm_permute_dp_array_method2(
 			const std::tuple<__m128d * const, const size_t>& data,
+			const size_t nElements,
 			const std::tuple<__m128i * const, const size_t>& swap,
 			__m128i& randInts)
 		{
-			const size_t nBytes = std::get<1>(data);
-			const size_t nElements = nBytes >> 3;
-			//std::cout << "INFO: _mm_permute_array::_mm_permute_dp_array_ref: nElements=" << nElements << std::endl;
-
 			_mm_lfsr32_epu32(swap, randInts);
 			_mm_rescale_epu16(swap);
 
@@ -218,13 +208,13 @@ namespace hli {
 
 				copy(data0, data1);
 				timer::reset_and_start_timer();
-				hli::priv::_mm_permute_epu8_array_ref(data1, swap, randInt);
+				hli::priv::_mm_permute_epu8_array_ref(data1, nElements, swap, randInt);
 				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 				{
 					copy(data0, data2);
 					timer::reset_and_start_timer();
-					hli::priv::_mm_permute_epu8_array_method1(data2, swap, randInt1);
+					hli::priv::_mm_permute_epu8_array_method1(data2, nElements, swap, randInt1);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -243,7 +233,7 @@ namespace hli {
 				{
 					copy(data0, data3);
 					timer::reset_and_start_timer();
-					hli::priv::_mm_permute_epu8_array_method2(data3, swap, randInt2);
+					hli::priv::_mm_permute_epu8_array_method2(data3, nElements, swap, randInt2);
 					min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -315,13 +305,13 @@ namespace hli {
 			{
 				memcpy(std::get<0>(data_1), std::get<0>(data), nBytes);
 				timer::reset_and_start_timer();
-				hli::priv::_mm_permute_dp_array_ref(data_1, swap, randInt);
+				hli::priv::_mm_permute_dp_array_ref(data_1, nElements, swap, randInt);
 				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 				{
 					memcpy(std::get<0>(data_2), std::get<0>(data), nBytes);
 					timer::reset_and_start_timer();
-					hli::priv::_mm_permute_dp_array_method2(data_2, swap, randInt1);
+					hli::priv::_mm_permute_dp_array_method2(data_2, nElements, swap, randInt1);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -359,22 +349,24 @@ namespace hli {
 
 	inline void _mm_permute_epu8_array(
 		const std::tuple<__m128i * const, const size_t>& data,
+		const size_t nElements,
 		const std::tuple<__m128i * const, const size_t>& swap,
 		__m128i& randInts)
 	{
 		//std::cout << "INFO: _mm_permute_array::_mm_permute_epu8_array: nBytes=" << nBytes << std::endl;
 		//priv::_mm_permute_epu8_array_ref(data, swap, randInts);
 		//priv::_mm_permute_epu8_array_method1(data, swap, randInts);
-		priv::_mm_permute_epu8_array_method2(data, swap, randInts);
+		priv::_mm_permute_epu8_array_method2(data, nElements, swap, randInts);
 	}
 
 	inline void _mm_permute_dp_array(
-		const std::tuple<__m128d * const, const size_t> data, 
+		const std::tuple<__m128d * const, const size_t> data,
+		const size_t nElements,
 		const std::tuple<__m128i * const, const size_t> swap,
 		__m128i& randInts)
 	{
 		//std::cout << "INFO: _mm_permute_array::_mm_permute_dp_array: nBytes=" << nBytes << std::endl;
 		//priv::_mm_permute_dp_array_ref(mem_addr, nBytes, randInts, swap_array_nBytes, swap_array);
-		priv::_mm_permute_dp_array_method2(data, swap, randInts);
+		priv::_mm_permute_dp_array_method2(data, nElements, swap, randInts);
 	}
 }

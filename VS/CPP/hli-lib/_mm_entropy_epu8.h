@@ -280,10 +280,11 @@ namespace hli {
 			for (int i = 0; i < N_VALUES; ++i)
 			{
 				//std::cout << "INFO: _mm_entropy_epu8_method1: freq[" << i <<"]=" << freq[i] << std::endl;
-				double prob = (static_cast<double>(freq[i]) / nValues_noMissing);
-				h += prob * log2(prob);
+				if (freq[i] > 0) {
+					double prob = (static_cast<double>(freq[i]) / nValues_noMissing);
+					h += prob * log2(prob);
+				}
 			}
-
 			return _mm_set1_pd(-h);
 		}
 
@@ -447,7 +448,12 @@ namespace hli {
 		const std::tuple<const __m128i * const, const size_t>& data,
 		const size_t nElements)
 	{
-		return priv::_mm_entropy_epu8_method1<N_BITS>(data, nElements);
+		const __m128d result = priv::_mm_entropy_epu8_method1<N_BITS>(data, nElements);
+#		if	_DEBUG
+		if (isnan(result.m128d_f64[0])) std::cout << "WARNING: _mm_entropy_epu8: result is NAN" << std::endl;
+		if (result.m128d_f64[0] < 0) std::cout << "WARNING: _mm_entropy_epu8: result is smaller than 0. " << result.m128d_f64[0] << std::endl;
+#		endif
+		return result;
 	}
 
 	template <int N_BITS1, int N_BITS2>
@@ -456,7 +462,14 @@ namespace hli {
 		const std::tuple<const __m128i * const, const size_t>& data2,
 		const size_t nElements)
 	{
-		return priv::_mm_entropy_epu8_method1<N_BITS1, N_BITS2>(data1, data2, nElements);
+		//const __m128d result = priv::_mm_entropy_epu8_method1<N_BITS1, N_BITS2>(data1, data2, nElements);
+		const __m128d result = priv::_mm_entropy_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements);
+
+#		if	_DEBUG
+		if (isnan(result.m128d_f64[0])) std::cout << "WARNING: test _mm_entropy_epu8: result is NAN" << std::endl;
+		if (result.m128d_f64[0] < 0) std::cout << "WARNING: _mm_entropy_epu8: result is smaller than 0. " << result.m128d_f64[0] << std::endl;
+#		endif
+		return result;
 	}
 
 }

@@ -21,23 +21,23 @@ namespace hli {
 
 	namespace priv {
 
-		template <int N_BITS>
+		template <int N_BITS1, int N_BITS2>
 		inline __m128d _mm_mi_epu8_ref(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
-			const __m128d h1 = priv::_mm_entropy_epu8_ref<N_BITS>(data1, nElements);
-			const __m128d h2 = priv::_mm_entropy_epu8_ref<N_BITS>(data2, nElements);
+			const __m128d h1 = priv::_mm_entropy_epu8_method0<N_BITS1>(data1, nElements);
+			const __m128d h2 = priv::_mm_entropy_epu8_method0<N_BITS2>(data2, nElements);
 			const __m128d h1Plush2 = _mm_add_pd(h1, h2);
-			const __m128d h1Andh2 = priv::_mm_entropy_epu8_ref(data1, data2, nElements);
+			const __m128d h1Andh2 = priv::_mm_entropy_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements);
 			const __m128d mi = _mm_sub_pd(h1Plush2, h1Andh2);
 			return mi;
 		}
 
 		namespace perm {
 
-			template <int N_BITS>
+			template <int N_BITS1, int N_BITS2>
 			inline void _mm_mi_perm_epu8_method0(
 				const std::tuple<const __m128i * const, const size_t>& data1,
 				const std::tuple<const __m128i * const, const size_t>& data2,
@@ -46,8 +46,8 @@ namespace hli {
 				const size_t nPermutations,
 				__m128i& randInts)
 			{
-				const __m128d h1 = _mm_entropy_epu8<N_BITS>(data1, nElements);
-				const __m128d h2 = _mm_entropy_epu8<N_BITS>(data2, nElements);
+				const __m128d h1 = _mm_entropy_epu8<N_BITS1>(data1, nElements);
+				const __m128d h2 = _mm_entropy_epu8<N_BITS2>(data2, nElements);
 				const __m128d h1Plush2 = _mm_add_pd(h1, h2);
 
 				auto data3 = deepCopy(data2);
@@ -56,9 +56,14 @@ namespace hli {
 				double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
 				for (size_t permutation = 0; permutation < nPermutations; ++permutation)
 				{
-					_mm_permute_epu8_array_ref(data3, swap, randInts);
-					const __m128d h1Andh2 = _mm_entropy_epu8<N_BITS>(data1, data3, nElements);
+					_mm_permute_epu8_array_ref(data3, nElements, swap, randInts);
+					const __m128d h1Andh2 = _mm_entropy_epu8<N_BITS1, N_BITS2>(data1, data3, nElements);
 					const __m128d mi = _mm_sub_pd(h1Plush2, h1Andh2);
+
+#					if	_DEBUG
+						if (isnan(mi.m128d_f64[0])) std::cout << "WARNING: test _mm_mi_perm_epu8_method0: mi is NAN" << std::endl;
+						if (mi.m128d_f64[0] < 0) std::cout << "WARNING: test _mm_mi_perm_epu8_method0: mi is smaller than 0. " << mi.m128d_f64[0] << std::endl;
+#					endif
 					results_double[permutation] = mi.m128d_f64[0];
 				}
 				_mm_free2(data3);
@@ -92,7 +97,7 @@ namespace hli {
 			for (size_t i = 0; i < nExperiments; ++i) {
 
 				timer::reset_and_start_timer();
-				result_ref = hli::priv::_mm_entropy_epu8_ref(data1, data2, nElements);
+				result_ref = hli::priv::_mm_entropy_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements);
 				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 				{
@@ -129,16 +134,16 @@ namespace hli {
 		}
 	}
 
-	template <int N_BITS>
+	template <int N_BITS1, int N_BITS2>
 	inline __m128d _mm_mi_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2,
 		const size_t nElements)
 	{
-		return priv::_mm_mi_epu8_ref<N_BITS>(data1, data2, nElements);
+		return priv::_mm_mi_epu8_ref<N_BITS1, N_BITS2>(data1, data2, nElements);
 	}
 
-	template <int N_BITS>
+	template <int N_BITS1, int N_BITS2>
 	inline void _mm_mi_perm_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2,
@@ -147,6 +152,6 @@ namespace hli {
 		const size_t nPermutations,
 		__m128i& randInts)
 	{
-		priv::perm::_mm_mi_perm_epu8_method0<N_BITS>(data1, data2, nElements, results, nPermutations, randInts);
+		priv::perm::_mm_mi_perm_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements, results, nPermutations, randInts);
 	}
 }

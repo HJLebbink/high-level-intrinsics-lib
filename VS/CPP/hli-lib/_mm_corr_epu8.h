@@ -333,7 +333,7 @@ namespace hli {
 				double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
 				for (size_t permutation = 0; permutation < nPermutations; ++permutation)
 				{
-					_mm_permute_epu8_array_ref(data3, swap, randInts);
+					_mm_permute_epu8_array_ref(data3, nElements, swap, randInts);
 					const __m128d corr1 = _mm_corr_epu8_ref(data1, data3, nElements);
 					results_double[permutation] = corr1.m128d_f64[0];
 				}
@@ -362,7 +362,7 @@ namespace hli {
 
 				double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
 				for (size_t permutation = 0; permutation < nPermutations; ++permutation) {
-					_mm_permute_epu8_array(data3, swap, randInts);
+					_mm_permute_epu8_array(data3, nElements, swap, randInts);
 					const __m128d corr = _mm_corr_epu8_method1<N_BITS>(data1, data3, nElements, average1, average2);
 					results_double[permutation] = corr.m128d_f64[0];
 				}
@@ -392,7 +392,7 @@ namespace hli {
 
 				double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
 				for (size_t permutation = 0; permutation < nPermutations; ++permutation) {
-					_mm_permute_dp_array(data2_Double, swap, randInts);
+					_mm_permute_dp_array(data2_Double, nElements, swap, randInts);
 					const __m128d corr = _mm_corr_dp_method3(data1_Double, data2_Double, nElements, var1_2);
 					//std::cout << "INFO: _mm_corr_epu8::_mm_corr_perm_epu8_method3: corr=" << corr.m128d_f64[0] << std::endl;
 					results_double[permutation] = corr.m128d_f64[0];
@@ -449,7 +449,7 @@ namespace hli {
 
 				for (size_t permutation = 0; permutation < nPermutations; ++permutation) 
 				{
-					_mm_permute_epu8_array(data3, swap, randInts);
+					_mm_permute_epu8_array(data3, nElements, swap, randInts);
 
 					__int32 s12 = 0;
 					for (size_t i = 0; i < nElements; ++i)
