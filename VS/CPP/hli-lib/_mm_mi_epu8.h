@@ -24,11 +24,13 @@ namespace hli {
 		template <int N_BITS>
 		inline __m128d _mm_mi_epu8_ref(
 			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2)
+			const std::tuple<const __m128i * const, const size_t>& data2,
+			const size_t nElements)
 		{
-			const __m128d h1 = priv:_mm_entropy_epu8_ref<N_BITS>(data1);
-			const __m128d h2 = priv:_mm_entropy_epu8_ref<N_BITS>(data2);
-			const __m128d h1And2 = priv:_mm_entropy_epu8_ref<N_BITS>(data1, data2);
+			const __m128d h1 = priv::_mm_entropy_epu8_ref<N_BITS>(data1, nElements);
+			const __m128d h2 = priv::_mm_entropy_epu8_ref<N_BITS>(data2, nElements);
+			const __m128d h1Plush2 = _mm_add_pd(h1, h2);
+			const __m128d h1Andh2 = priv::_mm_entropy_epu8_ref(data1, data2, nElements);
 			const __m128d mi = _mm_sub_pd(h1Plush2, h1Andh2);
 			return mi;
 		}
@@ -44,8 +46,8 @@ namespace hli {
 				const size_t nPermutations,
 				__m128i& randInts)
 			{
-				const __m128d h1 = _mm_entropy_epu8<N_BITS>(data1);
-				const __m128d h2 = _mm_entropy_epu8<N_BITS>(data2);
+				const __m128d h1 = _mm_entropy_epu8<N_BITS>(data1, nElements);
+				const __m128d h2 = _mm_entropy_epu8<N_BITS>(data2, nElements);
 				const __m128d h1Plush2 = _mm_add_pd(h1, h2);
 
 				auto data3 = deepCopy(data2);
@@ -55,7 +57,7 @@ namespace hli {
 				for (size_t permutation = 0; permutation < nPermutations; ++permutation)
 				{
 					_mm_permute_epu8_array_ref(data3, swap, randInts);
-					const __m128d h1Andh2 = _mm_entropy_epu8<N_BITS>(data1, data3);
+					const __m128d h1Andh2 = _mm_entropy_epu8<N_BITS>(data1, data3, nElements);
 					const __m128d mi = _mm_sub_pd(h1Plush2, h1Andh2);
 					results_double[permutation] = mi.m128d_f64[0];
 				}
@@ -70,9 +72,10 @@ namespace hli {
 		void test_mm_mi_epu8(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 		{
 			const double delta = 0.0000001;
+			const size_t nElements = 16 * nBlocks;
 
-			auto data1 = _mm_malloc_m128i(16 * nBlocks);
-			auto data2 = _mm_malloc_m128i(16 * nBlocks);
+			auto data1 = _mm_malloc_m128i(nElements);
+			auto data2 = _mm_malloc_m128i(nElements);
 			fillRand_epu8<2>(data1);
 			fillRand_epu8<2>(data2);
 
@@ -87,12 +90,12 @@ namespace hli {
 			for (size_t i = 0; i < nExperiments; ++i) {
 
 				timer::reset_and_start_timer();
-				result_ref = hli::priv::_mm_entropy_epu8_ref(data1, data2);
+				result_ref = hli::priv::_mm_entropy_epu8_ref(data1, data2, nElements);
 				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 				{
 					timer::reset_and_start_timer();
-					result1 = hli::priv::_mm_entropy_epu8_method0<2>(data1, data2);
+					result1 = hli::priv::_mm_entropy_epu8_method0<2>(data1, data2, nElements);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -104,7 +107,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					result2 = hli::priv::_mm_entropy_epu8_method0<3>(data1, data2);
+					result2 = hli::priv::_mm_entropy_epu8_method0<3>(data1, data2, nElements);
 					min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -117,7 +120,7 @@ namespace hli {
 
 				{
 					timer::reset_and_start_timer();
-					result3 = hli::priv::_mm_entropy_epu8_method1<2>(data1, data2);
+					result3 = hli::priv::_mm_entropy_epu8_method1<2>(data1, data2, nElements);
 					min3 = std::min(min3, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -129,7 +132,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					result4 = hli::priv::_mm_entropy_epu8_method1<3>(data1, data2);
+					result4 = hli::priv::_mm_entropy_epu8_method1<3>(data1, data2, nElements);
 					min4 = std::min(min4, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -155,9 +158,10 @@ namespace hli {
 	template <int N_BITS>
 	inline __m128d _mm_mi_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data1,
-		const std::tuple<const __m128i * const, const size_t>& data2)
+		const std::tuple<const __m128i * const, const size_t>& data2,
+		const size_t nElements)
 	{
-		return priv::_mm_mi_epu8_ref<N_BITS>(data1, data2);
+		return priv::_mm_mi_epu8_ref<N_BITS>(data1, data2, nElements);
 	}
 
 	template <int N_BITS>

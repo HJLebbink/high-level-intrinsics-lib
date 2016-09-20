@@ -215,7 +215,7 @@ namespace StatsLibCli {
 		const std::tuple<const __int8 * const, const size_t>& data2,
 		const size_t nElements)
 	{
-		return _mm_cvtsd_f64(hli::_mm_corr_epu8<8>(hli::_mm_cast_m128i(data1), hli::_mm_cast_m128i(data2), nElements));
+		return _mm_cvtsd_f64(hli::_mm_mi_epu8<8>(hli::_mm_cast_m128i(data1), hli::_mm_cast_m128i(data2), nElements));
 	}
 
 #	pragma managed

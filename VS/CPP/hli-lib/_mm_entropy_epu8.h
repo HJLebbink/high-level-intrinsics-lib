@@ -204,13 +204,13 @@ namespace hli {
 
 		template <int N_BITS>
 		inline __m128d _mm_entropy_epu8_ref(
-			const std::tuple<const __m128i * const, const size_t>& data)
+			const std::tuple<const __m128i * const, const size_t>& data,
+			const size_t nElements)
 		{
-			const size_t nElements = std::get<1>(data);
 			const __int8 * const ptr1 = reinterpret_cast<const __int8 * const>(std::get<0>(data));
 
 			std::map<__int8, int> freq;
-			int nMissingValues = 0;
+			size_t nMissingValues = 0;
 
 			for (size_t element = 0; element < nElements; ++element) {
 				if (ptr1[element] == 0xFF) {
@@ -224,7 +224,7 @@ namespace hli {
 					}
 				}
 			}
-			int nValues_noMissing = nElements - nMissingValues;
+			size_t nValues_noMissing = nElements - nMissingValues;
 
 			double h = 0;
 
@@ -238,9 +238,9 @@ namespace hli {
 
 		inline __m128d _mm_entropy_epu8_ref(
 			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2)
+			const std::tuple<const __m128i * const, const size_t>& data2,
+			const size_t nElements)
 		{
-			const size_t nElements = std::get<1>(data1);
 			const __int8 * const ptr1 = reinterpret_cast<const __int8 * const>(std::get<0>(data1));
 			const __int8 * const ptr2 = reinterpret_cast<const __int8 * const>(std::get<0>(data2));
 
@@ -274,17 +274,19 @@ namespace hli {
 		template <int N_BITS>
 		inline __m128d _mm_entropy_epu8_method0(
 			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2)
+			const std::tuple<const __m128i * const, const size_t>& data2,
+			const size_t nElements)
 		{
-			return _mm_entropy_epu8_ref(data1, data2);
+			return _mm_entropy_epu8_ref(data1, data2, nElements);
 		}
 
 		template <int N_BITS>
 		inline __m128d _mm_entropy_epu8_method1(
 			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2)
+			const std::tuple<const __m128i * const, const size_t>& data2,
+			const size_t nElements)
 		{
-			return _mm_entropy_epu8_ref(data1, data2);
+			return _mm_entropy_epu8_ref(data1, data2, nElements);
 		}
 	}
 
@@ -294,8 +296,11 @@ namespace hli {
 		{
 			const double delta = 0.0000001;
 
-			auto data1 = _mm_malloc_m128i(16 * nBlocks);
-			auto data2 = _mm_malloc_m128i(16 * nBlocks);
+			const size_t nElements = 16 * nBlocks;
+
+
+			auto data1 = _mm_malloc_m128i(nElements);
+			auto data2 = _mm_malloc_m128i(nElements);
 			fillRand_epu8<2>(data1);
 			fillRand_epu8<2>(data2);
 
@@ -310,12 +315,12 @@ namespace hli {
 			for (size_t i = 0; i < nExperiments; ++i) {
 
 				timer::reset_and_start_timer();
-				result_ref = hli::priv::_mm_entropy_epu8_ref(data1, data2);
+				result_ref = hli::priv::_mm_entropy_epu8_ref(data1, data2, nElements);
 				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 				{
 					timer::reset_and_start_timer();
-					result1 = hli::priv::_mm_entropy_epu8_method0<2>(data1, data2);
+					result1 = hli::priv::_mm_entropy_epu8_method0<2>(data1, data2, nElements);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -327,7 +332,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					result2 = hli::priv::_mm_entropy_epu8_method0<3>(data1, data2);
+					result2 = hli::priv::_mm_entropy_epu8_method0<3>(data1, data2, nElements);
 					min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -340,7 +345,7 @@ namespace hli {
 
 				{
 					timer::reset_and_start_timer();
-					result3 = hli::priv::_mm_entropy_epu8_method1<2>(data1, data2);
+					result3 = hli::priv::_mm_entropy_epu8_method1<2>(data1, data2, nElements);
 					min3 = std::min(min3, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -352,7 +357,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					result4 = hli::priv::_mm_entropy_epu8_method1<3>(data1, data2);
+					result4 = hli::priv::_mm_entropy_epu8_method1<3>(data1, data2, nElements);
 					min4 = std::min(min4, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -377,17 +382,19 @@ namespace hli {
 	
 	template <int N_BITS>
 	inline __m128d _mm_entropy_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data)
+		const std::tuple<const __m128i * const, const size_t>& data,
+		const size_t nElements)
 	{
-		return priv::_mm_entropy_epu8_ref<N_BITS>(data);
+		return priv::_mm_entropy_epu8_ref<N_BITS>(data, nElements);
 	}
 
 	template <int N_BITS>
 	inline __m128d _mm_entropy_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data1,
-		const std::tuple<const __m128i * const, const size_t>& data2)
+		const std::tuple<const __m128i * const, const size_t>& data2,
+		const size_t nElements)
 	{
-		return priv::_mm_entropy_epu8_ref(data1, data2);
+		return priv::_mm_entropy_epu8_ref(data1, data2, nElements);
 	}
 
 }
