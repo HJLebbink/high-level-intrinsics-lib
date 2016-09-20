@@ -28,6 +28,22 @@ namespace hli {
 			return _mm_set_pd(log2(a.m128d_f64[1]), log2(a.m128d_f64[0]));
 		}
 
+		template <int N_BITS1, int N_BITS2>
+		inline void merge(
+			const std::tuple<const __m128i * const, const size_t>& data1,
+			const std::tuple<const __m128i * const, const size_t>& data2,
+			const std::tuple<__m128i * const, const size_t>& data3)
+		{
+			static_assert(N_BITS1 > 0, "NBITS_1 has to be larger than zero");
+			static_assert(N_BITS2 > 0, "NBITS_2 has to be larger than zero");
+			static_assert((N_BITS1 + N_BITS2) <= 8, "NBITS_1 + N_BITS_2 has to be smaller than 9");
+
+			const size_t nBlocks = std::get<1>(data1) >> 4;
+			for (size_t block = 0; block < nBlocks; ++block) {
+				std::get<0>(data3)[block] = _mm_or_si128(std::get<0>(data1)[block], _mm_slli_epi16(std::get<0>(data2)[block], N_BITS1));
+			}
+		}
+
 		inline __m128d freq_2bits_to_entropy_ref(
 			const __m128i freq)
 		{
@@ -203,7 +219,7 @@ namespace hli {
 
 
 		template <int N_BITS>
-		inline __m128d _mm_entropy_epu8_ref(
+		inline __m128d _mm_entropy_epu8_method0(
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const size_t nElements)
 		{
@@ -236,11 +252,51 @@ namespace hli {
 			return _mm_set1_pd(-h);
 		}
 
-		inline __m128d _mm_entropy_epu8_ref(
+		template <int N_BITS>
+		inline __m128d _mm_entropy_epu8_method1(
+			const std::tuple<const __m128i * const, const size_t>& data,
+			const size_t nElements)
+		{
+			static_assert(N_BITS > 0, "");
+			static_assert(N_BITS <= 8, "");
+
+			const int N_VALUES = (1 << N_BITS);
+			const size_t nBlocks = std::get<1>(data) >> 4;
+
+			std::array<size_t, N_VALUES> freq;
+			freq.fill(0);
+
+			for (size_t block = 0; block < nBlocks; ++block) {
+				const __m128i d = std::get<0>(data)[block];
+				for (int i = 0; i < N_VALUES; ++i) {
+					freq[i] += _mm_popcnt_u64(_mm_movemask_epi8(_mm_cmpeq_epi8(d, _mm_set1_epi8(static_cast<char>(i)))));
+				}
+			}
+			// ASSUME THAT NO MISSING VALUES EXIST
+			size_t nValues_noMissing = nElements;
+			//std::cout << "INFO: _mm_entropy_epu8_method1: nValues_noMissing=" << nValues_noMissing << std::endl;
+
+			double h = 0;
+			for (int i = 0; i < N_VALUES; ++i)
+			{
+				//std::cout << "INFO: _mm_entropy_epu8_method1: freq[" << i <<"]=" << freq[i] << std::endl;
+				double prob = (static_cast<double>(freq[i]) / nValues_noMissing);
+				h += prob * log2(prob);
+			}
+
+			return _mm_set1_pd(-h);
+		}
+
+		template <int N_BITS1, int N_BITS2>
+		inline __m128d _mm_entropy_epu8_method0(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
+			static_assert(N_BITS1 > 0, "NBITS_1 has to be larger than zero");
+			static_assert(N_BITS2 > 0, "NBITS_2 has to be larger than zero");
+			static_assert((N_BITS1 + N_BITS2) <= 8, "NBITS_1 + N_BITS_2 has to be smaller than 9");
+
 			const __int8 * const ptr1 = reinterpret_cast<const __int8 * const>(std::get<0>(data1));
 			const __int8 * const ptr2 = reinterpret_cast<const __int8 * const>(std::get<0>(data2));
 
@@ -248,22 +304,27 @@ namespace hli {
 			size_t nMissingValues = 0;
 
 			for (size_t element = 0; element < nElements; ++element) {
-				if ((ptr1[element] == 0xFF) || (ptr2[element] == 0xFF)) {
-					nMissingValues++;
-				} else {
-					const __int16 mergedData = ptr1[element] | (static_cast<__int16>(ptr2[element]) << 8);
+
+				// ASSUME THAT NO MISSING VALUES EXIST
+//				if ((ptr1[element] == 0xFF) || (ptr2[element] == 0xFF)) {
+//					nMissingValues++;
+//				} else {
+					const __int8 mergedData = ptr1[element] | (ptr2[element] << N_BITS1);
 					if (freq.count(mergedData) == 1) {
 						freq[mergedData]++;
 					} else {
 						freq[mergedData] = 1;
 					}
-				}
+//				}
 			}
 			size_t nValues_noMissing = nElements - nMissingValues;
+			//std::cout << "INFO: _mm_entropy_epu8_method0: nValues_noMissing=" << nValues_noMissing << std::endl;
 
 			double h = 0;
 
-			for (const auto &iter : freq) {
+			for (const auto &iter : freq) 
+			{
+				//std::cout << "INFO: _mm_entropy_epu8_method0: freq[?]=" << iter.second << std::endl;
 				double prob = (static_cast<double>(iter.second) / nValues_noMissing);
 				h += prob * log2(prob);
 			}
@@ -271,22 +332,36 @@ namespace hli {
 			return _mm_set1_pd(-h);
 		}
 
-		template <int N_BITS>
-		inline __m128d _mm_entropy_epu8_method0(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
-		{
-			return _mm_entropy_epu8_ref(data1, data2, nElements);
-		}
-
-		template <int N_BITS>
+		template <int N_BITS1, int N_BITS2>
 		inline __m128d _mm_entropy_epu8_method1(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
-			return _mm_entropy_epu8_ref(data1, data2, nElements);
+			const std::tuple<__m128i * const, const size_t> data3 = _mm_malloc_m128i(std::get<1>(data1));
+			merge<N_BITS1, N_BITS2>(data1, data2, data3);
+			const int N_BITS3 = N_BITS1 + N_BITS2;
+			const __m128d result = _mm_entropy_epu8_method1<N_BITS3>(data3, nElements);
+			_mm_free2(data3);
+			return result;
+		}
+
+		template <int N_BITS1, int N_BITS2>
+		inline __m128d _mm_entropy_epu8_method2(
+			const std::tuple<const __m128i * const, const size_t>& data1,
+			const std::tuple<const __m128i * const, const size_t>& data2,
+			const size_t nElements)
+		{
+			return _mm_entropy_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements);
+		}
+		
+		template <int N_BITS1, int N_BITS2>
+		inline __m128d _mm_entropy_epu8_method3(
+			const std::tuple<const __m128i * const, const size_t>& data1,
+			const std::tuple<const __m128i * const, const size_t>& data2,
+			const size_t nElements)
+		{
+			return _mm_entropy_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements);
 		}
 	}
 
@@ -297,83 +372,70 @@ namespace hli {
 			const double delta = 0.0000001;
 
 			const size_t nElements = 16 * nBlocks;
-
+			const int N_BITS1 = 3;
+			const int N_BITS2 = 2;
 
 			auto data1 = _mm_malloc_m128i(nElements);
 			auto data2 = _mm_malloc_m128i(nElements);
-			fillRand_epu8<2>(data1);
-			fillRand_epu8<2>(data2);
+			fillRand_epu8<N_BITS1>(data1);
+			fillRand_epu8<N_BITS2>(data2);
 
-			double min_ref = std::numeric_limits<double>::max();
+			double min0 = std::numeric_limits<double>::max();
 			double min1 = std::numeric_limits<double>::max();
 			double min2 = std::numeric_limits<double>::max();
 			double min3 = std::numeric_limits<double>::max();
 			double min4 = std::numeric_limits<double>::max();
 
-			__m128d result_ref, result1, result2, result3, result4;
+			__m128d result0, result1, result2, result3;
 
 			for (size_t i = 0; i < nExperiments; ++i) {
 
 				timer::reset_and_start_timer();
-				result_ref = hli::priv::_mm_entropy_epu8_ref(data1, data2, nElements);
-				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
+				result0 = hli::priv::_mm_entropy_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements);
+				min0= std::min(min0, timer::get_elapsed_kcycles());
 
 				{
 					timer::reset_and_start_timer();
-					result1 = hli::priv::_mm_entropy_epu8_method0<2>(data1, data2, nElements);
+					result1 = hli::priv::_mm_entropy_epu8_method1<N_BITS1, N_BITS2>(data1, data2, nElements);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
-						if (std::abs(result_ref.m128d_f64[0] - result1.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_entropy_epu8_method0<2>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result1) << std::endl;
+						if (std::abs(result0.m128d_f64[0] - result1.m128d_f64[0]) > delta) {
+							std::cout << "WARNING: test _mm_entropy_epu8_method0<" << N_BITS1 << "," << N_BITS2 << ">: result-ref=" << hli::toString_f64(result0) << "; result=" << hli::toString_f64(result1) << std::endl;
 							return;
 						}
 					}
 				}
 				{
 					timer::reset_and_start_timer();
-					result2 = hli::priv::_mm_entropy_epu8_method0<3>(data1, data2, nElements);
+					result2 = hli::priv::_mm_entropy_epu8_method2<N_BITS1, N_BITS2>(data1, data2, nElements);
 					min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 					if (doTests) {
-						if (std::abs(result_ref.m128d_f64[0] - result2.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_entropy_epu8_method0<3>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result2) << std::endl;
+						if (std::abs(result0.m128d_f64[0] - result2.m128d_f64[0]) > delta) {
+							std::cout << "WARNING: test _mm_entropy_epu8_method1<" << N_BITS1 << "," << N_BITS2 << ">: result-ref=" << hli::toString_f64(result0) << "; result=" << hli::toString_f64(result2) << std::endl;
 							return;
 						}
 					}
 				}
-
 				{
 					timer::reset_and_start_timer();
-					result3 = hli::priv::_mm_entropy_epu8_method1<2>(data1, data2, nElements);
+					result3 = hli::priv::_mm_entropy_epu8_method3<N_BITS1, N_BITS2>(data1, data2, nElements);
 					min3 = std::min(min3, timer::get_elapsed_kcycles());
 
 					if (doTests) {
-						if (std::abs(result_ref.m128d_f64[0] - result3.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_entropy_epu8_method1<2>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result3) << std::endl;
-							return;
-						}
-					}
-				}
-				{
-					timer::reset_and_start_timer();
-					result4 = hli::priv::_mm_entropy_epu8_method1<3>(data1, data2, nElements);
-					min4 = std::min(min4, timer::get_elapsed_kcycles());
-
-					if (doTests) {
-						if (std::abs(result_ref.m128d_f64[0] - result4.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_entropy_epu8_method1<3>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result4) << std::endl;
+						if (std::abs(result0.m128d_f64[0] - result3.m128d_f64[0]) > delta) {
+							std::cout << "WARNING: test _mm_entropy_epu8_method1<" << N_BITS1 << "," << N_BITS2 << ">: result-ref=" << hli::toString_f64(result0) << "; result=" << hli::toString_f64(result3) << std::endl;
 							return;
 						}
 					}
 				}
 
 			}
-			printf("[_mm_entropy_epu8_ref<2>]    : %2.5f Kcycles; %0.14f\n", min_ref, result_ref.m128d_f64[0]);
-			printf("[_mm_entropy_epu8_method0<2>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min1, result1.m128d_f64[0], min_ref / min1);
-			printf("[_mm_entropy_epu8_method0<3>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min2, result2.m128d_f64[0], min_ref / min2);
-			printf("[_mm_entropy_epu8_method1<2>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min3, result3.m128d_f64[0], min_ref / min3);
-			printf("[_mm_entropy_epu8_method1<3>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min4, result4.m128d_f64[0], min_ref / min4);
+			printf("[_mm_entropy_epu8_method0<%i,%i>]: %2.5f Kcycles; %0.14f\n", N_BITS1, N_BITS2, min0, result0.m128d_f64[0]);
+			printf("[_mm_entropy_epu8_method1<%i,%i>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", N_BITS1, N_BITS2, min1, result1.m128d_f64[0], min0 / min1);
+			printf("[_mm_entropy_epu8_method2<%i,%i>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", N_BITS1, N_BITS2, min2, result2.m128d_f64[0], min0 / min2);
+			printf("[_mm_entropy_epu8_method3<%i,%i>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", N_BITS1, N_BITS2, min3, result3.m128d_f64[0], min0 / min3);
 		
 			_mm_free2(data1);
 			_mm_free2(data2);
@@ -385,16 +447,16 @@ namespace hli {
 		const std::tuple<const __m128i * const, const size_t>& data,
 		const size_t nElements)
 	{
-		return priv::_mm_entropy_epu8_ref<N_BITS>(data, nElements);
+		return priv::_mm_entropy_epu8_method1<N_BITS>(data, nElements);
 	}
 
-	template <int N_BITS>
+	template <int N_BITS1, int N_BITS2>
 	inline __m128d _mm_entropy_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2,
 		const size_t nElements)
 	{
-		return priv::_mm_entropy_epu8_ref(data1, data2, nElements);
+		return priv::_mm_entropy_epu8_method1<N_BITS1, N_BITS2>(data1, data2, nElements);
 	}
 
 }

@@ -57,7 +57,7 @@ namespace hli {
 
 			const size_t nBytes = std::get<1>(data1);
 
-			for (int element = 0; element < nElements; ++element)
+			for (size_t element = 0; element < nElements; ++element)
 			{
 				const double d1 = static_cast<double>(ptr1[element]) - a1;
 				const double d2 = static_cast<double>(ptr2[element]) - a2;
