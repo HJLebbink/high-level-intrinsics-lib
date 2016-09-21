@@ -343,60 +343,68 @@ namespace StatsLibCli {
 		case 1:
 			switch (nBits2)
 			{
-			case 1: _mm_mi_perm_epu8<1, 1>(data1, data2, results, randInts);
-			case 2: _mm_mi_perm_epu8<1, 2>(data1, data2, results, randInts);
-			case 3: _mm_mi_perm_epu8<1, 3>(data1, data2, results, randInts);
-			case 4: _mm_mi_perm_epu8<1, 4>(data1, data2, results, randInts);
-			case 5: _mm_mi_perm_epu8<1, 5>(data1, data2, results, randInts);
-			case 6: _mm_mi_perm_epu8<1, 6>(data1, data2, results, randInts);
-			case 7: _mm_mi_perm_epu8<1, 7>(data1, data2, results, randInts);
+			case 1: _mm_mi_perm_epu8<1, 1>(data1, data2, results, randInts); return;
+			case 2: _mm_mi_perm_epu8<1, 2>(data1, data2, results, randInts); return;
+			case 3: _mm_mi_perm_epu8<1, 3>(data1, data2, results, randInts); return;
+			case 4: _mm_mi_perm_epu8<1, 4>(data1, data2, results, randInts); return;
+			case 5: _mm_mi_perm_epu8<1, 5>(data1, data2, results, randInts); return;
+			case 6: _mm_mi_perm_epu8<1, 6>(data1, data2, results, randInts); return;
+			case 7: _mm_mi_perm_epu8<1, 7>(data1, data2, results, randInts); return;
+			default: return;
 			}
 		case 2:
 			switch (nBits2)
 			{
-			case 1: _mm_mi_perm_epu8<2, 1>(data1, data2, results, randInts);
-			case 2: _mm_mi_perm_epu8<2, 2>(data1, data2, results, randInts);
-			case 3: _mm_mi_perm_epu8<2, 3>(data1, data2, results, randInts);
-			case 4: _mm_mi_perm_epu8<2, 4>(data1, data2, results, randInts);
-			case 5: _mm_mi_perm_epu8<2, 5>(data1, data2, results, randInts);
-			case 6: _mm_mi_perm_epu8<2, 6>(data1, data2, results, randInts);
+			case 1: _mm_mi_perm_epu8<2, 1>(data1, data2, results, randInts); return;
+			case 2: _mm_mi_perm_epu8<2, 2>(data1, data2, results, randInts); return;
+			case 3: _mm_mi_perm_epu8<2, 3>(data1, data2, results, randInts); return;
+			case 4: _mm_mi_perm_epu8<2, 4>(data1, data2, results, randInts); return;
+			case 5: _mm_mi_perm_epu8<2, 5>(data1, data2, results, randInts); return;
+			case 6: _mm_mi_perm_epu8<2, 6>(data1, data2, results, randInts); return;
+			default: return;
 			}
 		case 3:
 			switch (nBits2)
 			{
-			case 1: _mm_mi_perm_epu8<3, 1>(data1, data2, results, randInts);
-			case 2: _mm_mi_perm_epu8<3, 2>(data1, data2, results, randInts);
-			case 3: _mm_mi_perm_epu8<3, 3>(data1, data2, results, randInts);
-			case 4: _mm_mi_perm_epu8<3, 4>(data1, data2, results, randInts);
-			case 5: _mm_mi_perm_epu8<3, 5>(data1, data2, results, randInts);
+			case 1: _mm_mi_perm_epu8<3, 1>(data1, data2, results, randInts); return;
+			case 2: _mm_mi_perm_epu8<3, 2>(data1, data2, results, randInts); return;
+			case 3: _mm_mi_perm_epu8<3, 3>(data1, data2, results, randInts); return;
+			case 4: _mm_mi_perm_epu8<3, 4>(data1, data2, results, randInts); return;
+			case 5: _mm_mi_perm_epu8<3, 5>(data1, data2, results, randInts); return;
+			default: return;
 			}
 		case 4:
 			switch (nBits2)
 			{
-			case 1: _mm_mi_perm_epu8<4, 1>(data1, data2, results, randInts);
-			case 2: _mm_mi_perm_epu8<4, 2>(data1, data2, results, randInts);
-			case 3: _mm_mi_perm_epu8<4, 3>(data1, data2, results, randInts);
-			case 4: _mm_mi_perm_epu8<4, 4>(data1, data2, results, randInts);
+			case 1: _mm_mi_perm_epu8<4, 1>(data1, data2, results, randInts); return;
+			case 2: _mm_mi_perm_epu8<4, 2>(data1, data2, results, randInts); return;
+			case 3: _mm_mi_perm_epu8<4, 3>(data1, data2, results, randInts); return;
+			case 4: _mm_mi_perm_epu8<4, 4>(data1, data2, results, randInts); return;
+			default: return;
 			}
 		case 5:
 			switch (nBits2)
 			{
-			case 1: _mm_mi_perm_epu8<5, 1>(data1, data2, results, randInts);
-			case 2: _mm_mi_perm_epu8<5, 2>(data1, data2, results, randInts);
-			case 3: _mm_mi_perm_epu8<5, 3>(data1, data2, results, randInts);
+			case 1: _mm_mi_perm_epu8<5, 1>(data1, data2, results, randInts); return;
+			case 2: _mm_mi_perm_epu8<5, 2>(data1, data2, results, randInts); return;
+			case 3: _mm_mi_perm_epu8<5, 3>(data1, data2, results, randInts); return;
+			default: return;
 			}
 		case 6:
 			switch (nBits2)
 			{
-			case 1: _mm_mi_perm_epu8<6, 1>(data1, data2, results, randInts);
-			case 2: _mm_mi_perm_epu8<6, 2>(data1, data2, results, randInts);
+			case 1: _mm_mi_perm_epu8<6, 1>(data1, data2, results, randInts); return;
+			case 2: _mm_mi_perm_epu8<6, 2>(data1, data2, results, randInts); return;
+			default: return;
 			}
 		case 7:
 			switch (nBits2)
 			{
-			case 1: _mm_mi_perm_epu8<7, 1>(data1, data2, results, randInts);
+			case 1: _mm_mi_perm_epu8<7, 1>(data1, data2, results, randInts); return;
+			default: return;
 			}
 		}
+		return;
 	}
 
 #	pragma managed
@@ -408,8 +416,8 @@ namespace StatsLibCli {
 		array<UInt32>^ randInts)
 	{
 		int nElements = data1->Count;
-		auto data1_x = hli::_mm_malloc_xmm(nElements);
-		auto data2_x = hli::_mm_malloc_xmm(nElements);
+		auto data1_x = hli::_mm_malloc_xmm(nElements * 1);
+		auto data2_x = hli::_mm_malloc_xmm(nElements * 1);
 		priv::copy_data(data1, data1_x);
 		priv::copy_data(data2, data2_x);
 

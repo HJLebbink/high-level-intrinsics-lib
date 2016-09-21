@@ -56,6 +56,8 @@ namespace hli {
 				const size_t nPermutations,
 				__m128i& randInts)
 			{
+				//std::cout << "INFO: _mm_mi_perm_epu8_method0: N_BITS1=" << N_BITS1 << "; N_BITS2=" << N_BITS2 << std::endl;
+
 				const __m128d h1 = _mm_entropy_epu8<N_BITS1>(data1, nElements);
 				const __m128d h2 = _mm_entropy_epu8<N_BITS2>(data2, nElements);
 				const __m128d h1Plush2 = _mm_add_pd(h1, h2);
@@ -66,13 +68,13 @@ namespace hli {
 				double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
 				for (size_t permutation = 0; permutation < nPermutations; ++permutation)
 				{
-					_mm_permute_epu8_array_method0(data3, nElements, swap, randInts);
+					_mm_permute_epu8_array(data3, nElements, swap, randInts);
 					const __m128d h1Andh2 = _mm_entropy_epu8<N_BITS1, N_BITS2>(data1, data3, nElements);
 					const __m128d mi = _mm_sub_pd(h1Plush2, h1Andh2);
 
 #					if	_DEBUG
-						if (isnan(mi.m128d_f64[0])) std::cout << "WARNING: test _mm_mi_perm_epu8_method0: mi is NAN" << std::endl;
-						if (mi.m128d_f64[0] < 0) std::cout << "WARNING: test _mm_mi_perm_epu8_method0: mi is smaller than 0. " << mi.m128d_f64[0] << std::endl;
+						if (isnan(mi.m128d_f64[0])) std::cout << "WARNING: _mm_mi_perm_epu8_method0: mi is NAN" << std::endl;
+						if (mi.m128d_f64[0] < 0) std::cout << "WARNING: _mm_mi_perm_epu8_method0: permutation=" << permutation << ": mi=" << mi.m128d_f64[0] << " is smaller than 0. h1=" << h1.m128d_f64[0] << "; h2 = " << h2.m128d_f64[0] << "; h1Plush2std = " << h1Plush2.m128d_f64[0] << "; h1Andh2 = " << h1Andh2.m128d_f64[0] << std::endl;
 #					endif
 					results_double[permutation] = mi.m128d_f64[0];
 				}
@@ -213,7 +215,7 @@ namespace hli {
 		const std::tuple<const __m128i * const, const size_t>& data2,
 		const size_t nElements)
 	{
-		return priv::_mm_mi_epu8_ref<N_BITS1, N_BITS2>(data1, data2, nElements);
+		return priv::_mm_mi_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements);
 	}
 
 	template <int N_BITS1, int N_BITS2>

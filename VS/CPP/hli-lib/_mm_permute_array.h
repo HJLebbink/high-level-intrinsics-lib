@@ -121,8 +121,10 @@ namespace hli {
 
 				for (size_t block = 0; block < nBlocks; ++block) 
 				{
+					__m128i randInts2 = priv::lfsr32_galois(randInts);
 					randInts = priv::lfsr32_galois(randInts);
-					ptr[block] = _mm_mulhi_epu16(randInts, m);
+					__m128i rand16Bits = _mm_xor_si128(randInts, _mm_swap_64(randInts2));
+					ptr[block] = _mm_mulhi_epu16(rand16Bits, m);
 					m = _mm_add_epi16(m, increment);
 				}
 			}

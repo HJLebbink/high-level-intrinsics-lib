@@ -342,7 +342,7 @@ namespace hli {
 			const std::tuple<__m128i * const, const size_t> data3 = _mm_malloc_m128i(std::get<1>(data1));
 			merge<N_BITS1, N_BITS2>(data1, data2, data3);
 			const int N_BITS3 = N_BITS1 + N_BITS2;
-			const __m128d result = _mm_entropy_epu8_method1<N_BITS3>(data3, nElements);
+			const __m128d result = _mm_entropy_epu8<N_BITS3>(data3, nElements);
 			_mm_free2(data3);
 			return result;
 		}
@@ -353,6 +353,7 @@ namespace hli {
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
+			//TODO
 			return _mm_entropy_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements);
 		}
 		
@@ -362,6 +363,7 @@ namespace hli {
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
+			//TODO
 			return _mm_entropy_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements);
 		}
 	}
@@ -462,11 +464,11 @@ namespace hli {
 		const std::tuple<const __m128i * const, const size_t>& data2,
 		const size_t nElements)
 	{
-		//const __m128d result = priv::_mm_entropy_epu8_method1<N_BITS1, N_BITS2>(data1, data2, nElements);
-		const __m128d result = priv::_mm_entropy_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements);
+		const __m128d result = priv::_mm_entropy_epu8_method1<N_BITS1, N_BITS2>(data1, data2, nElements);
+		//const __m128d result = priv::_mm_entropy_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements);
 
 #		if	_DEBUG
-		if (isnan(result.m128d_f64[0])) std::cout << "WARNING: test _mm_entropy_epu8: result is NAN" << std::endl;
+		if (isnan(result.m128d_f64[0])) std::cout << "WARNING: _mm_entropy_epu8: result is NAN" << std::endl;
 		if (result.m128d_f64[0] < 0) std::cout << "WARNING: _mm_entropy_epu8: result is smaller than 0. " << result.m128d_f64[0] << std::endl;
 #		endif
 		return result;
