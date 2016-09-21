@@ -33,6 +33,7 @@
 #include "..\hli-lib\_mm_rescale_epu16.h"
 #include "..\hli-lib\_mm_permute_array.h"
 #include "..\hli-lib\_mm_entropy_epu8.h"
+#include "..\hli-lib\_mm_mi_epu8.h"
 
 int main()
 {
@@ -54,12 +55,15 @@ int main()
 
 
 		//hli::test::test_mm_rand_si128(1010, nExperiments, true);
-		//hli::test::test_mm_rescale_epu16(2010, nExperiments, true);
-		//hli::test::test_mm_permute_epu8_array(3102, nExperiments, true);
+		//hli::test::test_mm_rescale_epu16(2102, nExperiments, true);
+		//hli::test::test_mm_permute_epu8_array(2102, nExperiments, true);
 		//hli::test::test_mm_permute_dp_array(3102, nExperiments, true);
 
 		//hli::test::test_mm_corr_perm_epu8(110, 1000, nExperiments, true);
-		hli::test::test_mm_entropy_epu8(100, nExperiments, true);
+
+		//hli::test::test_mm_entropy_epu8(100, nExperiments, true);
+		//hli::test::test_mm_mi_epu8(100, nExperiments, true);
+		hli::test::test_mm_mi_perm_epu8(100, 1000, nExperiments, true);
 
 		const auto diff = std::chrono::system_clock::now() - start;
 		std::cout << std::endl

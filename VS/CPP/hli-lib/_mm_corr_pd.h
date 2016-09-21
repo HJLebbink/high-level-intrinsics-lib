@@ -140,15 +140,23 @@ namespace hli {
 
 	namespace test {
 
-		void test_mm_corr_pd(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		void test_mm_corr_pd(
+			const size_t nBlocks, 
+			const size_t nExperiments, 
+			const bool doTests)
 		{
 			const double delta = 0.0000001;
+			const size_t nElements = nBlocks * 2;
 
-			const size_t nElements = nBlocks * 16;
-			auto data1 = _mm_malloc_m128d(nElements);
-			auto data2 = _mm_malloc_m128d(nElements);
-			fillRand_pd(data1);
-			fillRand_pd(data2);
+			auto data1_r = _mm_malloc_m128d(nElements * 8);
+			auto data2_r = _mm_malloc_m128d(nElements * 8);
+
+			fillRand_pd(data1_r);
+			fillRand_pd(data2_r);
+
+			const std::tuple<const __m128d * const, const size_t> data1 = data1_r;
+			const std::tuple<const __m128d * const, const size_t> data2 = data2_r;
+
 
 			double min0 = std::numeric_limits<double>::max();
 			double min1 = std::numeric_limits<double>::max();
@@ -168,7 +176,7 @@ namespace hli {
 
 					if (doTests) {
 						if (std::abs(result0.m128d_f64[0] - result1.m128d_f64[0]) > delta) {
-							std::cout << "WARNING: test _mm_corr_pd_method0<8>: result0=" << hli::toString_f64(result0) << "; result1=" << hli::toString_f64(result1) << std::endl;
+							std::cout << "WARNING: test _mm_corr_pd_method0: result0=" << hli::toString_f64(result0) << "; result1=" << hli::toString_f64(result1) << std::endl;
 							return;
 						}
 					}

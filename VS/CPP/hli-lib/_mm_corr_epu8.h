@@ -333,7 +333,7 @@ namespace hli {
 				double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
 				for (size_t permutation = 0; permutation < nPermutations; ++permutation)
 				{
-					_mm_permute_epu8_array_ref(data3, nElements, swap, randInts);
+					_mm_permute_epu8_array_method0(data3, nElements, swap, randInts);
 					const __m128d corr1 = _mm_corr_epu8_ref(data1, data3, nElements);
 					results_double[permutation] = corr1.m128d_f64[0];
 				}
@@ -655,31 +655,33 @@ namespace hli {
 		{
 			const double delta = 0.000001;
 			const size_t nElements = nBlocks * 16;
-			auto data1_r = _mm_malloc_m128i(16 * nBlocks);
-			auto data2_r = _mm_malloc_m128i(16 * nBlocks);
+			const int N_BITS1 = 5;
+			const int N_BITS2 = N_BITS1;
+
+
+			auto data1_r = _mm_malloc_m128i(nElements);
+			auto data2_r = _mm_malloc_m128i(nElements);
+
+			fillRand_epu8<N_BITS1>(data1_r);
+			fillRand_epu8<N_BITS2>(data2_r);
+
+			const std::tuple<const __m128i * const, const size_t> data1 = data1_r;
+			const std::tuple<const __m128i * const, const size_t> data2 = data2_r;
 
 			const size_t nBytesResults = resizeNBytes(8 * nPermutations, 16);
 			//std::cout << "INFO: test_mm_corr_perm_epu8: nPermutations=" << nPermutations << "; nBytesResults=" << nBytesResults << std::endl;
-			auto results = _mm_malloc_m128d(nBytesResults);
+			auto results0 = _mm_malloc_m128d(nBytesResults);
 			auto results1 = _mm_malloc_m128d(nBytesResults);
 			auto results2 = _mm_malloc_m128d(nBytesResults);
 			auto results3 = _mm_malloc_m128d(nBytesResults);
 
 			const __m128i seed = _mm_set_epi16(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand());
-			__m128i randInt = seed;
+			__m128i randInt0 = seed;
 			__m128i randInt1 = seed;
 			__m128i randInt2 = seed;
 			__m128i randInt3 = seed;
 
-			const int N_BITS = 5;
-			fillRand_epu8<N_BITS>(data1_r);
-			fillRand_epu8<N_BITS>(data2_r);
-
-			const std::tuple<const __m128i * const, const size_t> data1 = data1_r;
-			const std::tuple<const __m128i * const, const size_t> data2 = data2_r;
-
 			{
-				double min_ref = std::numeric_limits<double>::max();
 				double min0 = std::numeric_limits<double>::max();
 				double min1 = std::numeric_limits<double>::max();
 				double min2 = std::numeric_limits<double>::max();
@@ -688,12 +690,12 @@ namespace hli {
 				for (size_t i = 0; i < nExperiments; ++i) 
 				{
 					timer::reset_and_start_timer();
-					hli::priv::perm::_mm_corr_perm_epu8_method0(data1, data2, nElements, results, nPermutations, randInt);
-					min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
+					hli::priv::perm::_mm_corr_perm_epu8_method0(data1, data2, nElements, results0, nPermutations, randInt0);
+					min0 = std::min(min0, timer::get_elapsed_kcycles());
 
 					{
 						timer::reset_and_start_timer();
-						hli::priv::perm::_mm_corr_perm_epu8_method1<6>(data1, data2, nElements, results1, nPermutations, randInt1);
+						hli::priv::perm::_mm_corr_perm_epu8_method1<N_BITS1>(data1, data2, nElements, results1, nPermutations, randInt1);
 						min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 						//for (size_t block = 0; block < (nBytesResults >> 4); ++block) {
@@ -702,15 +704,15 @@ namespace hli {
 						//}
 
 						if (doTests) {
-							if (!equal(randInt, randInt1)) {
-								std::cout << "WARNING: test_mm_corr_perm_epu8_ref: randInt=" << hli::toString_u32(randInt) << "; randInt1=" << hli::toString_u32(randInt1) << std::endl;
+							if (!equal(randInt0, randInt1)) {
+								std::cout << "WARNING: test_mm_corr_perm_epu8_ref: randInt=" << hli::toString_u32(randInt0) << "; randInt1=" << hli::toString_u32(randInt1) << std::endl;
 								return;
 							}
 							if (i == 0) {
 								for (size_t i = 0; i < (nBytesResults >> 3); ++i) {
-									double diff = std::abs(getDouble(results, i) - getDouble(results1, i));
+									double diff = std::abs(getDouble(results0, i) - getDouble(results1, i));
 									if (diff > delta) {
-										std::cout << "WARNING: _mm_corr_perm_epu8_method1<6>: i=" << i << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results, i) << "; result1=" << getDouble(results1, i) << std::endl;
+										std::cout << "WARNING: _mm_corr_perm_epu8_method1<6>: i=" << i << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, i) << "; result1=" << getDouble(results1, i) << std::endl;
 										return;
 									}
 								}
@@ -719,19 +721,19 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						hli::priv::perm::_mm_corr_perm_epu8_method2<5>(data1, data2, nElements, results2, nPermutations, randInt2);
+						hli::priv::perm::_mm_corr_perm_epu8_method2<N_BITS1>(data1, data2, nElements, results2, nPermutations, randInt2);
 						min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 						if (doTests) {
-							if (!equal(randInt, randInt2)) {
-								std::cout << "WARNING: _mm_corr_perm_epu8_method2<6>: randInt=" << hli::toString_u32(randInt) << "; randInt2=" << hli::toString_u32(randInt2) << std::endl;
+							if (!equal(randInt0, randInt2)) {
+								std::cout << "WARNING: _mm_corr_perm_epu8_method2<6>: randInt=" << hli::toString_u32(randInt0) << "; randInt2=" << hli::toString_u32(randInt2) << std::endl;
 								return;
 							}
 							if (i == 0) {
 								for (size_t i = 0; i < (nBytesResults >> 3); ++i) {
-									double diff = std::abs(getDouble(results, i) - getDouble(results2, i));
+									double diff = std::abs(getDouble(results0, i) - getDouble(results2, i));
 									if (diff > delta) {
-										std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: i=" << i << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results, i) << "; result2=" << getDouble(results2, i) << std::endl;
+										std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: i=" << i << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, i) << "; result2=" << getDouble(results2, i) << std::endl;
 										return;
 									}
 								}
@@ -744,15 +746,15 @@ namespace hli {
 						min3 = std::min(min3, timer::get_elapsed_kcycles());
 
 						if (doTests) {
-							if (!equal(randInt, randInt3)) {
-								std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: randInt=" << hli::toString_u32(randInt) << "; randInt3=" << hli::toString_u32(randInt3) << std::endl;
+							if (!equal(randInt0, randInt3)) {
+								std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: randInt=" << hli::toString_u32(randInt0) << "; randInt3=" << hli::toString_u32(randInt3) << std::endl;
 								return;
 							}
 							if (i == 0) {
 								for (size_t i = 0; i < (nBytesResults >> 3); ++i) {
-									double diff = std::abs(getDouble(results, i) - getDouble(results3, i));
+									double diff = std::abs(getDouble(results0, i) - getDouble(results3, i));
 									if (diff > delta) {
-										std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: i=" << i << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results, i) << "; result3=" << getDouble(results3, i) << std::endl;
+										std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: i=" << i << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, i) << "; result3=" << getDouble(results3, i) << std::endl;
 										return;
 									}
 								}
@@ -760,14 +762,14 @@ namespace hli {
 						}
 					}
 				}
-				printf("[_mm_corr_perm_epu8 Ref]       : %2.5f Kcycles\n", min_ref);
-				printf("[_mm_corr_perm_epu8_method1<8>]: %2.5f Kcycles; %2.3f times faster than ref\n", min1, min_ref / min1);
-				printf("[_mm_corr_perm_epu8_method2<8>]: %2.5f Kcycles; %2.3f times faster than ref\n", min2, min_ref / min2);
-				printf("[_mm_corr_perm_epu8_method3]   : %2.5f Kcycles; %2.3f times faster than ref\n", min3, min_ref / min3);
+				printf("[_mm_corr_perm_epu8_method0]: %2.5f Kcycles\n", min0);
+				printf("[_mm_corr_perm_epu8_method1]: %2.5f Kcycles; %2.3f times faster than ref\n", min1, min0 / min1);
+				printf("[_mm_corr_perm_epu8_method2]: %2.5f Kcycles; %2.3f times faster than ref\n", min2, min0 / min2);
+				printf("[_mm_corr_perm_epu8_method3]: %2.5f Kcycles; %2.3f times faster than ref\n", min3, min0 / min3);
 			}
 			_mm_free2(data1);
 			_mm_free2(data2);
-			_mm_free2(results);
+			_mm_free2(results0);
 			_mm_free2(results1);
 			_mm_free2(results2);
 			_mm_free2(results3);
