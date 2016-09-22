@@ -14,10 +14,10 @@
 //#include "immintrin.h"  // avx, avx2, avx512, FP16C, KNCNI, FMA
 //#include "ammintrin.h"  // AMD-specific intrinsics
 
-#include "tools.h"
-#include "timer.h"
-#include "_mm_rand_si128.h"
-#include "_mm_entropy_epu8.h"
+#include "tools.ipp"
+#include "timer.ipp"
+#include "_mm_rand_si128.ipp"
+#include "_mm_entropy_epu8.ipp"
 
 
 namespace hli {
@@ -59,7 +59,7 @@ namespace hli {
 				const size_t nPermutations,
 				__m128i& randInts)
 			{
-				//std::cout << "INFO: _mm_mi_perm_epu8_method0: N_BITS1=" << N_BITS1 << "; N_BITS2=" << N_BITS2 << std::endl;
+				std::cout << "INFO: _mm_mi_perm_epu8_method0: N_BITS1=" << N_BITS1 << "; N_BITS2=" << N_BITS2 << "; nElements="<< nElements << std::endl;
 
 				const __m128d h1 = _mm_entropy_epu8<N_BITS1>(data1, nElements);
 				const __m128d h2 = _mm_entropy_epu8<N_BITS2>(data2, nElements);
@@ -76,8 +76,8 @@ namespace hli {
 					const __m128d mi = _mm_sub_pd(h1Plush2, h1Andh2);
 
 #					if	_DEBUG
-						if (isnan(mi.m128d_f64[0])) std::cout << "WARNING: _mm_mi_perm_epu8_method0: mi is NAN" << std::endl;
-						if (mi.m128d_f64[0] < 0) std::cout << "WARNING: _mm_mi_perm_epu8_method0: permutation=" << permutation << ": mi=" << mi.m128d_f64[0] << " is smaller than 0. h1=" << h1.m128d_f64[0] << "; h2 = " << h2.m128d_f64[0] << "; h1Plush2std = " << h1Plush2.m128d_f64[0] << "; h1Andh2 = " << h1Andh2.m128d_f64[0] << std::endl;
+						if (isnan(mi.m128d_f64[0])) std::cout << "WARNING: _mm_mi_perm_epu8_method0<" << N_BITS1 << "," << N_BITS2 << ">: mi is NAN" << std::endl;
+						if (mi.m128d_f64[0] <= 0)   std::cout << "WARNING: _mm_mi_perm_epu8_method0<" << N_BITS1 << "," << N_BITS2 << ">: permutation=" << permutation << ": mi=" << mi.m128d_f64[0] << " is smaller than 0. h1=" << h1.m128d_f64[0] << "; h2 = " << h2.m128d_f64[0] << "; h1Plush2std = " << h1Plush2.m128d_f64[0] << "; h1Andh2 = " << h1Andh2.m128d_f64[0] << std::endl;
 #					endif
 					results_double[permutation] = mi.m128d_f64[0];
 				}
@@ -221,6 +221,81 @@ namespace hli {
 		return priv::_mm_mi_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements);
 	}
 
+	inline __m128d _mm_mi_epu8(
+		const std::tuple<const __m128i * const, const size_t>& data1,
+		const int nBits1,
+		const std::tuple<const __m128i * const, const size_t>& data2,
+		const int nBits2,
+		const size_t nElements)
+	{
+		switch (nBits1) {
+		case 1:
+			switch (nBits2) 
+			{
+			case 1: return _mm_mi_epu8<1, 1>(data1, data2, nElements);
+			case 2: return _mm_mi_epu8<1, 2>(data1, data2, nElements);
+			case 3: return _mm_mi_epu8<1, 3>(data1, data2, nElements);
+			case 4: return _mm_mi_epu8<1, 4>(data1, data2, nElements);
+			case 5: return _mm_mi_epu8<1, 5>(data1, data2, nElements);
+			case 6: return _mm_mi_epu8<1, 6>(data1, data2, nElements);
+			case 7: return _mm_mi_epu8<1, 7>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 2:
+			switch (nBits2)
+			{
+			case 1: return _mm_mi_epu8<2, 1>(data1, data2, nElements);
+			case 2: return _mm_mi_epu8<2, 2>(data1, data2, nElements);
+			case 3: return _mm_mi_epu8<2, 3>(data1, data2, nElements);
+			case 4: return _mm_mi_epu8<2, 4>(data1, data2, nElements);
+			case 5: return _mm_mi_epu8<2, 5>(data1, data2, nElements);
+			case 6: return _mm_mi_epu8<2, 6>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 3:
+			switch (nBits2)
+			{
+			case 1: return _mm_mi_epu8<3, 1>(data1, data2, nElements);
+			case 2: return _mm_mi_epu8<3, 2>(data1, data2, nElements);
+			case 3: return _mm_mi_epu8<3, 3>(data1, data2, nElements);
+			case 4: return _mm_mi_epu8<3, 4>(data1, data2, nElements);
+			case 5: return _mm_mi_epu8<3, 5>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 4:
+			switch (nBits2)
+			{
+			case 1: return _mm_mi_epu8<4, 1>(data1, data2, nElements);
+			case 2: return _mm_mi_epu8<4, 2>(data1, data2, nElements);
+			case 3: return _mm_mi_epu8<4, 3>(data1, data2, nElements);
+			case 4: return _mm_mi_epu8<4, 4>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 5:
+			switch (nBits2)
+			{
+			case 1: return _mm_mi_epu8<5, 1>(data1, data2, nElements);
+			case 2: return _mm_mi_epu8<5, 2>(data1, data2, nElements);
+			case 3: return _mm_mi_epu8<5, 3>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 6:
+			switch (nBits2)
+			{
+			case 1: return _mm_mi_epu8<6, 1>(data1, data2, nElements);
+			case 2: return _mm_mi_epu8<6, 2>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 7:
+			switch (nBits2)
+			{
+			case 1: return _mm_mi_epu8<7, 1>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		default: return _mm_setzero_pd();
+		}
+	}
+
 	template <int N_BITS1, int N_BITS2>
 	inline void _mm_mi_perm_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data1,
@@ -231,5 +306,83 @@ namespace hli {
 		__m128i& randInts)
 	{
 		priv::perm::_mm_mi_perm_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements, results, nPermutations, randInts);
+	}
+
+	inline void _mm_mi_perm_epu8(
+		const std::tuple<const __m128i * const, const size_t>& data1,
+		const int nBits1,
+		const std::tuple<const __m128i * const, const size_t>& data2,
+		const int nBits2,
+		const size_t nElements,
+		const std::tuple<__m128d * const, const size_t>& results,
+		const size_t nPermutations,
+		__m128i& randInts)
+	{
+		switch (nBits1) {
+		case 1:
+			switch (nBits2)
+			{
+			case 1: _mm_mi_perm_epu8<1, 1>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 2: _mm_mi_perm_epu8<1, 2>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 3: _mm_mi_perm_epu8<1, 3>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 4: _mm_mi_perm_epu8<1, 4>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 5: _mm_mi_perm_epu8<1, 5>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 6: _mm_mi_perm_epu8<1, 6>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 7: _mm_mi_perm_epu8<1, 7>(data1, data2, nElements, results, nPermutations, randInts); break;
+			default: break;
+			}
+		case 2:
+			switch (nBits2)
+			{
+			case 1: _mm_mi_perm_epu8<2, 1>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 2: _mm_mi_perm_epu8<2, 2>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 3: _mm_mi_perm_epu8<2, 3>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 4: _mm_mi_perm_epu8<2, 4>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 5: _mm_mi_perm_epu8<2, 5>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 6: _mm_mi_perm_epu8<2, 6>(data1, data2, nElements, results, nPermutations, randInts); break;
+			default: break;
+			}
+		case 3:
+			switch (nBits2)
+			{
+			case 1: _mm_mi_perm_epu8<3, 1>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 2: _mm_mi_perm_epu8<3, 2>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 3: _mm_mi_perm_epu8<3, 3>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 4: _mm_mi_perm_epu8<3, 4>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 5: _mm_mi_perm_epu8<3, 5>(data1, data2, nElements, results, nPermutations, randInts); break;
+			default: break;
+			}
+		case 4:
+			switch (nBits2)
+			{
+			case 1: _mm_mi_perm_epu8<4, 1>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 2: _mm_mi_perm_epu8<4, 2>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 3: _mm_mi_perm_epu8<4, 3>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 4: _mm_mi_perm_epu8<4, 4>(data1, data2, nElements, results, nPermutations, randInts); break;
+			default: break;
+			}
+		case 5:
+			switch (nBits2)
+			{
+			case 1: _mm_mi_perm_epu8<5, 1>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 2: _mm_mi_perm_epu8<5, 2>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 3: _mm_mi_perm_epu8<5, 3>(data1, data2, nElements, results, nPermutations, randInts); break;
+			default: break;
+			}
+		case 6:
+			switch (nBits2)
+			{
+			case 1: _mm_mi_perm_epu8<6, 1>(data1, data2, nElements, results, nPermutations, randInts); break;
+			case 2: _mm_mi_perm_epu8<6, 2>(data1, data2, nElements, results, nPermutations, randInts); break;
+			default: break;
+			}
+		case 7:
+			switch (nBits2)
+			{
+			case 1: _mm_mi_perm_epu8<7, 1>(data1, data2, nElements, results, nPermutations, randInts); break;
+			default: break;
+			}
+		default: break;
+		}
 	}
 }

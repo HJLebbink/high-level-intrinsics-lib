@@ -19,17 +19,19 @@
 
 #include "intrin.h"
 
-#include "_mm_rand_si128.h"
-#include "tools.h"
-#include "timer.h"
+#include "_mm_rand_si128.ipp"
+#include "tools.ipp"
+#include "timer.ipp"
 
 namespace hli {
 
 	namespace priv {
 
+#		ifdef _MSC_VER
 		inline __m128d _mm_log2_pd(__m128d a) {
 			return _mm_set_pd(log2(a.m128d_f64[1]), log2(a.m128d_f64[0]));
 		}
+#		endif
 
 		template <int N_BITS1, int N_BITS2>
 		inline void merge(
@@ -228,30 +230,28 @@ namespace hli {
 		{
 			const __int8 * const ptr1 = reinterpret_cast<const __int8 * const>(std::get<0>(data));
 
-			std::map<__int8, int> freq;
-			size_t nMissingValues = 0;
+			static_assert(N_BITS > 0, "");
+			static_assert(N_BITS <= 8, "");
+
+			const int N_DISTINCT_VALUES = (1 << N_BITS);
+			std::array<size_t, N_DISTINCT_VALUES> freq;
+			freq.fill(0);
 
 			for (size_t element = 0; element < nElements; ++element) {
-				if (ptr1[element] == 0xFF) {
-					nMissingValues++;
-				} else {
-					const __int8 mergedData = ptr1[element];
-					if (freq.count(mergedData) == 1) {
-						freq[mergedData]++;
-					} else {
-						freq[mergedData] = 1;
-					}
+				const __int8 mergedData = ptr1[element];
+				freq[mergedData]++;
+			}
+
+			// ASSUME THAT NO MISSING VALUES EXIST
+			double h = 0;
+			for (int i = 0; i < N_DISTINCT_VALUES; ++i)
+			{
+				//std::cout << "INFO: _mm_entropy_epu8_method0: freq[" << i <<"]=" << freq[i] << std::endl;
+				if (freq[i] > 0) {
+					double prob = (static_cast<double>(freq[i]) / nElements);
+					h += prob * log2(prob);
 				}
 			}
-			size_t nValues_noMissing = nElements - nMissingValues;
-
-			double h = 0;
-
-			for (const auto &iter : freq) {
-				double prob = (static_cast<double>(iter.second) / nValues_noMissing);
-				h += prob * log2(prob);
-			}
-
 			return _mm_set1_pd(-h);
 		}
 
@@ -263,28 +263,31 @@ namespace hli {
 			static_assert(N_BITS > 0, "");
 			static_assert(N_BITS <= 8, "");
 
-			const int N_VALUES = (1 << N_BITS);
-			const size_t nBlocks = std::get<1>(data) >> 4;
-
-			std::array<size_t, N_VALUES> freq;
+			const int N_DISTINCT_VALUES = (1 << N_BITS);
+			std::array<size_t, N_DISTINCT_VALUES> freq;
 			freq.fill(0);
+
+			const size_t nBlocks = std::get<1>(data) >> 4;
 
 			for (size_t block = 0; block < nBlocks; ++block) {
 				const __m128i d = std::get<0>(data)[block];
-				for (int i = 0; i < N_VALUES; ++i) {
+				for (int i = 0; i < N_DISTINCT_VALUES; ++i) {
 					freq[i] += _mm_popcnt_u64(_mm_movemask_epi8(_mm_cmpeq_epi8(d, _mm_set1_epi8(static_cast<char>(i)))));
 				}
 			}
-			// ASSUME THAT NO MISSING VALUES EXIST
-			size_t nValues_noMissing = nElements;
-			//std::cout << "INFO: _mm_entropy_epu8_method1: nValues_noMissing=" << nValues_noMissing << std::endl;
 
+
+
+
+
+
+			// ASSUME THAT NO MISSING VALUES EXIST
 			double h = 0;
-			for (int i = 0; i < N_VALUES; ++i)
+			for (int i = 0; i < N_DISTINCT_VALUES; ++i)
 			{
 				//std::cout << "INFO: _mm_entropy_epu8_method1: freq[" << i <<"]=" << freq[i] << std::endl;
 				if (freq[i] > 0) {
-					double prob = (static_cast<double>(freq[i]) / nValues_noMissing);
+					double prob = (static_cast<double>(freq[i]) / nElements);
 					h += prob * log2(prob);
 				}
 			}
@@ -299,40 +302,31 @@ namespace hli {
 		{
 			static_assert(N_BITS1 > 0, "NBITS_1 has to be larger than zero");
 			static_assert(N_BITS2 > 0, "NBITS_2 has to be larger than zero");
-			static_assert((N_BITS1 + N_BITS2) <= 8, "NBITS_1 + N_BITS_2 has to be smaller than 9");
+			const int N_BITS = N_BITS1 + N_BITS2;
+			static_assert(N_BITS <= 8, "NBITS_1 + N_BITS_2 has to be smaller than 9");
 
 			const __int8 * const ptr1 = reinterpret_cast<const __int8 * const>(std::get<0>(data1));
 			const __int8 * const ptr2 = reinterpret_cast<const __int8 * const>(std::get<0>(data2));
 
-			std::map<__int16, int> freq;
-			size_t nMissingValues = 0;
+			const int N_DISTINCT_VALUES = (1 << N_BITS);
+			std::array<size_t, N_DISTINCT_VALUES> freq;
+			freq.fill(0);
 
 			for (size_t element = 0; element < nElements; ++element) {
-
-				// ASSUME THAT NO MISSING VALUES EXIST
-//				if ((ptr1[element] == 0xFF) || (ptr2[element] == 0xFF)) {
-//					nMissingValues++;
-//				} else {
-					const __int8 mergedData = ptr1[element] | (ptr2[element] << N_BITS1);
-					if (freq.count(mergedData) == 1) {
-						freq[mergedData]++;
-					} else {
-						freq[mergedData] = 1;
-					}
-//				}
+				const __int8 mergedData = ptr1[element] | (ptr2[element] << N_BITS1);
+				freq[mergedData]++;
 			}
-			size_t nValues_noMissing = nElements - nMissingValues;
-			//std::cout << "INFO: _mm_entropy_epu8_method0: nValues_noMissing=" << nValues_noMissing << std::endl;
 
+			// ASSUME THAT NO MISSING VALUES EXIST
 			double h = 0;
-
-			for (const auto &iter : freq) 
+			for (int i = 0; i < N_DISTINCT_VALUES; ++i)
 			{
-				//std::cout << "INFO: _mm_entropy_epu8_method0: freq[?]=" << iter.second << std::endl;
-				double prob = (static_cast<double>(iter.second) / nValues_noMissing);
-				h += prob * log2(prob);
+				//std::cout << "INFO: _mm_entropy_epu8_method1: freq[" << i <<"]=" << freq[i] << std::endl;
+				if (freq[i] > 0) {
+					double prob = (static_cast<double>(freq[i]) / nElements);
+					h += prob * log2(prob);
+				}
 			}
-
 			return _mm_set1_pd(-h);
 		}
 
@@ -453,12 +447,31 @@ namespace hli {
 		const std::tuple<const __m128i * const, const size_t>& data,
 		const size_t nElements)
 	{
-		const __m128d result = priv::_mm_entropy_epu8_method1<N_BITS>(data, nElements);
+		const __m128d result = priv::_mm_entropy_epu8_method0<N_BITS>(data, nElements);
 #		if	_DEBUG
 		if (isnan(result.m128d_f64[0])) std::cout << "WARNING: _mm_entropy_epu8: result is NAN" << std::endl;
-		if (result.m128d_f64[0] < 0) std::cout << "WARNING: _mm_entropy_epu8: result is smaller than 0. " << result.m128d_f64[0] << std::endl;
+		if (result.m128d_f64[0] < 0)    std::cout << "WARNING: _mm_entropy_epu8: result is smaller than 0. result=" << result.m128d_f64[0] << std::endl;
+		if (result.m128d_f64[0] > N_BITS) std::cout << "WARNING: _mm_entropy_epu8: result is larger than N_BITS=" << N_BITS << ". result=" << result.m128d_f64[0] << std::endl;
 #		endif
 		return result;
+	}
+
+	inline __m128d _mm_entropy_epu8(
+		const std::tuple<const __m128i * const, const size_t>& data,
+		const int nBits,
+		const size_t nElements)
+	{
+		switch (nBits) {
+		case 1: return _mm_entropy_epu8<1>(data, nElements);
+		case 2: return _mm_entropy_epu8<2>(data, nElements);
+		case 3: return _mm_entropy_epu8<3>(data, nElements);
+		case 4: return _mm_entropy_epu8<4>(data, nElements);
+		case 5: return _mm_entropy_epu8<5>(data, nElements);
+		case 6: return _mm_entropy_epu8<6>(data, nElements);
+		case 7: return _mm_entropy_epu8<7>(data, nElements);
+		case 8: return _mm_entropy_epu8<8>(data, nElements);
+		default: return _mm_setzero_pd();
+		}
 	}
 
 	template <int N_BITS1, int N_BITS2>
@@ -467,7 +480,7 @@ namespace hli {
 		const std::tuple<const __m128i * const, const size_t>& data2,
 		const size_t nElements)
 	{
-		const __m128d result = priv::_mm_entropy_epu8_method1<N_BITS1, N_BITS2>(data1, data2, nElements);
+		const __m128d result = priv::_mm_entropy_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements);
 		//const __m128d result = priv::_mm_entropy_epu8_method0<N_BITS1, N_BITS2>(data1, data2, nElements);
 
 #		if	_DEBUG
@@ -477,4 +490,78 @@ namespace hli {
 		return result;
 	}
 
+	inline __m128d _mm_entropy_epu8(
+		const std::tuple<const __m128i * const, const size_t>& data1,
+		const int nBits1,
+		const std::tuple<const __m128i * const, const size_t>& data2,
+		const int nBits2,
+		const size_t nElements)
+	{
+		switch (nBits1) {
+		case 1:
+			switch (nBits2)
+			{
+			case 1: return _mm_entropy_epu8<1, 1>(data1, data2, nElements);
+			case 2: return _mm_entropy_epu8<1, 2>(data1, data2, nElements);
+			case 3: return _mm_entropy_epu8<1, 3>(data1, data2, nElements);
+			case 4: return _mm_entropy_epu8<1, 4>(data1, data2, nElements);
+			case 5: return _mm_entropy_epu8<1, 5>(data1, data2, nElements);
+			case 6: return _mm_entropy_epu8<1, 6>(data1, data2, nElements);
+			case 7: return _mm_entropy_epu8<1, 7>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 2:
+			switch (nBits2)
+			{
+			case 1: return _mm_entropy_epu8<2, 1>(data1, data2, nElements);
+			case 2: return _mm_entropy_epu8<2, 2>(data1, data2, nElements);
+			case 3: return _mm_entropy_epu8<2, 3>(data1, data2, nElements);
+			case 4: return _mm_entropy_epu8<2, 4>(data1, data2, nElements);
+			case 5: return _mm_entropy_epu8<2, 5>(data1, data2, nElements);
+			case 6: return _mm_entropy_epu8<2, 6>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 3:
+			switch (nBits2)
+			{
+			case 1: return _mm_entropy_epu8<3, 1>(data1, data2, nElements);
+			case 2: return _mm_entropy_epu8<3, 2>(data1, data2, nElements);
+			case 3: return _mm_entropy_epu8<3, 3>(data1, data2, nElements);
+			case 4: return _mm_entropy_epu8<3, 4>(data1, data2, nElements);
+			case 5: return _mm_entropy_epu8<3, 5>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 4:
+			switch (nBits2)
+			{
+			case 1: return _mm_entropy_epu8<4, 1>(data1, data2, nElements);
+			case 2: return _mm_entropy_epu8<4, 2>(data1, data2, nElements);
+			case 3: return _mm_entropy_epu8<4, 3>(data1, data2, nElements);
+			case 4: return _mm_entropy_epu8<4, 4>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 5:
+			switch (nBits2)
+			{
+			case 1: return _mm_entropy_epu8<5, 1>(data1, data2, nElements);
+			case 2: return _mm_entropy_epu8<5, 2>(data1, data2, nElements);
+			case 3: return _mm_entropy_epu8<5, 3>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 6:
+			switch (nBits2)
+			{
+			case 1: return _mm_entropy_epu8<6, 1>(data1, data2, nElements);
+			case 2: return _mm_entropy_epu8<6, 2>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 7:
+			switch (nBits2)
+			{
+			case 1: return _mm_entropy_epu8<7, 1>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		default: return _mm_setzero_pd();
+		}
+	}
 }

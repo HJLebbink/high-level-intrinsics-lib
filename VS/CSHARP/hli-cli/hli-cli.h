@@ -6,10 +6,10 @@
 using namespace System;
 using namespace System::Collections::Generic;
 
-namespace StatsLibCli {
+namespace hli_cli {
 
 #	pragma managed
-	public ref class Class1
+	public ref class HliCli
 	{
 	public:
 		static int _mm_hadd_epu8(
@@ -29,23 +29,21 @@ namespace StatsLibCli {
 			List<Double>^ results,
 			array<UInt32>^ randInts);
 
-		template <int N_BITS1, int N_BITS2>
-		static double _mm_mi_epu8(
+		static double _mm_entropy_epu8(
+			List<Byte>^ data,
+			int nBits);
+
+		static double _mm_entropy_epu8(
 			List<Byte>^ data1,
-			List<Byte>^ data2);
+			int nBits1,
+			List<Byte>^ data2,
+			int nBits2);
 
 		static double _mm_mi_epu8(
 			List<Byte>^ data1,
 			int nBits1,
 			List<Byte>^ data2,
 			int nBits2);
-
-		template <int N_BITS1, int N_BITS2>
-		static void _mm_mi_perm_epu8(
-			List<Byte>^ data1,
-			List<Byte>^ data2,
-			List<Double>^ results,
-			array<UInt32>^ randInts);
 
 		static void _mm_mi_perm_epu8(
 			List<Byte>^ data1,

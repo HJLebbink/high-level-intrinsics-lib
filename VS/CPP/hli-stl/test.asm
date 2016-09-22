@@ -1,8 +1,20 @@
-#pragma once
 
 
-movsd XMM1, XMM11
 
- pmovzxbd    xmm15,xmm15  
-vpmovzxbd    xmm15,xmm15  
-vmovdqu
+label1: 
+
+
+
+and	AH, bl
+
+
+ja label1
+
+@@:
+
+//ja @B
+
+
+
+
+

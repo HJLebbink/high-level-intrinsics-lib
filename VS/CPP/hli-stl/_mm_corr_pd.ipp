@@ -14,9 +14,9 @@
 //#include "immintrin.h"  // avx, avx2, avx512, FP16C, KNCNI, FMA
 //#include "ammintrin.h"  // AMD-specific intrinsics
 
-#include "_mm_variance_epu8.h"
-#include "_mm_covar_epu8.h"
-#include "_mm_permute_array.h"
+#include "_mm_variance_epu8.ipp"
+#include "_mm_covar_epu8.ipp"
+#include "_mm_permute_array.ipp"
 
 
 namespace hli {

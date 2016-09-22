@@ -13,11 +13,11 @@
 #include "immintrin.h"  // avx, avx2, avx512, FP16C, KNCNI, FMA
 //#include "ammintrin.h"  // AMD-specific intrinsics
 
-#include "tools.h"
-#include "timer.h"
-#include "toString.h"
-#include "_mm_hadd_epi64.h"
-#include "_mm_rand_si128.h"
+#include "tools.ipp"
+#include "timer.ipp"
+#include "toString.ipp"
+#include "_mm_hadd_epi64.ipp"
+#include "_mm_rand_si128.ipp"
 
 namespace hli {
 
@@ -72,6 +72,9 @@ namespace hli {
 
 			const size_t nBytes = std::get<1>(data);
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
+
+			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method2: nElements is not equal to number of bytes" << std::endl;
+
 			const __m128i and_mask = _mm_set1_epi32(0b11111111);
 			//const __m128i shuffle_mask_0 = _mm_set_epi8(15, 14, 13, 12,   11, 10, 9, 8,   7, 6, 5, 4,   3, 2, 1, 0);
 			const __m128i shuffle_mask_1 = _mm_set_epi8(15, 14, 13, 13, 11, 10, 9, 9, 7, 6, 5, 5, 3, 2, 1, 1);
@@ -97,6 +100,7 @@ namespace hli {
 			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data);
+			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method3: nElements is not equal to number of bytes" << std::endl;
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 			__m128i sum = _mm_setzero_si128();
 			for (size_t block = 0; block < nBlocks; ++block) {
@@ -110,6 +114,7 @@ namespace hli {
 			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data);
+			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method1: nElements is not equal to number of bytes" << std::endl;
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 			__m128i sum = _mm_setzero_si128();
 
@@ -124,6 +129,7 @@ namespace hli {
 			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data);
+			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method1_nBits7: nElements is not equal to number of bytes" << std::endl;
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 
 			__m128i sum = _mm_setzero_si128();
@@ -149,6 +155,7 @@ namespace hli {
 			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data);
+			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method1_nBits6: nElements is not equal to number of bytes" << std::endl;
 			const int nBlocks = static_cast<int>(nBytes >> 4); // divide by 16 to get the number of __m128i regs (blocks)
 
 			__m128i sum = _mm_setzero_si128();
@@ -177,6 +184,7 @@ namespace hli {
 			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data);
+			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method1_nBits5: nElements is not equal to number of bytes" << std::endl;
 			const int nBlocks = static_cast<int>(nBytes >> 4); // divide by 16 to get the number of __m128i regs (blocks)
 
 			__m128i sum = _mm_setzero_si128();

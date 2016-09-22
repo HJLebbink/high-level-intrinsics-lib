@@ -4,8 +4,6 @@
 #include <limits>		// std::numeric_limits
 #include <iostream>		// std::cout
 
-#include "toString.h"
-
 //#include "mmintrin.h"  // mmx
 #include "emmintrin.h"  // sse
 #include "pmmintrin.h"  // sse3
@@ -14,6 +12,10 @@
 #include "nmmintrin.h"  // sse4.2
 #include "immintrin.h"  // avx, avx2, avx512, FP16C, KNCNI, FMA
 //#include "ammintrin.h"  // AMD-specific intrinsics
+
+#include "toString.ipp"
+
+
 
 namespace hli {
 

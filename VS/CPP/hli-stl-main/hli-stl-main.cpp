@@ -20,20 +20,20 @@
 #include <chrono>
 #include <algorithm> // for std::min
 
-#include "..\hli-stl\toString.h"
-#include "..\hli-stl\timer.h"
-#include "..\hli-stl\Equal.h"
-#include "..\hli-stl\tools.h"
+#include "..\hli-stl\toString.ipp"
+#include "..\hli-stl\timer.ipp"
+#include "..\hli-stl\equal.ipp"
+#include "..\hli-stl\tools.ipp"
 
-#include "..\hli-stl\_mm_hadd_epu8.h"
-#include "..\hli-stl\_mm_variance_epu8.h"
-#include "..\hli-stl\_mm_corr_epu8.h"
+#include "..\hli-stl\_mm_hadd_epu8.ipp"
+#include "..\hli-stl\_mm_variance_epu8.ipp"
+#include "..\hli-stl\_mm_corr_epu8.ipp"
 
-#include "..\hli-stl\_mm_rand_si128.h"
-#include "..\hli-stl\_mm_rescale_epu16.h"
-#include "..\hli-stl\_mm_permute_array.h"
-#include "..\hli-stl\_mm_entropy_epu8.h"
-#include "..\hli-stl\_mm_mi_epu8.h"
+#include "..\hli-stl\_mm_rand_si128.ipp"
+#include "..\hli-stl\_mm_rescale_epu16.ipp"
+#include "..\hli-stl\_mm_permute_array.ipp"
+#include "..\hli-stl\_mm_entropy_epu8.ipp"
+#include "..\hli-stl\_mm_mi_epu8.ipp"
 
 int main()
 {
@@ -61,9 +61,9 @@ int main()
 
 		//hli::test::test_mm_corr_perm_epu8(110, 1000, nExperiments, true);
 
-		//hli::test::test_mm_entropy_epu8(100, nExperiments, true);
+		hli::test::test_mm_entropy_epu8(100, nExperiments, true);
 		//hli::test::test_mm_mi_epu8(100, nExperiments, true);
-		hli::test::test_mm_mi_perm_epu8(100, 1000, nExperiments, true);
+		//hli::test::test_mm_mi_perm_epu8(100, 1000, nExperiments, true);
 
 		const auto diff = std::chrono::system_clock::now() - start;
 		std::cout << std::endl

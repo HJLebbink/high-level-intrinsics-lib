@@ -14,7 +14,7 @@
 #include "immintrin.h"  // avx, avx2, avx512, FP16C, KNCNI, FMA
 //#include "ammintrin.h"  // AMD-specific intrinsics
 
-#include "toString.h"
+#include "toString.ipp"
 
 namespace hli {
 

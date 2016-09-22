@@ -15,10 +15,10 @@
 //#include "immintrin.h"  // avx, avx2, avx512, FP16C, KNCNI, FMA
 //#include "ammintrin.h"  // AMD-specific intrinsics
 
-#include "_mm_variance_epu8.h"
-#include "_mm_covar_epu8.h"
-#include "_mm_permute_array.h"
-#include "_mm_corr_pd.h"
+#include "_mm_variance_epu8.ipp"
+#include "_mm_covar_epu8.ipp"
+#include "_mm_permute_array.ipp"
+#include "_mm_corr_pd.ipp"
 
 namespace hli {
 
@@ -635,16 +635,16 @@ namespace hli {
 					}
 				}
 			}
-			printf("[_mm_corr_epu8 Ref]       : %2.5f Kcycles; %0.14f\n", min_ref, result_ref.m128d_f64[0]);
-			printf("[_mm_corr_epu8_method0<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min1, result1.m128d_f64[0], min_ref / min1);
-			printf("[_mm_corr_epu8_method0<6>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min2, result2.m128d_f64[0], min_ref / min2);
-			printf("[_mm_corr_epu8_method1<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min3, result3.m128d_f64[0], min_ref / min3);
-			printf("[_mm_corr_epu8_method1<6>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min4, result4.m128d_f64[0], min_ref / min4);
-			printf("[_mm_corr_epu8_method2<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min5, result5.m128d_f64[0], min_ref / min5);
-			printf("[_mm_corr_epu8_method2<6>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min6, result6.m128d_f64[0], min_ref / min6);
-			printf("[_mm_corr_epu8_method3]   : %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min7, result7.m128d_f64[0], min_ref / min7);
-			printf("[_mm_corr_epu8_method4<8>]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min8, result8.m128d_f64[0], min_ref / min8);
-			printf("[_mm_corr_pd_method0]     : %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min9, result9.m128d_f64[0], min_ref / min9);
+			printf("[_mm_corr_epu8 Ref]       : %9.5f Kcycles; %0.14f\n", min_ref, result_ref.m128d_f64[0]);
+			printf("[_mm_corr_epu8_method0<8>]: %9.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min1, result1.m128d_f64[0], min_ref / min1);
+			printf("[_mm_corr_epu8_method0<6>]: %9.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min2, result2.m128d_f64[0], min_ref / min2);
+			printf("[_mm_corr_epu8_method1<8>]: %9.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min3, result3.m128d_f64[0], min_ref / min3);
+			printf("[_mm_corr_epu8_method1<6>]: %9.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min4, result4.m128d_f64[0], min_ref / min4);
+			printf("[_mm_corr_epu8_method2<8>]: %9.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min5, result5.m128d_f64[0], min_ref / min5);
+			printf("[_mm_corr_epu8_method2<6>]: %9.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min6, result6.m128d_f64[0], min_ref / min6);
+			printf("[_mm_corr_epu8_method3]   : %9.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min7, result7.m128d_f64[0], min_ref / min7);
+			printf("[_mm_corr_epu8_method4<8>]: %9.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min8, result8.m128d_f64[0], min_ref / min8);
+			printf("[_mm_corr_pd_method0]     : %9.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min9, result9.m128d_f64[0], min_ref / min9);
 
 			_mm_free2(data1);
 			_mm_free2(data2);

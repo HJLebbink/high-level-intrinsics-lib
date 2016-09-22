@@ -15,13 +15,13 @@
 #include "immintrin.h"  // avx, avx2, avx512, FP16C, KNCNI, FMA
 //#include "ammintrin.h"  // AMD-specific intrinsics
 
-#include "toString.h"
-#include "timer.h"
-#include "Equal.h"
-#include "tools.h"
+#include "toString.ipp"
+#include "timer.ipp"
+#include "equal.ipp"
+#include "tools.ipp"
 
-#include "_mm_rand_si128.h"
-#include "_mm_rescale_epu16.h"
+#include "_mm_rand_si128.ipp"
+#include "_mm_rescale_epu16.ipp"
 
 namespace hli {
 

@@ -5,10 +5,10 @@ using System.Collections.Generic;
 namespace hli_lib_cli_unittest
 {
 	[TestClass]
-	public class UnitTestPerm
+	public class Test_mm_perm_epu8
 	{
 		[TestMethod]
-		public void Test_mm_perm_epu8()
+		public void Test_mm_perm_epu8_1()
 		{
             UInt32[,] destination = new UInt32[100, 100];
             
