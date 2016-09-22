@@ -1,5 +1,8 @@
 #pragma once
 
+#include <algorithm>	// std::min
+#include <limits>		// std::numeric_limits
+#include <iostream>		// std::cout
 #include <tuple>
 #include <math.h>
 

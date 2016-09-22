@@ -1,5 +1,10 @@
 #pragma once
 
+#include <algorithm>	// std::min
+#include <limits>		// std::numeric_limits
+#include <iostream>		// std::cout
+
+
 //#include "mmintrin.h"  // mmx
 #include "emmintrin.h"  // sse
 #include "pmmintrin.h"  // sse3

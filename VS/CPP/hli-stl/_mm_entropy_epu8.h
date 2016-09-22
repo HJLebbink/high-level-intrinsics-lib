@@ -1,5 +1,8 @@
 #pragma once
 
+#include <algorithm>	// std::min
+#include <limits>		// std::numeric_limits
+#include <iostream>		// std::cout
 #include <tuple>
 #include <array>
 #include <map>
@@ -108,19 +111,19 @@ namespace hli {
 				const __m128i d2 = ptr[block + 2];
 				const __m128i d3 = ptr[block + 3];
 
-				const int nBits0 = static_cast<int>(__popcnt64(
+				const int nBits0 = static_cast<int>(_mm_popcnt_u64(
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask0))) ||
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d1, mask0)) << 2) ||
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d2, mask0)) << 4) ||
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d3, mask0)) << 5)));
 
-				const int nBits1 = static_cast<int>(__popcnt64(
+				const int nBits1 = static_cast<int>(_mm_popcnt_u64(
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask1))) ||
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d1, mask1)) << 2) ||
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d2, mask1)) << 4) ||
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d3, mask1)) << 5)));
 
-				const int nBits2 = static_cast<int>(__popcnt64(
+				const int nBits2 = static_cast<int>(_mm_popcnt_u64(
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask2))) ||
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d1, mask2)) << 2) ||
 					(_mm_movemask_epi8(_mm_cmpeq_epi8(d2, mask2)) << 4) ||
@@ -131,9 +134,9 @@ namespace hli {
 
 			for (; block < nBlocks; ++block) {
 				const __m128i d0 = ptr[block];
-				const int nBits0 = static_cast<int>(__popcnt64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask0))));
-				const int nBits1 = static_cast<int>(__popcnt64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask1))));
-				const int nBits2 = static_cast<int>(__popcnt64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask2))));
+				const int nBits0 = static_cast<int>(_mm_popcnt_u64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask0))));
+				const int nBits1 = static_cast<int>(_mm_popcnt_u64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask1))));
+				const int nBits2 = static_cast<int>(_mm_popcnt_u64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask2))));
 				freq = _mm_add_epi32(freq, _mm_set_epi32(nBits0, nBits1, nBits2, 0));
 			}
 

@@ -1,6 +1,9 @@
 #pragma once
 
-#include <iostream>		// for cout
+#include <algorithm>	// std::min
+#include <limits>		// std::numeric_limits
+#include <iostream>		// std::cout
+
 #include "toString.h"
 
 //#include "mmintrin.h"  // mmx

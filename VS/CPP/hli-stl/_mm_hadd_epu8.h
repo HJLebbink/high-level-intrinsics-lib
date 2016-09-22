@@ -1,8 +1,8 @@
 #pragma once
 
-#include <limits>       // std::numeric_limits
-#include <iostream>		// std::cout
 #include <algorithm>	// std::min
+#include <limits>		// std::numeric_limits
+#include <iostream>		// std::cout
 
 //#include "mmintrin.h"  // mmx
 #include "emmintrin.h"  // sse
@@ -43,8 +43,6 @@ namespace hli {
 			return _mm_set1_epi32(sum);
 		}
 
-
-		
 		template <int N_BITS>
 		inline __m128i _mm_hadd_epu8_method1(
 			const std::tuple<const __m128i * const, const size_t>& data,
