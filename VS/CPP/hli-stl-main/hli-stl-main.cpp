@@ -20,20 +20,20 @@
 #include <chrono>
 #include <algorithm> // for std::min
 
-#include "..\hli-lib\toString.h"
-#include "..\hli-lib\timer.h"
-#include "..\hli-lib\Equal.h"
-#include "..\hli-lib\tools.h"
+#include "..\hli-stl\toString.h"
+#include "..\hli-stl\timer.h"
+#include "..\hli-stl\Equal.h"
+#include "..\hli-stl\tools.h"
 
-#include "..\hli-lib\_mm_hadd_epu8.h"
-#include "..\hli-lib\_mm_variance_epu8.h"
-#include "..\hli-lib\_mm_corr_epu8.h"
+#include "..\hli-stl\_mm_hadd_epu8.h"
+#include "..\hli-stl\_mm_variance_epu8.h"
+#include "..\hli-stl\_mm_corr_epu8.h"
 
-#include "..\hli-lib\_mm_rand_si128.h"
-#include "..\hli-lib\_mm_rescale_epu16.h"
-#include "..\hli-lib\_mm_permute_array.h"
-#include "..\hli-lib\_mm_entropy_epu8.h"
-#include "..\hli-lib\_mm_mi_epu8.h"
+#include "..\hli-stl\_mm_rand_si128.h"
+#include "..\hli-stl\_mm_rescale_epu16.h"
+#include "..\hli-stl\_mm_permute_array.h"
+#include "..\hli-stl\_mm_entropy_epu8.h"
+#include "..\hli-stl\_mm_mi_epu8.h"
 
 int main()
 {

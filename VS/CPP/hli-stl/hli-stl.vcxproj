@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C2408A75-63AD-407F-88E5-B34B43983ABB}</ProjectGuid>
+    <ProjectGuid>{47507498-5B7E-4B3C-A9B1-7A9C5185223E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>hlilib</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
@@ -28,26 +28,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>Intel C++ Compiler 16.0</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>Intel C++ Compiler 16.0</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>Intel C++ Compiler 16.0</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>Intel C++ Compiler 16.0</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -127,7 +127,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
+    <ClInclude Include="Equal.h" />
+    <ClInclude Include="getSet.h" />
+    <ClInclude Include="tools.h" />
+    <ClInclude Include="_mm_corr_pd.h" />
+    <ClInclude Include="_mm_corr_epu8.h" />
+    <ClInclude Include="_mm_covar_epu8.h" />
+    <ClInclude Include="_mm_entropy_epu8.h" />
+    <ClInclude Include="_mm_hadd_epi64.h" />
+    <ClInclude Include="_mm_hadd_epu8.h" />
+    <ClInclude Include="timer.h" />
+    <ClInclude Include="toString.h" />
+    <ClInclude Include="_mm_mi_epu8.h" />
+    <ClInclude Include="_mm_permute_array.h" />
+    <ClInclude Include="_mm_rand_si128.h" />
+    <ClInclude Include="_mm_rescale_epu16.h" />
+    <ClInclude Include="_mm_variance_epu8.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test.asm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

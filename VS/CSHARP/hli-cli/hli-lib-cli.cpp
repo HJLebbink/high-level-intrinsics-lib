@@ -10,10 +10,10 @@
 #include "StatsLibCli.h"
 
 #pragma unmanaged
-#include "../../CPP/hli-lib/_mm_hadd_epu8.h"
-#include "../../CPP/hli-lib/_mm_corr_pd.h"
-#include "../../CPP/hli-lib/_mm_corr_epu8.h"
-#include "../../CPP/hli-lib/_mm_mi_epu8.h"
+#include "../../CPP/hli-stl/_mm_hadd_epu8.h"
+#include "../../CPP/hli-stl/_mm_corr_pd.h"
+#include "../../CPP/hli-stl/_mm_corr_epu8.h"
+#include "../../CPP/hli-stl/_mm_mi_epu8.h"
 
 
 using namespace System;
