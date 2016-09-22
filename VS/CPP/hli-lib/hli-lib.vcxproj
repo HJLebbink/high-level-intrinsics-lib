@@ -25,7 +25,7 @@
     <ClInclude Include="headers.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C2408A75-63AD-407F-88E5-B34B43983ABB}</ProjectGuid>
+    <ProjectGuid>{47507498-5B7E-4B3C-A9B1-7A9C5185223E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>hlilib</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>

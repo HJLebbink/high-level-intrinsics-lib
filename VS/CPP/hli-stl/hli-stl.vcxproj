@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{47507498-5B7E-4B3C-A9B1-7A9C5185223E}</ProjectGuid>
+    <ProjectGuid>{0062C23B-6723-40A4-BBF6-DAD73AAB9E8C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>hlilib</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>

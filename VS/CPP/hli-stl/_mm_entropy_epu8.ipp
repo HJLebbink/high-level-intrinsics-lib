@@ -230,8 +230,8 @@ namespace hli {
 		{
 			const __int8 * const ptr1 = reinterpret_cast<const __int8 * const>(std::get<0>(data));
 
-			static_assert(N_BITS > 0, "");
-			static_assert(N_BITS <= 8, "");
+			static_assert(N_BITS > 0, "_mm_entropy_epu8_method0: N_BITS should be larger than 0");
+			static_assert(N_BITS <= 8, "_mm_entropy_epu8_method0: N_BITS should be smaller or equal than 8");
 
 			const int N_DISTINCT_VALUES = (1 << N_BITS);
 			std::array<size_t, N_DISTINCT_VALUES> freq;
@@ -276,10 +276,7 @@ namespace hli {
 				}
 			}
 
-
-
-
-
+			//TODO: ERROR here: some training data is not counted
 
 			// ASSUME THAT NO MISSING VALUES EXIST
 			double h = 0;
@@ -303,7 +300,7 @@ namespace hli {
 			static_assert(N_BITS1 > 0, "NBITS_1 has to be larger than zero");
 			static_assert(N_BITS2 > 0, "NBITS_2 has to be larger than zero");
 			const int N_BITS = N_BITS1 + N_BITS2;
-			static_assert(N_BITS <= 8, "NBITS_1 + N_BITS_2 has to be smaller than 9");
+			static_assert(N_BITS <= 8, "NBITS_1 + N_BITS_2 has to be smaller or equal than 8");
 
 			const __int8 * const ptr1 = reinterpret_cast<const __int8 * const>(std::get<0>(data1));
 			const __int8 * const ptr2 = reinterpret_cast<const __int8 * const>(std::get<0>(data2));
