@@ -12,7 +12,7 @@ namespace hli_lib_cli_unittest
         {
             const double margin = 1E-15;
 
-            const int nRuns = 10000;
+            const int nRuns = 50000;
             Random rand = new Random();
 
             for (int run = 0; run < nRuns; ++run)
@@ -41,9 +41,9 @@ namespace hli_lib_cli_unittest
         [TestMethod]
         public void Test_mm_entropy_epu8_2()
         {
-            const double margin = 1E-15;
+            const double margin = 1E-14;
 
-            const int nRuns = 1000;
+            const int nRuns = 100000;
             Random rand = new Random();
 
             for (int run = 0; run < nRuns; ++run)
@@ -79,7 +79,7 @@ namespace hli_lib_cli_unittest
                 Assert.IsTrue(h2 <= maxH2,   "nElements=" + nElements + "; nBits2=" + nBits2 + ": H2=" + h2 + " is larger than maxH1=" + maxH2);
                 Assert.IsTrue(h1Andh2 >= -margin, "nElements=" + nElements + "; nBits1=" + nBits1 + "; nBits2=" + nBits2 + ": h1Andh2=" + h1Andh2 + " is smaller than zero");
                 Assert.IsTrue(h1Andh2 <= maxMi,   "nElements=" + nElements + "; nBits1=" + nBits1 + "; nBits2=" + nBits2 + ": h1Andh2=" + h1Andh2 + " is larger than maxMi=" + maxMi);
-                Assert.IsTrue(h1Plush2 >= h1Andh2, "nElements=" + nElements + "; nBits1=" + nBits1 + "; nBits2=" + nBits2 + ": h1Plush2=" + h1Plush2 + ", h1Andh2=" + h1Andh2);
+                Assert.IsTrue((h1Plush2 + margin) > h1Andh2, "nElements=" + nElements + "; nBits1=" + nBits1 + "; nBits2=" + nBits2 + ": h1Plush2=" + h1Plush2 + ", h1Andh2=" + h1Andh2);
             }
         }
     }

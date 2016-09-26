@@ -10,7 +10,7 @@ namespace hli_lib_cli_unittest
         [TestMethod]
         public void Test_mm_mi_epu8_1()
         {
-            const int nRuns = 1000;
+            const int nRuns = 50000;
             const double margin = 1E-15;
 
 
