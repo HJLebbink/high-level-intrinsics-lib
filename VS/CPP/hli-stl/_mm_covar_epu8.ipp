@@ -21,25 +21,43 @@ namespace hli {
 	namespace priv {
 
 		// Variance population reference
+		template <bool MIS_VALUE>
 		inline __m128d _mm_covar_epu8_ref(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data1);
-			const double average1 = static_cast<double>(_mm_hadd_epu8_method0(data1, nElements).m128i_u32[0]) / nBytes;
-			const double average2 = static_cast<double>(_mm_hadd_epu8_method0(data2, nElements).m128i_u32[0]) / nBytes;
+			const auto tup1 = _mm_hadd_epu8_method0<MIS_VALUE>(data1, nElements);
+			const auto tup2 = _mm_hadd_epu8_method0<MIS_VALUE>(data1, nElements);
+
+			const double average1 = static_cast<double>(std::get<0>(tup1).m128i_u32[0]) / std::get<1>(tup1).m128i_u32[0];
+			const double average2 = static_cast<double>(std::get<0>(tup2).m128i_u32[0]) / std::get<1>(tup2).m128i_u32[0];
 
 			const unsigned __int8 * const ptr1 = reinterpret_cast<const unsigned __int8 * const>(std::get<0>(data1));
 			const unsigned __int8 * const ptr2 = reinterpret_cast<const unsigned __int8 * const>(std::get<0>(data2));
 
 			double sum = 0;
-			for (size_t i = 0; i < nBytes; ++i) {
-				double d1 = static_cast<double>(ptr1[i]) - average1;
-				double d2 = static_cast<double>(ptr2[i]) - average2;
-				sum += (d1 * d2);
+
+			if (MIS_VALUE) {
+				size_t nTrueElements = 0;
+				for (size_t i = 0; i < nElements; ++i) {
+					const double d1 = ptr1[i];
+					if (d1 == 0xFF) continue;
+					const double d2 = ptr2[i];
+					if (d2 == 0xFF) continue;
+					nTrueElements++;
+					sum += ((static_cast<double>(d1) - average1) * (static_cast<double>(d2) - average2));
+				}
+				return _mm_set1_pd(sum / nTrueElements);
+			} else {
+				for (size_t i = 0; i < nElements; ++i) {
+					const double d1 = ptr1[i];
+					const double d2 = ptr2[i];
+					sum += ((static_cast<double>(d1) - average1) * (static_cast<double>(d2) - average2));
+				}
+				return _mm_set1_pd(sum / nElements);
 			}
-			return _mm_set1_pd(sum / nBytes);
 		}
 	}
 

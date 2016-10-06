@@ -61,6 +61,7 @@ namespace hli {
 			}
 		}
 
+		template <bool MIS_VALUE>
 		inline void _mm_permute_epu8_array_method0(
 			const std::tuple<__m128i * const, const size_t>& data,
 			const size_t nElements,
@@ -106,9 +107,6 @@ namespace hli {
 			const std::tuple<__m128i * const, const size_t>& swap,
 			__m128i& randInts)
 		{
-			const size_t nBytes = std::get<1>(data);
-			const size_t nBlocks = nBytes >> 4;
-
 			if (false) {
 				_mm_lfsr32_epu32(swap, randInts);
 				_mm_rescale_epu16_method2(swap);
@@ -181,6 +179,7 @@ namespace hli {
 				return;
 			}
 
+			const bool MIS_VALUE = false;
 			const size_t nElements = 8 * nBlocks;
 			const size_t nBytes = nElements * 2;
 			const int N_BITS = 5;
@@ -213,7 +212,7 @@ namespace hli {
 			{
 				copy(data_source, data0);
 				timer::reset_and_start_timer();
-				hli::priv::_mm_permute_epu8_array_method0(data0, nElements, swap, randInt0);
+				hli::priv::_mm_permute_epu8_array_method0<MIS_VALUE>(data0, nElements, swap, randInt0);
 				min0 = std::min(min0, timer::get_elapsed_kcycles());
 
 				{
@@ -276,10 +275,10 @@ namespace hli {
 			}
 			if (doTests)
 			{
-				const __m128i sum0 = hli::_mm_hadd_epu8<N_BITS>(data0, nElements);
-				const __m128i sum1 = hli::_mm_hadd_epu8<N_BITS>(data1, nElements);
-				const __m128i sum2 = hli::_mm_hadd_epu8<N_BITS>(data2, nElements);
-				const __m128i sum3 = hli::_mm_hadd_epu8<N_BITS>(data3, nElements);
+				const __m128i sum0 = std::get<0>(hli::_mm_hadd_epu8<N_BITS, MIS_VALUE>(data0, nElements));
+				const __m128i sum1 = std::get<0>(hli::_mm_hadd_epu8<N_BITS, MIS_VALUE>(data1, nElements));
+				const __m128i sum2 = std::get<0>(hli::_mm_hadd_epu8<N_BITS, MIS_VALUE>(data2, nElements));
+				const __m128i sum3 = std::get<0>(hli::_mm_hadd_epu8<N_BITS, MIS_VALUE>(data3, nElements));
 				if (sum0.m128i_u32[0] != sum1.m128i_u32[0]) {
 					std::cout << "WARNING: test_mm_permute_epu8: sums are unequal: sum0=" << sum0.m128i_u32[0] << "; sum1=" << sum1.m128i_u32[0] << std::endl;
 				}

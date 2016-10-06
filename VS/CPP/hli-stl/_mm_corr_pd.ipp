@@ -23,6 +23,7 @@ namespace hli {
 
 	namespace priv {
 
+		template <bool MIS_VALUE>
 		inline __m128d _mm_corr_pd_method0(
 			const std::tuple<const __m128d * const, const size_t>& data1,
 			const std::tuple<const __m128d * const, const size_t>& data2,
@@ -52,6 +53,7 @@ namespace hli {
 			return _mm_set1_pd(corr);
 		}
 
+		template <bool MIS_VALUE>
 		inline __m128d _mm_corr_pd_method1(
 			const std::tuple<const __m128d * const, const size_t>& data1,
 			const std::tuple<const __m128d * const, const size_t>& data2,
@@ -89,6 +91,7 @@ namespace hli {
 			return corr;
 		}
 
+		template <bool MIS_VALUE>
 		inline __m128d _mm_corr_dp_method3(
 			const std::tuple<const __m128d * const, const size_t>& data1,
 			const std::tuple<const __m128d * const, const size_t>& data2,
@@ -149,6 +152,7 @@ namespace hli {
 			const bool doTests)
 		{
 			const double delta = 0.0000001;
+			const bool MIS_VALUE = false;
 			const size_t nElements = nBlocks * 2;
 
 			auto data1_r = _mm_malloc_m128d(nElements * 8);
@@ -169,12 +173,12 @@ namespace hli {
 			for (size_t i = 0; i < nExperiments; ++i) {
 
 				timer::reset_and_start_timer();
-				result0 = hli::priv::_mm_corr_pd_method0(data1, data2, nElements);
+				result0 = hli::priv::_mm_corr_pd_method0<MIS_VALUE>(data1, data2, nElements);
 				min0 = std::min(min0, timer::get_elapsed_kcycles());
 
 				{
 					timer::reset_and_start_timer();
-					result1 = hli::priv::_mm_corr_pd_method1(data1, data2, nElements);
+					result1 = hli::priv::_mm_corr_pd_method1<MIS_VALUE>(data1, data2, nElements);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -193,12 +197,13 @@ namespace hli {
 		}
 	}
 
+	template <bool MIS_VALUE>
 	inline __m128d _mm_corr_pd(
 		const std::tuple<const __m128d * const, const size_t>& data1,
 		const std::tuple<const __m128d * const, const size_t>& data2,
 		const size_t nElements)
 	{
-		return priv::_mm_corr_pd_method0(data1, data2, nElements);
-		//return priv::_mm_corr_pd_method1(data1, data2);
+		return priv::_mm_corr_pd_method0<MIS_VALUE>(data1, data2, nElements);
+		//return priv::_mm_corr_pd_method1<MIS_VALUE>(data1, data2);
 	}
 }

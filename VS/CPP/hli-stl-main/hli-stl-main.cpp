@@ -18,7 +18,6 @@
 #include <vector>
 #include <string>
 #include <chrono>
-#include <algorithm> // for std::min
 
 #include "..\hli-stl\toString.ipp"
 #include "..\hli-stl\timer.ipp"

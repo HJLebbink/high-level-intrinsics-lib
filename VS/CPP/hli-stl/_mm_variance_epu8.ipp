@@ -20,35 +20,42 @@ namespace hli {
 	namespace priv {
 
 		// Variance population reference
+		template <bool MIS_VALUE>
 		inline __m128d _mm_variance_epu8_method0(
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const size_t nElements)
 		{
-			const size_t nBytes = std::get<1>(data);
-			const double average = static_cast<double>(_mm_hadd_epu8_method0(data, nElements).m128i_u32[0]) / nBytes;
+			static_assert(!MIS_VALUE, "");
+
+			const auto tup = _mm_hadd_epu8_method0<MIS_VALUE>(data, nElements);
+			unsigned int nTrueElements = static_cast<unsigned int>(_mm_cvtsi128_si32(std::get<1>(tup)));
+
+			const double average = static_cast<double>(std::get<0>(tup).m128i_u32[0]) / nTrueElements;
 			
 			const unsigned __int8 * const ptr = reinterpret_cast<const unsigned __int8 * const>(std::get<0>(data));
 			double sum = 0;
-			for (size_t i = 0; i < nBytes; ++i) {
+			for (size_t i = 0; i < nElements; ++i) {
 				double d = static_cast<double>(ptr[i]) - average;
 				sum += (d * d);
 			}
-			return _mm_set1_pd(sum / nBytes);
+			return _mm_set1_pd(sum / nTrueElements);
 		}
 
 		// Variance population SSE: return 2x double var
-		template <int N_BITS>
+		template <int N_BITS, bool MIS_VALUE>
 		inline __m128d _mm_variance_epu8_method1(
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const size_t nElements)
 		{
-			const __m128d sum = _mm_cvtepi32_pd(_mm_hadd_epu8<N_BITS>(data, nElements));
-			const __m128d nElementsD = _mm_set1_pd(static_cast<double>(nElements));
-			const __m128d average = _mm_div_pd(sum, nElementsD);
-			return _mm_variance_epu8_method1(data, average);
+			const auto tup = _mm_hadd_epu8<N_BITS, MIS_VALUE>(data, nElements);
+			const __m128d sum = _mm_cvtepi32_pd(std::get<0>(tup));
+			const __m128d nTrueElements = _mm_cvtepi32_pd(std::get<1>(tup));
+			const __m128d average = _mm_div_pd(sum, nTrueElements);
+			return _mm_variance_epu8_method1<MIS_VALUE>(data, average);
 		}
 
 		// Variance population SSE: return 2x double var
+		template <bool MIS_VALUE>
 		inline __m128d _mm_variance_epu8_method1(
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const __m128d average)
@@ -102,7 +109,7 @@ namespace hli {
 		void test_mm_variance_epu8(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 		{
 			const double delta = 0.0000001;
-
+			const bool MIS_VALUE = false;
 			const size_t nElements = nBlocks * 16;
 			auto data = _mm_malloc_m128i(nElements);
 			fillRand_epu8<5>(data);
@@ -117,12 +124,12 @@ namespace hli {
 				for (size_t i = 0; i < nExperiments; ++i) {
 
 					timer::reset_and_start_timer();
-					const __m128d result_ref = hli::priv::_mm_variance_epu8_method0(data, nElements);
+					const __m128d result_ref = hli::priv::_mm_variance_epu8_method0<MIS_VALUE>(data, nElements);
 					min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 					{
 						timer::reset_and_start_timer();
-						const __m128d result = hli::priv::_mm_variance_epu8_method1<8>(data, nElements);
+						const __m128d result = hli::priv::_mm_variance_epu8_method1<8, MIS_VALUE>(data, nElements);
 						min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -134,7 +141,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const __m128d result = hli::priv::_mm_variance_epu8_method1<7>(data, nElements);
+						const __m128d result = hli::priv::_mm_variance_epu8_method1<7, MIS_VALUE>(data, nElements);
 						min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -146,7 +153,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const __m128d result = hli::priv::_mm_variance_epu8_method1<6>(data, nElements);
+						const __m128d result = hli::priv::_mm_variance_epu8_method1<6, MIS_VALUE>(data, nElements);
 						min3 = std::min(min3, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -158,7 +165,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const __m128d result = hli::priv::_mm_variance_epu8_method1<5>(data, nElements);
+						const __m128d result = hli::priv::_mm_variance_epu8_method1<5, MIS_VALUE>(data, nElements);
 						min4 = std::min(min4, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -182,18 +189,19 @@ namespace hli {
 	}
 
 	// Variance population SSE: return 2x double var
+	template <bool MIS_VALUE = false>
 	inline __m128d _mm_variance_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data,
 		const __m128d average)
 	{
-		return priv::_mm_variance_epu8_method1(data, average);
+		return priv::_mm_variance_epu8_method1<MIS_VALUE>(data, average);
 	}
 
 	// Variance population SSE: return 2x double var
-	template <int N_BITS>
+	template <int N_BITS, bool MIS_VALUE = false>
 	inline __m128d _mm_variance_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data)
 	{
-		return priv::_mm_variance_epu8_method1<N_BITS>(data);
+		return priv::_mm_variance_epu8_method1<N_BITS, MIS_VALUE>(data);
 	}
 }
