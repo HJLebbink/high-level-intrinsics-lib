@@ -1,5 +1,7 @@
 #pragma once
-#include "emmintrin.h"  // sse
+#include "emmintrin.h"  // SSE
+#include "immintrin.h"  // AVX
+
 
 namespace hli {
 

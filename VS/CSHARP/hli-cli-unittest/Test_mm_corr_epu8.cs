@@ -10,10 +10,11 @@ namespace hli_lib_cli_unittest
         [TestMethod]
         public void Test_mm_corr_epu8_1()
         {
+            const bool hasMissingValues = false;
             List<Byte> data1 = new List<Byte> { 0, 0, 1 };
             List<Byte> data2 = new List<Byte> { 3, 1, 0 };
             double expected_Result = -2.0 / Math.Sqrt(7.0);//   -0.755928946018454454429;
-            double observed_Result = hli_cli.HliCli._mm_corr_epu8(data1, data2);
+            double observed_Result = hli_cli.HliCli._mm_corr_epu8(data1, data2, hasMissingValues);
             double diff = Math.Abs(expected_Result - observed_Result);
             const double threshold = 1E-14;
             Console.WriteLine("diff=" + diff+"; threshold="+threshold);
@@ -23,6 +24,7 @@ namespace hli_lib_cli_unittest
         [TestMethod]
         public void Test_mm_corr_epu8_equal_pd()
         {
+            const bool hasMissingValues = false;
             const int nRuns = 100000;
             const double threshold = 1E-25;
 
@@ -46,8 +48,8 @@ namespace hli_lib_cli_unittest
                     data2d.Add((Double)data2[i]);
                 }
 
-                double corr1 = hli_cli.HliCli._mm_corr_epu8(data1, data2);
-                double corr2 = hli_cli.HliCli._mm_corr_pd(data1d, data2d);
+                double corr1 = hli_cli.HliCli._mm_corr_epu8(data1, data2, hasMissingValues);
+                double corr2 = hli_cli.HliCli._mm_corr_pd(data1d, data2d, hasMissingValues);
 
                 double diff = Math.Abs(corr1 - corr2);
                 if (Double.IsNaN(diff))

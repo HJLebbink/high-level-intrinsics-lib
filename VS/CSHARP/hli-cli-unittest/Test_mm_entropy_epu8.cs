@@ -11,7 +11,7 @@ namespace hli_lib_cli_unittest
         public void Test_mm_entropy_epu8_1()
         {
             const double margin = 1E-15;
-
+            const bool hasMissingValues = false;
             const int nRuns = 50000;
             Random rand = new Random();
 
@@ -31,7 +31,7 @@ namespace hli_lib_cli_unittest
                 }
                 #endregion
 
-                double h1 = hli_cli.HliCli._mm_entropy_epu8(data1, nBits1);
+                double h1 = hli_cli.HliCli._mm_entropy_epu8(data1, nBits1, hasMissingValues);
 
                 Assert.IsTrue(h1 >= -margin, "nElements=" + nElements + "; nBits1=" + nBits1 + ": H=" + h1 + " is smaller than zero");
                 Assert.IsTrue(h1 <= maxH,   "nElements=" + nElements + "; nBits1=" + nBits1 + ": H=" + h1 + " is larger than maxH=" + maxH);
@@ -42,7 +42,7 @@ namespace hli_lib_cli_unittest
         public void Test_mm_entropy_epu8_2()
         {
             const double margin = 1E-14;
-
+            const bool hasMissingValues = false;
             const int nRuns = 100000;
             Random rand = new Random();
 
@@ -68,10 +68,10 @@ namespace hli_lib_cli_unittest
                 }
                 #endregion
 
-                double h1 = hli_cli.HliCli._mm_entropy_epu8(data1, nBits1);
-                double h2 = hli_cli.HliCli._mm_entropy_epu8(data2, nBits2);
+                double h1 = hli_cli.HliCli._mm_entropy_epu8(data1, nBits1, hasMissingValues);
+                double h2 = hli_cli.HliCli._mm_entropy_epu8(data2, nBits2, hasMissingValues);
                 double h1Plush2 = h1 + h2;
-                double h1Andh2 = hli_cli.HliCli._mm_entropy_epu8(data1, nBits1, data2, nBits2);
+                double h1Andh2 = hli_cli.HliCli._mm_entropy_epu8(data1, nBits1, data2, nBits2, hasMissingValues);
 
                 Assert.IsTrue(h1 >= -margin, "nElements=" + nElements + "; nBits1=" + nBits1 + ": H1=" + h1 + " is smaller than zero");
                 Assert.IsTrue(h1 <= maxH1,   "nElements=" + nElements + "; nBits1=" + nBits1 + ": H1=" + h1 + " is larger than maxH2=" + maxH1);

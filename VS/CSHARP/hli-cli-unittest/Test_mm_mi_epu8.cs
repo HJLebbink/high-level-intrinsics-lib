@@ -11,6 +11,7 @@ namespace hli_lib_cli_unittest
         public void Test_mm_mi_epu8_1()
         {
             const int nRuns = 50000;
+            const bool hasMissingValues = false;
             const double margin = 1E-15;
 
 
@@ -35,7 +36,7 @@ namespace hli_lib_cli_unittest
                 }
                 #endregion
 
-                double mi = hli_cli.HliCli._mm_mi_epu8(data1, nBits1, data2, nBits2);
+                double mi = hli_cli.HliCli._mm_mi_epu8(data1, nBits1, data2, nBits2, hasMissingValues);
                 Assert.IsTrue(mi >= -margin,     "nElements=" + nElements + "; nBits1=" + nBits1 + "; nBits2=" + nBits2 + ": mi=" + mi + " is smaller than zero");
                 Assert.IsTrue(mi <= maxMi, "nElements=" + nElements + "; nBits1=" + nBits1 + "; nBits2=" + nBits2 + ": mi=" + mi + " is larger than maxValue="+maxMi);
             }
