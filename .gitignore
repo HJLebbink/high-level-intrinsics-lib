@@ -35,3 +35,4 @@
 .suo
 **/Release/
 .dropbox.attr
+VS/.vs/*

@@ -3,7 +3,4 @@
   <ItemGroup>
     <ClCompile Include="hli-lib.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="headers.h" />
-  </ItemGroup>
 </Project>

@@ -46,7 +46,7 @@ namespace hli {
 				for (size_t i = 0; i < nElements; ++i) {
 					sum += ptr[i];
 				}
-				return std::make_tuple(_mm_set1_epi32(sum), _mm_set1_epi32(nElements));
+				return std::make_tuple(_mm_set1_epi32(sum), _mm_set1_epi32((int)nElements));
 			}
 		}
 
@@ -101,7 +101,7 @@ namespace hli {
 			}
 
 			const __m128i sum2 = _mm_cvtepi32_epi64(_mm_hadd_epi32(sum, sum));
-			return std::make_tuple(_mm_hadd_epi64(sum2), _mm_set1_epi32(nElements));
+			return std::make_tuple(_mm_hadd_epi64(sum2), _mm_set1_epi32((int)nElements));
 		}
 
 		template <bool MIS_VALUE>
@@ -117,7 +117,7 @@ namespace hli {
 			for (size_t block = 0; block < nBlocks; ++block) {
 				sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
 			}
-			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32(nElements));
+			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32((int)nElements));
 		}
 
 		template <bool MIS_VALUE>
@@ -134,7 +134,7 @@ namespace hli {
 			for (size_t block = 0; block < nBlocks; ++block) {
 				sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
 			}
-			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32(nElements));
+			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32((int)nElements));
 		}
 
 		template <bool MIS_VALUE>
@@ -162,7 +162,7 @@ namespace hli {
 					sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
 				}
 			}
-			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32(nElements));
+			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32((int)nElements));
 		}
 
 		template <bool MIS_VALUE>
@@ -193,7 +193,7 @@ namespace hli {
 					sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
 				}
 			}
-			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32(nElements));
+			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32((int)nElements));
 		}
 
 		template <bool MIS_VALUE>
@@ -231,7 +231,7 @@ namespace hli {
 				}
 				sum = _mm_add_epi64(sum, _mm_sad_epu8(sum_p, _mm_setzero_si128()));
 			}
-			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32(nElements));
+			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32((int)nElements));
 		}
 	}
 

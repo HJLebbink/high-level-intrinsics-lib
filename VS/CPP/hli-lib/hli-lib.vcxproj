@@ -21,9 +21,6 @@
   <ItemGroup>
     <ClCompile Include="hli-lib.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="headers.h" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{47507498-5B7E-4B3C-A9B1-7A9C5185223E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -124,7 +121,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
