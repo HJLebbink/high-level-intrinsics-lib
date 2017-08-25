@@ -23,7 +23,7 @@ namespace hli {
 
 	namespace priv {
 
-		template <bool MIS_VALUE>
+		template <bool HAS_MISSING_VALUE>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method0(
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const size_t nElements)
@@ -32,7 +32,7 @@ namespace hli {
 			const unsigned __int8 * const ptr = reinterpret_cast<const unsigned __int8 * const>(std::get<0>(data));
 			unsigned __int32 sum = 0;
 
-			if (MIS_VALUE) {
+			if (HAS_MISSING_VALUE) {
 				unsigned __int32 nTrueElements = 0;
 				for (size_t i = 0; i < nElements; ++i) {
 					__int8 d = ptr[i];
@@ -50,7 +50,7 @@ namespace hli {
 			}
 		}
 
-		template <int N_BITS, bool MIS_VALUE>
+		template <int N_BITS, bool HAS_MISSING_VALUE>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method1(
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const size_t nElements)
@@ -58,25 +58,25 @@ namespace hli {
 			static_assert((N_BITS > 0) && (N_BITS <= 8), "Number of bits must be in range 1 to 8.");
 #			pragma warning( disable: 280) 
 			switch (N_BITS) {
-			case 8: return _mm_hadd_epu8_method1_nBits8<MIS_VALUE>(data, nElements);
-			case 7: return _mm_hadd_epu8_method1_nBits7<MIS_VALUE>(data, nElements);
-			case 6: return _mm_hadd_epu8_method1_nBits6<MIS_VALUE>(data, nElements);
+			case 8: return _mm_hadd_epu8_method1_nBits8<HAS_MISSING_VALUE>(data, nElements);
+			case 7: return _mm_hadd_epu8_method1_nBits7<HAS_MISSING_VALUE>(data, nElements);
+			case 6: return _mm_hadd_epu8_method1_nBits6<HAS_MISSING_VALUE>(data, nElements);
 			case 5:
 			case 4:
 			case 3:
 			case 2:
-			case 1: return _mm_hadd_epu8_method1_nBits5<MIS_VALUE>(data, nElements);
+			case 1: return _mm_hadd_epu8_method1_nBits5<HAS_MISSING_VALUE>(data, nElements);
 			default:
 				return std::make_tuple(_mm_setzero_si128(), _mm_setzero_si128());
 			}
 		}
 
-		template <bool MIS_VALUE>
+		template <bool HAS_MISSING_VALUE>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method2(
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const size_t nElements)
 		{
-			static_assert(MIS_VALUE == false, "not implemented for missing values");
+			static_assert(HAS_MISSING_VALUE == false, "not implemented for missing values");
 			//assume (nBytes < 2 ^ (32 - 8))
 
 			const size_t nBytes = std::get<1>(data);
@@ -104,12 +104,12 @@ namespace hli {
 			return std::make_tuple(_mm_hadd_epi64(sum2), _mm_set1_epi32((int)nElements));
 		}
 
-		template <bool MIS_VALUE>
+		template <bool HAS_MISSING_VALUE>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method3(
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const size_t nElements)
 		{
-			static_assert(MIS_VALUE == false, "not implemented for missing values");
+			static_assert(HAS_MISSING_VALUE == false, "not implemented for missing values");
 			const size_t nBytes = std::get<1>(data);
 			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method3: nElements is not equal to number of bytes" << std::endl;
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
@@ -120,12 +120,12 @@ namespace hli {
 			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32((int)nElements));
 		}
 
-		template <bool MIS_VALUE>
+		template <bool HAS_MISSING_VALUE>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method1_nBits8(
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const size_t nElements)
 		{
-			//static_assert(MIS_VALUE == false, "not implemented for missing values");
+			//static_assert(HAS_MISSING_VALUE == false, "not implemented for missing values");
 			const size_t nBytes = std::get<1>(data);
 			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method1: nElements is not equal to number of bytes" << std::endl;
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
@@ -137,12 +137,12 @@ namespace hli {
 			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32((int)nElements));
 		}
 
-		template <bool MIS_VALUE>
+		template <bool HAS_MISSING_VALUE>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method1_nBits7(
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const size_t nElements)
 		{
-			//static_assert(MIS_VALUE == false, "not implemented for missing values");
+			//static_assert(HAS_MISSING_VALUE == false, "not implemented for missing values");
 			const size_t nBytes = std::get<1>(data);
 			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method1_nBits7: nElements is not equal to number of bytes" << std::endl;
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
@@ -165,12 +165,12 @@ namespace hli {
 			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32((int)nElements));
 		}
 
-		template <bool MIS_VALUE>
+		template <bool HAS_MISSING_VALUE>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method1_nBits6(
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const size_t nElements)
 		{
-			//static_assert(MIS_VALUE == false, "not implemented for missing values");
+			//static_assert(HAS_MISSING_VALUE == false, "not implemented for missing values");
 			const size_t nBytes = std::get<1>(data);
 			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method1_nBits6: nElements is not equal to number of bytes" << std::endl;
 			const int nBlocks = static_cast<int>(nBytes >> 4); // divide by 16 to get the number of __m128i regs (blocks)
@@ -196,12 +196,12 @@ namespace hli {
 			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32((int)nElements));
 		}
 
-		template <bool MIS_VALUE>
+		template <bool HAS_MISSING_VALUE>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method1_nBits5(
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const size_t nElements)
 		{
-			//static_assert(MIS_VALUE == false, "not implemented for missing values");
+			//static_assert(HAS_MISSING_VALUE == false, "not implemented for missing values");
 			const size_t nBytes = std::get<1>(data);
 			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method1_nBits5: nElements is not equal to number of bytes" << std::endl;
 			const int nBlocks = static_cast<int>(nBytes >> 4); // divide by 16 to get the number of __m128i regs (blocks)
@@ -239,7 +239,7 @@ namespace hli {
 
 		void test_mm_hadd_epu8(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 		{
-			const bool MIS_VALUE = false;
+			const bool HAS_MISSING_VALUE = false;
 			const size_t nElements = nBlocks * 16;
 			auto data_r = _mm_malloc_m128i(nElements);
 			fillRand_epu8<5>(data_r);
@@ -257,13 +257,13 @@ namespace hli {
 				for (size_t i = 0; i < nExperiments; ++i)
 				{
 					timer::reset_and_start_timer();
-					const std::tuple<__m128i, __m128i> result_ref = hli::priv::_mm_hadd_epu8_method0<MIS_VALUE>(data, nElements);
+					const std::tuple<__m128i, __m128i> result_ref = hli::priv::_mm_hadd_epu8_method0<HAS_MISSING_VALUE>(data, nElements);
 					const unsigned int sum0 = std::get<0>(result_ref).m128i_u32[0];
 					min0 = std::min(min0, timer::get_elapsed_kcycles());
 
 					{
 						timer::reset_and_start_timer();
-						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<8, MIS_VALUE>(data, nElements);
+						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<8, HAS_MISSING_VALUE>(data, nElements);
 						min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -275,7 +275,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<7, MIS_VALUE>(data, nElements);
+						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<7, HAS_MISSING_VALUE>(data, nElements);
 						min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -287,7 +287,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<6, MIS_VALUE>(data, nElements);
+						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<6, HAS_MISSING_VALUE>(data, nElements);
 						min3 = std::min(min3, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -299,7 +299,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<5, MIS_VALUE>(data, nElements);
+						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<5, HAS_MISSING_VALUE>(data, nElements);
 						min4 = std::min(min4, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -311,7 +311,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method2<MIS_VALUE>(data, nElements);
+						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method2<HAS_MISSING_VALUE>(data, nElements);
 						min5 = std::min(min5, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -323,7 +323,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method3<MIS_VALUE>(data, nElements);
+						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method3<HAS_MISSING_VALUE>(data, nElements);
 						min6 = std::min(min6, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -354,12 +354,12 @@ namespace hli {
 	// dst[63:32] := tmp
 	// dst[95:64] := tmp
 	// dst[127:96] := tmp
-	template <int N_BITS, bool MIS_VALUE>
+	template <int N_BITS, bool HAS_MISSING_VALUE>
 	inline std::tuple<__m128i, __m128i> _mm_hadd_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data,
 		const size_t nElements)
 	{
-		return priv::_mm_hadd_epu8_method1<N_BITS, MIS_VALUE>(data, nElements);
-		//return priv::_mm_hadd_epu8_method2<N_BITS, MIS_VALUE>(data);
+		return priv::_mm_hadd_epu8_method1<N_BITS, HAS_MISSING_VALUE>(data, nElements);
+		//return priv::_mm_hadd_epu8_method2<N_BITS, HAS_MISSING_VALUE>(data);
 	}
 }

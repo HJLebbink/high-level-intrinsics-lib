@@ -21,15 +21,15 @@ namespace hli {
 	namespace priv {
 
 		// Variance population reference
-		template <bool MIS_VALUE>
+		template <bool HAS_MISSING_VALUE>
 		inline __m128d _mm_covar_epu8_ref(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data1);
-			const auto tup1 = _mm_hadd_epu8_method0<MIS_VALUE>(data1, nElements);
-			const auto tup2 = _mm_hadd_epu8_method0<MIS_VALUE>(data1, nElements);
+			const auto tup1 = _mm_hadd_epu8_method0<HAS_MISSING_VALUE>(data1, nElements);
+			const auto tup2 = _mm_hadd_epu8_method0<HAS_MISSING_VALUE>(data1, nElements);
 
 			const double average1 = static_cast<double>(std::get<0>(tup1).m128i_u32[0]) / std::get<1>(tup1).m128i_u32[0];
 			const double average2 = static_cast<double>(std::get<0>(tup2).m128i_u32[0]) / std::get<1>(tup2).m128i_u32[0];
@@ -39,7 +39,7 @@ namespace hli {
 
 			double sum = 0;
 
-			if (MIS_VALUE) {
+			if (HAS_MISSING_VALUE) {
 				size_t nTrueElements = 0;
 				for (size_t i = 0; i < nElements; ++i) {
 					const double d1 = ptr1[i];

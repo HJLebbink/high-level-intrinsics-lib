@@ -85,6 +85,8 @@ namespace hli_cli {
 		}
 	}
 
+#pragma region hadd
+
 #	pragma unmanaged
 	int _mm_hadd_epu8_unmanaged(
 		const std::tuple<const __int8 * const, const size_t>& data,
@@ -109,6 +111,9 @@ namespace hli_cli {
 		hli::_mm_free2(data_x);
 		return result;
 	}
+#pragma endregion
+
+#pragma region corr
 
 #	pragma unmanaged
 	double _mm_corr_epu8_unmanaged(
@@ -236,6 +241,10 @@ namespace hli_cli {
 		hli::_mm_free2(results_x);
 	}
 
+#pragma endregion
+
+#pragma region entropy
+
 #	pragma unmanaged
 	double _mm_entropy_epu8_unmanaged(
 		const std::tuple<const __int8 * const, const size_t>& data,
@@ -296,6 +305,10 @@ namespace hli_cli {
 		hli::_mm_free2(data2_x);
 		return result;
 	}
+
+#pragma endregion
+
+#pragma region Mutual Information
 
 #	pragma unmanaged
 	double _mm_mi_epu8_unmanaged(
@@ -405,6 +418,11 @@ namespace hli_cli {
 		hli::_mm_free2(results_x);
 	}
 
+
+#pragma endregion
+
+#pragma region Mutual Information & Correlation
+
 #	pragma unmanaged
 	void _mm_mi_corr_perm_epu8_unmanaged(
 		const std::tuple<const __int8 * const, const size_t>& data1,
@@ -443,7 +461,7 @@ namespace hli_cli {
 				nPermutations,
 				randInts2);
 
-			randInts[3] = randInts2.m128i_u32[3];
+		randInts[3] = randInts2.m128i_u32[3];
 		randInts[2] = randInts2.m128i_u32[2];
 		randInts[1] = randInts2.m128i_u32[1];
 		randInts[0] = randInts2.m128i_u32[0];
@@ -485,4 +503,6 @@ namespace hli_cli {
 		hli::_mm_free2(results_mi_x);
 		hli::_mm_free2(results_corr_x);
 	}
+
+#pragma endregion
 }

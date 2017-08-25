@@ -145,7 +145,7 @@
     <ClInclude Include="_mm_variance_epu8.ipp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="test.asm" />
+    <None Include="span.ipp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

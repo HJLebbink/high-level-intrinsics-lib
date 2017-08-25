@@ -19,6 +19,6 @@
     <ClInclude Include="toString.ipp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="test.asm" />
+    <None Include="span.ipp" />
   </ItemGroup>
 </Project>
