@@ -44,7 +44,7 @@ int main()
 	{
 		const auto start = std::chrono::system_clock::now();
 
-		const size_t nExperiments = 100000;
+		const size_t nExperiments = 1000;
 		//hli::test_endianess();
 
 		//hli::test::test_mm_hadd_epu8(10010, nExperiments, true);

@@ -12,9 +12,12 @@
 #include "../../CPP/hli-stl/_mm_hadd_epu8.ipp"
 #include "../../CPP/hli-stl/_mm_corr_pd.ipp"
 #include "../../CPP/hli-stl/_mm_corr_epu8.ipp"
+#include "../../CPP/hli-stl/_mm_corr_perm_epu8.ipp"
 
 #include "../../CPP/hli-stl/_mm_entropy_epu8.ipp"
 #include "../../CPP/hli-stl/_mm_mi_epu8.ipp"
+#include "../../CPP/hli-stl/_mm_mi_perm_epu8.ipp"
+#include "../../CPP/hli-stl/_mm_mi_corr_perm_epu8.ipp"
 
 
 using namespace System;

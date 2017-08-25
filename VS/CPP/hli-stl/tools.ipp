@@ -42,19 +42,11 @@ namespace hli {
 	template <size_t ALIGN>
 	inline size_t resizeNBytes(size_t nBytes)
 	{
-		if (ALIGN == 16) {
-			size_t result = nBytes + (((nBytes & 0b1111) == 0) ? 0 : (16 - (nBytes & 0b1111)));
-			//std::cout << "INFO: resizeNBytes: align=" << align << "; nBytes=" << nBytes << "; result=" << result << std::endl;
-			return result;
-		}
-		else if (ALIGN == 32) {
-			return nBytes + (((nBytes & 0b11111) == 0) ? 0 : (32 - (nBytes & 0b11111)));
-		}
-		else if (ALIGN == 64) {
-			return nBytes + (((nBytes & 0b111111) == 0) ? 0 : (64 - (nBytes & 0b111111)));
-		}
-		else {
-			return nBytes;
+		switch (nBytes) {
+		case 16: return nBytes + (((nBytes & 0b1111) == 0) ? 0 : (16 - (nBytes & 0b1111)));
+		case 32: return nBytes + (((nBytes & 0b11111) == 0) ? 0 : (32 - (nBytes & 0b11111)));
+		case 64: return nBytes + (((nBytes & 0b111111) == 0) ? 0 : (64 - (nBytes & 0b111111)));
+		default: return nBytes;
 		}
 	}
 
@@ -64,8 +56,7 @@ namespace hli {
 		case 16: return resizeNBytes<16>(nBytes);
 		case 32: return resizeNBytes<32>(nBytes);
 		case 64: return resizeNBytes<64>(nBytes);
-		default:
-			return nBytes;
+		default: return nBytes;
 		}
 	}
 

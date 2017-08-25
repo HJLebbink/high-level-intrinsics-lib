@@ -109,7 +109,7 @@ namespace hli {
 		{
 			auto data1 = _mm_malloc_m128i(16 * nBlocks);
 			auto data2 = _mm_malloc_m128i(16 * nBlocks);
-			const __m128i randSeeds = _mm_set_epi16(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand());
+			const __m128i randSeeds = _mm_set_epi16((short)rand(), (short)rand(), (short)rand(), (short)rand(), (short)rand(), (short)rand(), (short)rand(), (short)rand());
 			__m128i randInts1 = randSeeds;
 			__m128i randInts2 = randSeeds;
 

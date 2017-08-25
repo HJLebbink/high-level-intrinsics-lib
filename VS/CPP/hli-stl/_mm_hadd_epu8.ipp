@@ -35,7 +35,7 @@ namespace hli {
 			if (HAS_MISSING_VALUE) {
 				unsigned __int32 nTrueElements = 0;
 				for (size_t i = 0; i < nElements; ++i) {
-					__int8 d = ptr[i];
+					unsigned __int8 d = ptr[i];
 					if (d != 0xFF) {
 						nTrueElements++;
 						sum += d;

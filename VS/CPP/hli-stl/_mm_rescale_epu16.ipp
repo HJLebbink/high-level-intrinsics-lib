@@ -58,12 +58,12 @@ namespace hli {
 
 			if (showInfo) std::cout << "_mm_rescale_epu16_method1: increment=" << toString_i32(increment) << std::endl;
 
-			for (size_t block = 0; block < nBlocks; ++block) {
-				const __m128i data = ptr[block];
-				if (showInfo) std::cout << "_mm_rescale_epu16_method1: input data=" << toString_u16(data) << std::endl;
+			for (size_t i = 0; i < nBlocks; ++i) {
+				const __m128i block = ptr[i];
+				if (showInfo) std::cout << "_mm_rescale_epu16_method1: input data=" << toString_u16(block) << std::endl;
 
-				const __m128i numbers1 = _mm_cvtepu16_epi32(data);
-				const __m128i numbers2 = _mm_cvtepu16_epi32(_mm_swap_64(data));
+				const __m128i numbers1 = _mm_cvtepu16_epi32(block);
+				const __m128i numbers2 = _mm_cvtepu16_epi32(_mm_swap_64(block));
 				if (showInfo) std::cout << "_mm_rescale_epu16_method1: input numbers1=" << toString_u32(numbers1) << "; input numbers2=" << toString_u32(numbers2) << std::endl;
 
 				if (showInfo) std::cout << "_mm_rescale_epu16_method1 :max " << toString_i32(m) << std::endl;
@@ -86,7 +86,7 @@ namespace hli {
 				if (showInfo) std::cout << "_mm_rescale_epu16_method1: output short " << toString_u16(saturated) << std::endl;
 
 				if (showInfo) std::cout << std::endl;
-				ptr[block] = saturated;
+				ptr[i] = saturated;
 			}
 		}
 
@@ -131,7 +131,7 @@ namespace hli {
 			auto data1 = _mm_malloc_m128i(16 * nBlocks);
 			auto data2 = _mm_malloc_m128i(16 * nBlocks);
 
-			const __m128i seed = _mm_set_epi16(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand());
+			const __m128i seed = _mm_set_epi16((short)rand(), (short)rand(), (short)rand(), (short)rand(), (short)rand(), (short)rand(), (short)rand(), (short)rand());
 			__m128i randInt = seed;
 
 			hli::_mm_lfsr32_epu32(data_source_r, randInt);
