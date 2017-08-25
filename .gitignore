@@ -36,3 +36,6 @@
 **/Release/
 .dropbox.attr
 VS/.vs/*
+/VS/CSHARP/hli-cli-unittest/obj/hli-cli-unittest.csproj.nuget.cache
+**/*.cache
+**/TemporaryGeneratedFile_*.cs
