@@ -39,3 +39,7 @@ VS/.vs/*
 /VS/CSHARP/hli-cli-unittest/obj/hli-cli-unittest.csproj.nuget.cache
 **/*.cache
 **/TemporaryGeneratedFile_*.cs
+/VS/CPP/hli-stl-main/x64/*
+/VS/x64/*
+/VS/CSHARP/hli-cli-unittest/obj/*
+/VS/CSHARP/hli-cli-unittest/obj/*
