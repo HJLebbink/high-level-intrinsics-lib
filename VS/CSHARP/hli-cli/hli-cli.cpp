@@ -12,12 +12,12 @@
 #include "../../CPP/hli-stl/_mm_hadd_epu8.ipp"
 #include "../../CPP/hli-stl/_mm_corr_pd.ipp"
 #include "../../CPP/hli-stl/_mm_corr_epu8.ipp"
-#include "../../CPP/hli-stl/_mm_corr_perm_epu8.ipp"
+#include "../../CPP/hli-stl/_mm_corr_epu8_perm.ipp"
 
 #include "../../CPP/hli-stl/_mm_entropy_epu8.ipp"
 #include "../../CPP/hli-stl/_mm_mi_epu8.ipp"
-#include "../../CPP/hli-stl/_mm_mi_perm_epu8.ipp"
-#include "../../CPP/hli-stl/_mm_mi_corr_perm_epu8.ipp"
+#include "../../CPP/hli-stl/_mm_mi_epu8_perm.ipp"
+#include "../../CPP/hli-stl/_mm_mi_corr_epu8_perm.ipp"
 
 
 using namespace System;
@@ -191,7 +191,7 @@ namespace hli_cli {
 		__m128i randInts2 = _mm_set_epi32(randInts[3], randInts[2], randInts[1], randInts[0]);
 
 		if (has_missing_values) 
-			hli::_mm_corr_perm_epu8<8, true>(
+			hli::_mm_corr_epu8_perm<8, true>(
 				hli::_mm_cast_m128i(data1),
 				hli::_mm_cast_m128i(data2),
 				nElements,
@@ -199,7 +199,7 @@ namespace hli_cli {
 				nPermutations,
 				randInts2);
 		else
-			hli::_mm_corr_perm_epu8<8, false>(
+			hli::_mm_corr_epu8_perm<8, false>(
 				hli::_mm_cast_m128i(data1),
 				hli::_mm_cast_m128i(data2),
 				nElements,
@@ -362,7 +362,7 @@ namespace hli_cli {
 		__m128i randInts2 = _mm_set_epi32(randInts[3], randInts[2], randInts[1], randInts[0]);
 
 		if (has_missing_values)
-			hli::_mm_mi_perm_epu8<true>(
+			hli::_mm_mi_epu8_perm<true>(
 				hli::_mm_cast_m128i(data1),
 				nBits1,
 				hli::_mm_cast_m128i(data2),
@@ -372,7 +372,7 @@ namespace hli_cli {
 				nPermutations,
 				randInts2);
 		else
-			hli::_mm_mi_perm_epu8<false>(
+			hli::_mm_mi_epu8_perm<false>(
 				hli::_mm_cast_m128i(data1),
 				nBits1,
 				hli::_mm_cast_m128i(data2),
@@ -442,7 +442,7 @@ namespace hli_cli {
 		__m128i randInts2 = _mm_set_epi32(randInts[3], randInts[2], randInts[1], randInts[0]);
 
 		if (has_missing_values)
-			hli::_mm_mi_corr_perm_epu8<true>(
+			hli::_mm_mi_corr_epu8_perm<true>(
 				hli::_mm_cast_m128i(data1),
 				nBits1,
 				hli::_mm_cast_m128i(data2),
@@ -453,7 +453,7 @@ namespace hli_cli {
 				nPermutations,
 				randInts2);
 		else
-			hli::_mm_mi_corr_perm_epu8<false>(
+			hli::_mm_mi_corr_epu8_perm<false>(
 				hli::_mm_cast_m128i(data1),
 				nBits1,
 				hli::_mm_cast_m128i(data2),

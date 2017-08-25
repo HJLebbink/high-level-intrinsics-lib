@@ -177,7 +177,7 @@ namespace hli {
 
 	namespace test {
 
-		void test_mm_corr_perm_epu8(
+		void test_mm_corr_epu8_perm(
 			const size_t nBlocks,
 			const size_t nPermutations,
 			const size_t nExperiments,
@@ -206,7 +206,7 @@ namespace hli {
 			auto results2 = _mm_malloc_m128d(nBytesResults);
 			auto results3 = _mm_malloc_m128d(nBytesResults);
 
-			const __m128i seed = _mm_set_epi16(rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand());
+			const __m128i seed = _mm_set_epi16((short)rand(), (short)rand(), (short)rand(), (short)rand(), (short)rand(), (short)rand(), (short)rand(), (short)rand());
 			__m128i randInt0 = seed;
 			__m128i randInt1 = seed;
 			__m128i randInt2 = seed;
@@ -240,10 +240,10 @@ namespace hli {
 								return;
 							}
 							if (i == 0) {
-								for (size_t i = 0; i < (nBytesResults >> 3); ++i) {
-									double diff = std::abs(getDouble(results0, i) - getDouble(results1, i));
+								for (size_t j = 0; j < (nBytesResults >> 3); ++j) {
+									double diff = std::abs(getDouble(results0, j) - getDouble(results1, j));
 									if (diff > delta) {
-										std::cout << "WARNING: _mm_corr_perm_epu8_method1<6>: i=" << i << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, i) << "; result1=" << getDouble(results1, i) << std::endl;
+										std::cout << "WARNING: _mm_corr_perm_epu8_method1<6>: j=" << j << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, j) << "; result1=" << getDouble(results1, j) << std::endl;
 										return;
 									}
 								}
@@ -261,10 +261,10 @@ namespace hli {
 								return;
 							}
 							if (i == 0) {
-								for (size_t i = 0; i < (nBytesResults >> 3); ++i) {
-									double diff = std::abs(getDouble(results0, i) - getDouble(results2, i));
+								for (size_t j = 0; j < (nBytesResults >> 3); ++j) {
+									double diff = std::abs(getDouble(results0, j) - getDouble(results2, j));
 									if (diff > delta) {
-										std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: i=" << i << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, i) << "; result2=" << getDouble(results2, i) << std::endl;
+										std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: i=" << j << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, j) << "; result2=" << getDouble(results2, j) << std::endl;
 										return;
 									}
 								}
@@ -282,10 +282,10 @@ namespace hli {
 								return;
 							}
 							if (i == 0) {
-								for (size_t i = 0; i < (nBytesResults >> 3); ++i) {
-									double diff = std::abs(getDouble(results0, i) - getDouble(results3, i));
+								for (size_t j = 0; j < (nBytesResults >> 3); ++j) {
+									double diff = std::abs(getDouble(results0, j) - getDouble(results3, j));
 									if (diff > delta) {
-										std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: i=" << i << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, i) << "; result3=" << getDouble(results3, i) << std::endl;
+										std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: i=" << j << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, j) << "; result3=" << getDouble(results3, j) << std::endl;
 										return;
 									}
 								}
@@ -308,7 +308,7 @@ namespace hli {
 	}
 
 	template <int N_BITS, bool HAS_MISSING_VALUE>
-	inline void _mm_corr_perm_epu8(
+	inline void _mm_corr_epu8_perm(
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2,
 		const size_t nElements,

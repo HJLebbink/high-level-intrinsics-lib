@@ -125,7 +125,7 @@ namespace hli {
 	}
 
 	template <int N_BITS1, int N_BITS2, bool HAS_MISSING_VALUE>
-	inline void _mm_mi_perm_epu8(
+	inline void _mm_mi_epu8_perm(
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2,
 		const size_t nElements,
@@ -137,7 +137,7 @@ namespace hli {
 	}
 
 	template <bool HAS_MISSING_VALUE>
-	inline void _mm_mi_perm_epu8(
+	inline void _mm_mi_epu8_perm(
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const int nBits1,
 		const std::tuple<const __m128i * const, const size_t>& data2,
@@ -151,64 +151,64 @@ namespace hli {
 		case 1:
 			switch (nBits2)
 			{
-			case 1: _mm_mi_perm_epu8<1, 1, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 2: _mm_mi_perm_epu8<1, 2, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 3: _mm_mi_perm_epu8<1, 3, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 4: _mm_mi_perm_epu8<1, 4, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 5: _mm_mi_perm_epu8<1, 5, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 6: _mm_mi_perm_epu8<1, 6, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 7: _mm_mi_perm_epu8<1, 7, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 1: _mm_mi_epu8_perm<1, 1, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 2: _mm_mi_epu8_perm<1, 2, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 3: _mm_mi_epu8_perm<1, 3, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 4: _mm_mi_epu8_perm<1, 4, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 5: _mm_mi_epu8_perm<1, 5, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 6: _mm_mi_epu8_perm<1, 6, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 7: _mm_mi_epu8_perm<1, 7, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
 			default: return;
 			}
 		case 2:
 			switch (nBits2)
 			{
-			case 1: _mm_mi_perm_epu8<2, 1, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 2: _mm_mi_perm_epu8<2, 2, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 3: _mm_mi_perm_epu8<2, 3, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 4: _mm_mi_perm_epu8<2, 4, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 5: _mm_mi_perm_epu8<2, 5, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 6: _mm_mi_perm_epu8<2, 6, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 1: _mm_mi_epu8_perm<2, 1, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 2: _mm_mi_epu8_perm<2, 2, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 3: _mm_mi_epu8_perm<2, 3, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 4: _mm_mi_epu8_perm<2, 4, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 5: _mm_mi_epu8_perm<2, 5, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 6: _mm_mi_epu8_perm<2, 6, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
 			default: return;
 			}
 		case 3:
 			switch (nBits2)
 			{
-			case 1: _mm_mi_perm_epu8<3, 1, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 2: _mm_mi_perm_epu8<3, 2, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 3: _mm_mi_perm_epu8<3, 3, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 4: _mm_mi_perm_epu8<3, 4, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 5: _mm_mi_perm_epu8<3, 5, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 1: _mm_mi_epu8_perm<3, 1, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 2: _mm_mi_epu8_perm<3, 2, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 3: _mm_mi_epu8_perm<3, 3, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 4: _mm_mi_epu8_perm<3, 4, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 5: _mm_mi_epu8_perm<3, 5, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
 			default: return;
 			}
 		case 4:
 			switch (nBits2)
 			{
-			case 1: _mm_mi_perm_epu8<4, 1, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 2: _mm_mi_perm_epu8<4, 2, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 3: _mm_mi_perm_epu8<4, 3, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 4: _mm_mi_perm_epu8<4, 4, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 1: _mm_mi_epu8_perm<4, 1, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 2: _mm_mi_epu8_perm<4, 2, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 3: _mm_mi_epu8_perm<4, 3, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 4: _mm_mi_epu8_perm<4, 4, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
 			default: return;
 			}
 		case 5:
 			switch (nBits2)
 			{
-			case 1: _mm_mi_perm_epu8<5, 1, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 2: _mm_mi_perm_epu8<5, 2, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 3: _mm_mi_perm_epu8<5, 3, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 1: _mm_mi_epu8_perm<5, 1, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 2: _mm_mi_epu8_perm<5, 2, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 3: _mm_mi_epu8_perm<5, 3, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
 			default: return;
 			}
 		case 6:
 			switch (nBits2)
 			{
-			case 1: _mm_mi_perm_epu8<6, 1, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 2: _mm_mi_perm_epu8<6, 2, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 1: _mm_mi_epu8_perm<6, 1, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 2: _mm_mi_epu8_perm<6, 2, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
 			default: return;
 			}
 		case 7:
 			switch (nBits2)
 			{
-			case 1: _mm_mi_perm_epu8<7, 1, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
+			case 1: _mm_mi_epu8_perm<7, 1, HAS_MISSING_VALUE>(data1, data2, nElements, results, nPermutations, randInts); return;
 			default: return;
 			}
 		default: return;

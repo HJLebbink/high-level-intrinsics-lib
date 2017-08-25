@@ -9,13 +9,19 @@
 #endif
 
 #include "..\hli-stl\_mm_corr_epu8.ipp"
+#include "..\hli-stl\_mm_corr_epu8_perm.ipp"
 #include "..\hli-stl\_mm_corr_pd.ipp"
 #include "..\hli-stl\_mm_covar_epu8.ipp"
 #include "..\hli-stl\_mm_entropy_epu8.ipp"
 #include "..\hli-stl\_mm_hadd_epi64.ipp"
 #include "..\hli-stl\_mm_hadd_epu8.ipp"
 #include "..\hli-stl\_mm_mi_epu8.ipp"
+#include "..\hli-stl\_mm_mi_epu8_perm.ipp"
+#include "..\hli-stl\_mm_mi_corr_epu8_perm.ipp"
 #include "..\hli-stl\_mm_permute_array.ipp"
 #include "..\hli-stl\_mm_rand_si128.ipp"
 #include "..\hli-stl\_mm_rescale_epu16.ipp"
 #include "..\hli-stl\_mm_variance_epu8.ipp"
+
+
+
