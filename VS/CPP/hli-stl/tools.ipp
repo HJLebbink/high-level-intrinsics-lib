@@ -5,6 +5,11 @@
 
 namespace hli {
 
+	using U8 = unsigned __int8;
+
+
+
+
 	// shuffle: NO shuffle = _MM_SHUFFLE_EPI32_INT(3, 2, 1, 0)
 	//constexpr const int _MM_SHUFFLE_EPI32_INT(int d, int c, int b, int a)
 	//{

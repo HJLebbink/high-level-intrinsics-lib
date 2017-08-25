@@ -24,7 +24,7 @@ namespace hli {
 
 	namespace priv {
 
-		template <bool HAS_MISSING_VALUE>
+		template <bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_ref(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
@@ -34,15 +34,15 @@ namespace hli {
 			//const double std_dev_d2 = sqrt(var_pop_ref(data1, nElements));
 			//return covar_pop_ref(data1, data2, nElements) / (std_dev_d1 * std_dev_d2);
 
-			const __m128d var1 = _mm_variance_epu8_method0<HAS_MISSING_VALUE>(data1, nElements);
-			const __m128d var2 = _mm_variance_epu8_method0<HAS_MISSING_VALUE>(data2, nElements);
-			const __m128d covar = _mm_covar_epu8_ref<HAS_MISSING_VALUE>(data1, data2, nElements);
+			const __m128d var1 = _mm_variance_epu8_method0<HAS_MV, MV>(data1, nElements);
+			const __m128d var2 = _mm_variance_epu8_method0<HAS_MV, MV>(data2, nElements);
+			const __m128d covar = _mm_covar_epu8_ref<HAS_MV, MV>(data1, data2, nElements);
 			const __m128d corr = _mm_div_pd(covar, _mm_mul_pd(_mm_sqrt_pd(var1), _mm_sqrt_pd(var2)));
 			//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_ref: var1=" << var1.m128d_f64[0] << "; var2=" << var2.m128d_f64[0] << "; covar=" << covar.m128d_f64[0] << "; corr=" << corr.m128d_f64[0] << std::endl;
 			return corr;
 		}
 
-		template <int N_BITS, bool HAS_MISSING_VALUE>
+		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method0(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
@@ -79,20 +79,20 @@ namespace hli {
 			return _mm_set1_pd(corr);
 		}
 
-		template <int N_BITS, bool HAS_MISSING_VALUE>
+		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method0(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
-			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MISSING_VALUE>(data1, nElements);
-			const auto tup2 = _mm_hadd_epu8<N_BITS, HAS_MISSING_VALUE>(data2, nElements);
+			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data1, nElements);
+			const auto tup2 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data2, nElements);
 			const __m128d average1 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup1)), _mm_cvtepi32_pd(std::get<1>(tup1)));
 			const __m128d average2 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup2)), _mm_cvtepi32_pd(std::get<1>(tup2)));
-			return _mm_corr_epu8_method0<N_BITS, HAS_MISSING_VALUE>(data1, data2, nElements, average1, average2);
+			return _mm_corr_epu8_method0<N_BITS, HAS_MV, MV>(data1, data2, nElements, average1, average2);
 		}
 
-		template <int N_BITS, bool HAS_MISSING_VALUE>
+		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method1(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
@@ -148,20 +148,20 @@ namespace hli {
 			return corr;
 		}
 
-		template <int N_BITS, bool HAS_MISSING_VALUE>
+		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method1(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
-			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MISSING_VALUE>(data1, nElements);
-			const auto tup2 = _mm_hadd_epu8<N_BITS, HAS_MISSING_VALUE>(data2, nElements);
+			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data1, nElements);
+			const auto tup2 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data2, nElements);
 			const __m128d average1 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup1)), _mm_cvtepi32_pd(std::get<1>(tup1)));
 			const __m128d average2 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup2)), _mm_cvtepi32_pd(std::get<1>(tup2)));
-			return _mm_corr_epu8_method1<N_BITS, HAS_MISSING_VALUE>(data1, data2, nElements, average1, average2);
+			return _mm_corr_epu8_method1<N_BITS, HAS_MV, MV>(data1, data2, nElements, average1, average2);
 		}
 
-		template <bool HAS_MISSING_VALUE>
+		template <bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method2(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
@@ -169,28 +169,28 @@ namespace hli {
 			const __m128d average1,
 			const __m128d average2)
 		{
-			const __m128d var1 = _mm_variance_epu8(data1, average1);
-			const __m128d var2 = _mm_variance_epu8(data2, average2);
-			const __m128d covar = _mm_covar_epu8(data1, data2, nElements, average1, average2);
+			const __m128d var1 = _mm_variance_epu8<HAS_MV, MV>(data1, average1);
+			const __m128d var2 = _mm_variance_epu8<HAS_MV, MV>(data2, average2);
+			const __m128d covar = _mm_covar_epu8<HAS_MV, MV>(data1, data2, nElements, average1, average2);
 			const __m128d corr = _mm_div_pd(covar, _mm_sqrt_pd(_mm_mul_pd(var1, var2)));
 			//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_method2: var1=" << var1.m128d_f64[0] << "; var2=" << var2.m128d_f64[0] << "; covar=" << covar.m128d_f64[0] << "; corr=" << corr.m128d_f64[0] << std::endl;
 			return corr;
 		}
 
-		template <int N_BITS, bool HAS_MISSING_VALUE>
+		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method2(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
-			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MISSING_VALUE>(data1, nElements);
-			const auto tup2 = _mm_hadd_epu8<N_BITS, HAS_MISSING_VALUE>(data2, nElements);
+			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data1, nElements);
+			const auto tup2 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data2, nElements);
 			const __m128d average1 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup1)), _mm_cvtepi32_pd(std::get<1>(tup1)));
 			const __m128d average2 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup2)), _mm_cvtepi32_pd(std::get<1>(tup2)));
-			return _mm_corr_epu8_method2<HAS_MISSING_VALUE>(data1, data2, nElements, average1, average2);
+			return _mm_corr_epu8_method2<HAS_MV, MV>(data1, data2, nElements, average1, average2);
 		}
 
-		template <bool HAS_MISSING_VALUE>
+		template <bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method3(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
@@ -212,16 +212,48 @@ namespace hli {
 			__int32 s1 = 0;
 			__int32 s2 = 0;
 
-			for (size_t i = 0; i < nElements; ++i)
+			if (HAS_MV)
 			{
-				const unsigned __int8 d1 = ptr1[i];
-				const unsigned __int8 d2 = ptr2[i];
+				size_t nElements_No_MV = 0;
 
-				s12 += d1 * d2;
-				s11 += d1 * d1;
-				s22 += d2 * d2;
-				s1 += d1;
-				s2 += d2;
+				for (size_t i = 0; i < nElements; ++i)
+				{
+					const U8 d1 = ptr1[i];
+					const U8 d2 = ptr2[i];
+					if ((d1 != MV) && (d2 != MV)) {
+
+						s12 += d1 * d2;
+						s11 += d1 * d1;
+						s22 += d2 * d2;
+						s1 += d1;
+						s2 += d2;
+
+						nElements_No_MV++;
+					}
+				}
+
+				const double s12d = static_cast<double>(s12);
+				const double s11d = static_cast<double>(s11);
+				const double s22d = static_cast<double>(s22);
+				const double s1d = static_cast<double>(s1);
+				const double s2d = static_cast<double>(s2);
+
+				double corr = ((nElements_No_MV * s12d) - (s1d*s2d)) / (sqrt((nElements_No_MV*s11d) - (s1d*s1d)) * sqrt((nElements_No_MV * s22d) - (s2d*s2d)));
+				return _mm_set1_pd(corr);
+			}
+			else 
+			{
+				for (size_t i = 0; i < nElements; ++i)
+				{
+					const U8 d1 = ptr1[i];
+					const U8 d2 = ptr2[i];
+
+					s12 += d1 * d2;
+					s11 += d1 * d1;
+					s22 += d2 * d2;
+					s1 += d1;
+					s2 += d2;
+				}
 			}
 
 			const double s12d = static_cast<double>(s12);
@@ -234,13 +266,13 @@ namespace hli {
 			return _mm_set1_pd(corr);
 		}
 
-		template <int N_BITS, bool HAS_MISSING_VALUE>
+		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline __m128d calc_variance(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const size_t nElements,
 			const std::tuple<__m128d * const, const size_t>& data_double_out)
 		{
-			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MISSING_VALUE>(data1, nElements);
+			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data1, nElements);
 			const __m128d nTrueElements = _mm_cvtepi32_pd(std::get<1>(tup1));
 			const __m128d average = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup1)), nTrueElements);
 
@@ -303,7 +335,7 @@ namespace hli {
 			return _mm_div_pd(_mm_hadd_pd(var, var), nTrueElements);
 		}
 
-		template <int N_BITS, bool HAS_MISSING_VALUE>
+		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method4(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
@@ -316,10 +348,10 @@ namespace hli {
 			auto data1_d = _mm_malloc_m128d(nBlocksDouble * 16);
 			auto data2_d = _mm_malloc_m128d(nBlocksDouble * 16);
 
-			const __m128d var1 = calc_variance<N_BITS, HAS_MISSING_VALUE>(data1, nElements, data1_d);
-			const __m128d var2 = calc_variance<N_BITS, HAS_MISSING_VALUE>(data2, nElements, data2_d);
+			const __m128d var1 = calc_variance<N_BITS, HAS_MV, MV>(data1, nElements, data1_d);
+			const __m128d var2 = calc_variance<N_BITS, HAS_MV, MV>(data2, nElements, data2_d);
 			const __m128d var1_2 = _mm_sqrt_pd(_mm_mul_pd(var1, var2));
-			const __m128d corr = _mm_corr_dp_method3<HAS_MISSING_VALUE>(data1_d, data2_d, nElements, var1_2);
+			const __m128d corr = _mm_corr_dp_method3<HAS_MV>(data1_d, data2_d, nElements, var1_2);
 
 			_mm_free2(data1_d);
 			_mm_free2(data2_d);
@@ -336,7 +368,8 @@ namespace hli {
 			const bool doTests)
 		{
 			const double delta = 0.0000001;
-			const bool HAS_MISSING_VALUE = false;
+			const bool HAS_MV = false;
+			const U8 MV = 0xFF;
 
 			const size_t nElements = nBlocks * 16;
 			auto data1_r = _mm_malloc_m128i(nElements);
@@ -379,12 +412,12 @@ namespace hli {
 			for (size_t i = 0; i < nExperiments; ++i)
 			{
 				timer::reset_and_start_timer();
-				result_ref = hli::priv::_mm_corr_epu8_ref<HAS_MISSING_VALUE>(data1, data2, nElements);
+				result_ref = hli::priv::_mm_corr_epu8_ref<HAS_MV, MV>(data1, data2, nElements);
 				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 				{
 					timer::reset_and_start_timer();
-					result1 = hli::priv::_mm_corr_epu8_method0<8, HAS_MISSING_VALUE>(data1, data2, nElements);
+					result1 = hli::priv::_mm_corr_epu8_method0<8, HAS_MV, MV>(data1, data2, nElements);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -396,7 +429,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					result2 = hli::priv::_mm_corr_epu8_method0<6, HAS_MISSING_VALUE>(data1, data2, nElements);
+					result2 = hli::priv::_mm_corr_epu8_method0<6, HAS_MV, MV>(data1, data2, nElements);
 					min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -409,7 +442,7 @@ namespace hli {
 
 				{
 					timer::reset_and_start_timer();
-					result3 = hli::priv::_mm_corr_epu8_method1<8, HAS_MISSING_VALUE>(data1, data2, nElements);
+					result3 = hli::priv::_mm_corr_epu8_method1<8, HAS_MV, MV>(data1, data2, nElements);
 					min3 = std::min(min3, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -421,7 +454,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					result4 = hli::priv::_mm_corr_epu8_method1<6, HAS_MISSING_VALUE>(data1, data2, nElements);
+					result4 = hli::priv::_mm_corr_epu8_method1<6, HAS_MV, MV>(data1, data2, nElements);
 					min4 = std::min(min4, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -434,7 +467,7 @@ namespace hli {
 
 				{
 					timer::reset_and_start_timer();
-					result5 = hli::priv::_mm_corr_epu8_method2<8, HAS_MISSING_VALUE>(data1, data2, nElements);
+					result5 = hli::priv::_mm_corr_epu8_method2<8, HAS_MV, MV>(data1, data2, nElements);
 					min5 = std::min(min5, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -446,7 +479,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					result6 = hli::priv::_mm_corr_epu8_method0<6, HAS_MISSING_VALUE>(data1, data2, nElements);
+					result6 = hli::priv::_mm_corr_epu8_method0<6, HAS_MV, MV>(data1, data2, nElements);
 					min6 = std::min(min6, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -458,7 +491,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					result7 = hli::priv::_mm_corr_epu8_method3<HAS_MISSING_VALUE>(data1, data2, nElements);
+					result7 = hli::priv::_mm_corr_epu8_method3<HAS_MV, MV>(data1, data2, nElements);
 					min7 = std::min(min7, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -470,7 +503,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					result8 = hli::priv::_mm_corr_epu8_method4<8, HAS_MISSING_VALUE>(data1, data2, nElements);
+					result8 = hli::priv::_mm_corr_epu8_method4<8, HAS_MV, MV>(data1, data2, nElements);
 					min8 = std::min(min8, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -482,7 +515,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					result9 = hli::priv::_mm_corr_pd_method0<HAS_MISSING_VALUE>(data1_D, data2_D, nElements);
+					result9 = hli::priv::_mm_corr_pd_method0<HAS_MV, MV>(data1_D, data2_D, nElements);
 					min9 = std::min(min9, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -510,14 +543,14 @@ namespace hli {
 
 	}
 
-	template <int N_BITS, bool HAS_MISSING_VALUE>
+	template <int N_BITS, bool HAS_MV, U8 MV>
 	inline __m128d _mm_corr_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2,
 		const size_t nElements)
 	{
-//		return priv::_mm_corr_epu8_method2<N_BITS, HAS_MISSING_VALUE>(data1, data2, nElements);
-		return priv::_mm_corr_epu8_method3<HAS_MISSING_VALUE>(data1, data2, nElements);
+//		return priv::_mm_corr_epu8_method2<N_BITS, HAS_MV, MV>(data1, data2, nElements);
+		return priv::_mm_corr_epu8_method3<HAS_MV, MV>(data1, data2, nElements);
 	}
 
 }

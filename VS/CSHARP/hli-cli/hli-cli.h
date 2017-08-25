@@ -14,51 +14,51 @@ namespace hli_cli {
 	public:
 		static int _mm_hadd_epu8(
 			List<Byte>^ data,
-			bool has_missing_values
+			bool HAS_MVs
 		);
 
 		static double _mm_corr_epu8(
 			List<Byte>^ data1, 
 			List<Byte>^ data2,
-			bool has_missing_values);
+			bool HAS_MVs);
 			
 		static double _mm_corr_pd(
 			List<Double>^ data1, 
 			List<Double>^ data2,
-			bool has_missing_values);
+			bool HAS_MVs);
 
 		static void _mm_corr_perm_epu8(
 			List<Byte>^ data1,
 			List<Byte>^ data2,
-			bool has_missing_values,
+			bool HAS_MVs,
 			List<Double>^ results,
 			array<UInt32>^ randInts);
 
 		static double _mm_entropy_epu8(
 			List<Byte>^ data,
 			int nBits,
-			bool has_missing_values);
+			bool HAS_MVs);
 
 		static double _mm_entropy_epu8(
 			List<Byte>^ data1,
 			int nBits1,
 			List<Byte>^ data2,
 			int nBits2,
-			bool has_missing_values);
+			bool HAS_MVs);
 
 		static double _mm_mi_epu8(
 			List<Byte>^ data1,
 			int nBits1,
 			List<Byte>^ data2,
 			int nBits2,
-			bool has_missing_values);
+			bool HAS_MVs);
 
 		static void _mm_mi_perm_epu8(
 			List<Byte>^ data1,
 			int nBits1,
 			List<Byte>^ data2,
 			int nBits2,
-			bool has_missing_values,
+			bool HAS_MVs,
 			List<Double>^ results,
 			array<UInt32>^ randInts);
 
@@ -67,7 +67,7 @@ namespace hli_cli {
 			int nBits1,
 			List<Byte>^ data2,
 			int nBits2,
-			bool has_missing_values,
+			bool HAS_MVs,
 			List<Double>^ results_mi,
 			List<Double>^ results_corr,
 			array<UInt32>^ randInts);

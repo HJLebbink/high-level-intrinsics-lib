@@ -94,9 +94,9 @@ namespace hli_cli {
 	int _mm_hadd_epu8_unmanaged(
 		const std::tuple<const __int8 * const, const size_t>& data,
 		const size_t nElements,
-		bool has_missing_values)
+		bool HAS_MVs)
 	{
-		if (has_missing_values)
+		if (HAS_MVs)
 			return _mm_cvtsi128_si32(std::get<0>(hli::_mm_hadd_epu8<8, true>(hli::_mm_cast_m128i(data), nElements)));
 		else 
 			return _mm_cvtsi128_si32(std::get<0>(hli::_mm_hadd_epu8<8, false>(hli::_mm_cast_m128i(data), nElements)));
@@ -105,12 +105,12 @@ namespace hli_cli {
 #	pragma managed
 	int HliCli::_mm_hadd_epu8(
 		List<Byte>^ data,
-		bool has_missing_values)
+		bool HAS_MVs)
 	{
 		int nElement = data->Count;
 		auto data_x = hli::_mm_malloc_xmm(nElement);
 		priv::copy_data(data, data_x);
-		int result = _mm_hadd_epu8_unmanaged(data_x, nElement, has_missing_values);
+		int result = _mm_hadd_epu8_unmanaged(data_x, nElement, HAS_MVs);
 		hli::_mm_free2(data_x);
 		return result;
 	}
@@ -123,26 +123,26 @@ namespace hli_cli {
 		const std::tuple<const __int8 * const, const size_t>& data1,
 		const std::tuple<const __int8 * const, const size_t>& data2,
 		const size_t nElements,
-		const bool has_missing_values)
+		const bool HAS_MVs)
 	{
-		if (has_missing_values) 
-			return _mm_cvtsd_f64(hli::_mm_corr_epu8<8, true>(hli::_mm_cast_m128i(data1), hli::_mm_cast_m128i(data2), nElements));
+		if (HAS_MVs) 
+			return _mm_cvtsd_f64(hli::_mm_corr_epu8<8, true, 0xFF>(hli::_mm_cast_m128i(data1), hli::_mm_cast_m128i(data2), nElements));
 		else 
-			return _mm_cvtsd_f64(hli::_mm_corr_epu8<8, false>(hli::_mm_cast_m128i(data1), hli::_mm_cast_m128i(data2), nElements));
+			return _mm_cvtsd_f64(hli::_mm_corr_epu8<8, false, 0xFF>(hli::_mm_cast_m128i(data1), hli::_mm_cast_m128i(data2), nElements));
 	}
 
 #	pragma managed
 	double HliCli::_mm_corr_epu8(
 		List<Byte>^ data1, 
 		List<Byte>^ data2,
-		bool has_missing_values)
+		bool HAS_MVs)
 	{
 		int nElements = data1->Count;
 		auto data1_x = hli::_mm_malloc_xmm(nElements);
 		auto data2_x = hli::_mm_malloc_xmm(nElements);
 		priv::copy_data(data1, data1_x);
 		priv::copy_data(data2, data2_x);
-		double result = _mm_corr_epu8_unmanaged(data1_x, data2_x, nElements, has_missing_values);
+		double result = _mm_corr_epu8_unmanaged(data1_x, data2_x, nElements, HAS_MVs);
 		hli::_mm_free2(data1_x);
 		hli::_mm_free2(data2_x);
 		return result;
@@ -153,9 +153,9 @@ namespace hli_cli {
 		const std::tuple<const __int8 * const, const size_t>& data1,
 		const std::tuple<const __int8 * const, const size_t>& data2,
 		const size_t nElements,
-		bool has_missing_values)
+		bool HAS_MVs)
 	{
-		if (has_missing_values)
+		if (HAS_MVs)
 			return _mm_cvtsd_f64(hli::_mm_corr_pd<true>(hli::_mm_cast_m128d(data1), hli::_mm_cast_m128d(data2), nElements));
 		else 
 			return _mm_cvtsd_f64(hli::_mm_corr_pd<false>(hli::_mm_cast_m128d(data1), hli::_mm_cast_m128d(data2), nElements));
@@ -165,14 +165,14 @@ namespace hli_cli {
 	double HliCli::_mm_corr_pd(
 		List<Double>^ data1,
 		List<Double>^ data2,
-		bool has_missing_values)
+		bool HAS_MVs)
 	{
 		int nElements = data1->Count;
 		auto data1_x = hli::_mm_malloc_xmm(nElements * 8);
 		auto data2_x = hli::_mm_malloc_xmm(nElements * 8);
 		priv::copy_data(data1, data1_x);
 		priv::copy_data(data2, data2_x);
-		double result = _mm_corr_pd_unmanaged(data1_x, data2_x, nElements, has_missing_values);
+		double result = _mm_corr_pd_unmanaged(data1_x, data2_x, nElements, HAS_MVs);
 		hli::_mm_free2(data1_x);
 		hli::_mm_free2(data2_x);
 		return result;
@@ -183,14 +183,14 @@ namespace hli_cli {
 		const std::tuple<const __int8 * const, const size_t>& data1,
 		const std::tuple<const __int8 * const, const size_t>& data2,
 		const size_t nElements,
-		const bool has_missing_values,
+		const bool HAS_MVs,
 		const std::tuple<__int8 * const, const size_t>& results,
 		const size_t nPermutations,
 		std::array<UInt32, 4>& randInts)
 	{
 		__m128i randInts2 = _mm_set_epi32(randInts[3], randInts[2], randInts[1], randInts[0]);
 
-		if (has_missing_values) 
+		if (HAS_MVs) 
 			hli::_mm_corr_epu8_perm<8, true>(
 				hli::_mm_cast_m128i(data1),
 				hli::_mm_cast_m128i(data2),
@@ -217,7 +217,7 @@ namespace hli_cli {
 	void HliCli::_mm_corr_perm_epu8(
 		List<Byte>^ data1,
 		List<Byte>^ data2,
-		bool has_missing_values,
+		bool HAS_MVs,
 		List<Double>^ results,
 		array<UInt32>^ randInts)
 	{
@@ -231,7 +231,7 @@ namespace hli_cli {
 		auto results_x = hli::_mm_malloc_xmm(nPermutations * 8);
 
 		std::array<UInt32, 4> randInts2 = { randInts[3], randInts[2], randInts[1], randInts[0] };
-		_mm_corr_perm_epu8_unmanaged(data1_x, data2_x, nElements, has_missing_values, results_x, nPermutations, randInts2);
+		_mm_corr_perm_epu8_unmanaged(data1_x, data2_x, nElements, HAS_MVs, results_x, nPermutations, randInts2);
 		
 		randInts[0] = randInts2[0];
 		randInts[1] = randInts2[1];
@@ -253,9 +253,9 @@ namespace hli_cli {
 		const std::tuple<const __int8 * const, const size_t>& data,
 		const int nBits,
 		const size_t nElements,
-		const bool has_missing_values)
+		const bool HAS_MVs)
 	{
-		if (has_missing_values) 
+		if (HAS_MVs) 
 			return _mm_cvtsd_f64(hli::_mm_entropy_epu8<true>(hli::_mm_cast_m128i(data), nBits, nElements));
 		else 
 			return _mm_cvtsd_f64(hli::_mm_entropy_epu8<false>(hli::_mm_cast_m128i(data), nBits, nElements));
@@ -265,12 +265,12 @@ namespace hli_cli {
 	double HliCli::_mm_entropy_epu8(
 		List<Byte>^ data,
 		int nBits,
-		const bool has_missing_values)
+		const bool HAS_MVs)
 	{
 		int nElements = data->Count;
 		auto data_x = hli::_mm_malloc_xmm(nElements);
 		priv::copy_data(data, data_x);
-		double result = _mm_entropy_epu8_unmanaged(data_x, nBits, nElements, has_missing_values);
+		double result = _mm_entropy_epu8_unmanaged(data_x, nBits, nElements, HAS_MVs);
 		hli::_mm_free2(data_x);
 		return result;
 	}
@@ -282,9 +282,9 @@ namespace hli_cli {
 		const std::tuple<const __int8 * const, const size_t>& data2,
 		const int nBits2,
 		const size_t nElements,
-		const bool has_missing_values)
+		const bool HAS_MVs)
 	{
-		if (has_missing_values)
+		if (HAS_MVs)
 			return _mm_cvtsd_f64(hli::_mm_entropy_epu8<true>(hli::_mm_cast_m128i(data1), nBits1, hli::_mm_cast_m128i(data2), nBits2, nElements));
 		else 
 			return _mm_cvtsd_f64(hli::_mm_entropy_epu8<false>(hli::_mm_cast_m128i(data1), nBits1, hli::_mm_cast_m128i(data2), nBits2, nElements));
@@ -296,14 +296,14 @@ namespace hli_cli {
 		int nBits1,
 		List<Byte>^ data2,
 		int nBits2,
-		const bool has_missing_values)
+		const bool HAS_MVs)
 	{
 		int nElements = data1->Count;
 		auto data1_x = hli::_mm_malloc_xmm(nElements);
 		auto data2_x = hli::_mm_malloc_xmm(nElements);
 		priv::copy_data(data1, data1_x);
 		priv::copy_data(data2, data2_x);
-		double result = _mm_entropy_epu8_unmanaged(data1_x, nBits1, data2_x, nBits2, nElements, has_missing_values);
+		double result = _mm_entropy_epu8_unmanaged(data1_x, nBits1, data2_x, nBits2, nElements, HAS_MVs);
 		hli::_mm_free2(data1_x);
 		hli::_mm_free2(data2_x);
 		return result;
@@ -320,9 +320,9 @@ namespace hli_cli {
 		const std::tuple<const __int8 * const, const size_t>& data2,
 		const int nBits2,
 		const size_t nElements,
-		const bool has_missing_values)
+		const bool HAS_MVs)
 	{
-		if (has_missing_values)
+		if (HAS_MVs)
 			return _mm_cvtsd_f64(hli::_mm_mi_epu8<true>(hli::_mm_cast_m128i(data1), nBits1, hli::_mm_cast_m128i(data2), nBits2, nElements));
 		else 
 			return _mm_cvtsd_f64(hli::_mm_mi_epu8<false>(hli::_mm_cast_m128i(data1), nBits1, hli::_mm_cast_m128i(data2), nBits2, nElements));
@@ -334,14 +334,14 @@ namespace hli_cli {
 		int nBits1,
 		List<Byte>^ data2,
 		int nBits2,
-		const bool has_missing_values)
+		const bool HAS_MVs)
 	{
 		int nElements = data1->Count;
 		auto data1_x = hli::_mm_malloc_xmm(nElements);
 		auto data2_x = hli::_mm_malloc_xmm(nElements);
 		priv::copy_data(data1, data1_x);
 		priv::copy_data(data2, data2_x);
-		double result = _mm_mi_epu8_unmanaged(data1_x, nBits1, data2_x, nBits2, nElements, has_missing_values);
+		double result = _mm_mi_epu8_unmanaged(data1_x, nBits1, data2_x, nBits2, nElements, HAS_MVs);
 		hli::_mm_free2(data1_x);
 		hli::_mm_free2(data2_x);
 		return result;
@@ -354,14 +354,14 @@ namespace hli_cli {
 		const std::tuple<const __int8 * const, const size_t>& data2,
 		const int nBits2,
 		const size_t nElements,
-		const bool has_missing_values,
+		const bool HAS_MVs,
 		const std::tuple<__int8 * const, const size_t>& results,
 		const size_t nPermutations,
 		std::array<UInt32, 4>& randInts)
 	{
 		__m128i randInts2 = _mm_set_epi32(randInts[3], randInts[2], randInts[1], randInts[0]);
 
-		if (has_missing_values)
+		if (HAS_MVs)
 			hli::_mm_mi_epu8_perm<true>(
 				hli::_mm_cast_m128i(data1),
 				nBits1,
@@ -394,7 +394,7 @@ namespace hli_cli {
 		int nBits1,
 		List<Byte>^ data2,
 		int nBits2,
-		const bool has_missing_values,
+		const bool HAS_MVs,
 		List<Double>^ results,
 		array<UInt32>^ randInts)
 	{
@@ -408,7 +408,7 @@ namespace hli_cli {
 		auto results_x = hli::_mm_malloc_xmm(nPermutations * 8);
 
 		std::array<UInt32, 4> randInts2 = { randInts[3], randInts[2], randInts[1], randInts[0] };
-		_mm_mi_perm_epu8_unmanaged(data1_x, nBits1, data2_x, nBits2, nElements, has_missing_values, results_x, nPermutations, randInts2);
+		_mm_mi_perm_epu8_unmanaged(data1_x, nBits1, data2_x, nBits2, nElements, HAS_MVs, results_x, nPermutations, randInts2);
 
 		randInts[0] = randInts2[0];
 		randInts[1] = randInts2[1];
@@ -433,7 +433,7 @@ namespace hli_cli {
 		const std::tuple<const __int8 * const, const size_t>& data2,
 		const int nBits2,
 		const size_t nElements,
-		const bool has_missing_values,
+		const bool HAS_MVs,
 		const std::tuple<__int8 * const, const size_t>& results_mi,
 		const std::tuple<__int8 * const, const size_t>& results_corr,
 		const size_t nPermutations,
@@ -441,7 +441,7 @@ namespace hli_cli {
 	{
 		__m128i randInts2 = _mm_set_epi32(randInts[3], randInts[2], randInts[1], randInts[0]);
 
-		if (has_missing_values)
+		if (HAS_MVs)
 			hli::_mm_mi_corr_epu8_perm<true>(
 				hli::_mm_cast_m128i(data1),
 				nBits1,
@@ -476,7 +476,7 @@ namespace hli_cli {
 		int nBits1,
 		List<Byte>^ data2,
 		int nBits2,
-		const bool has_missing_values,
+		const bool HAS_MVs,
 		List<Double>^ results_mi,
 		List<Double>^ results_corr,
 		array<UInt32>^ randInts)
@@ -492,7 +492,7 @@ namespace hli_cli {
 		auto results_corr_x = hli::_mm_malloc_xmm(nPermutations * 8);
 
 		std::array<UInt32, 4> randInts2 = { randInts[3], randInts[2], randInts[1], randInts[0] };
-		_mm_mi_corr_perm_epu8_unmanaged(data1_x, nBits1, data2_x, nBits2, nElements, has_missing_values, results_mi_x, results_corr_x, nPermutations, randInts2);
+		_mm_mi_corr_perm_epu8_unmanaged(data1_x, nBits1, data2_x, nBits2, nElements, HAS_MVs, results_mi_x, results_corr_x, nPermutations, randInts2);
 
 		randInts[0] = randInts2[0];
 		randInts[1] = randInts2[1];

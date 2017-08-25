@@ -178,7 +178,9 @@ namespace hli {
 				return;
 			}
 
-			const bool HAS_MISSING_VALUE = false;
+			const bool HAS_MV = false;
+			const U8 MV = 0xFF;
+
 			const size_t nElements = 8 * nBlocks;
 			const size_t nBytes = nElements * 2;
 			const int N_BITS = 5;
@@ -274,10 +276,10 @@ namespace hli {
 			}
 			if (doTests)
 			{
-				const __m128i sum0 = std::get<0>(hli::_mm_hadd_epu8<N_BITS, HAS_MISSING_VALUE>(data0, nElements));
-				const __m128i sum1 = std::get<0>(hli::_mm_hadd_epu8<N_BITS, HAS_MISSING_VALUE>(data1, nElements));
-				const __m128i sum2 = std::get<0>(hli::_mm_hadd_epu8<N_BITS, HAS_MISSING_VALUE>(data2, nElements));
-				const __m128i sum3 = std::get<0>(hli::_mm_hadd_epu8<N_BITS, HAS_MISSING_VALUE>(data3, nElements));
+				const __m128i sum0 = std::get<0>(hli::_mm_hadd_epu8<N_BITS, HAS_MV, MV>(data0, nElements));
+				const __m128i sum1 = std::get<0>(hli::_mm_hadd_epu8<N_BITS, HAS_MV, MV>(data1, nElements));
+				const __m128i sum2 = std::get<0>(hli::_mm_hadd_epu8<N_BITS, HAS_MV, MV>(data2, nElements));
+				const __m128i sum3 = std::get<0>(hli::_mm_hadd_epu8<N_BITS, HAS_MV, MV>(data3, nElements));
 				if (sum0.m128i_u32[0] != sum1.m128i_u32[0]) {
 					std::cout << "WARNING: test_mm_permute_epu8: sums are unequal: sum0=" << sum0.m128i_u32[0] << "; sum1=" << sum1.m128i_u32[0] << std::endl;
 				}
