@@ -27,12 +27,39 @@
 #include "..\hli-stl\_mm_hadd_epu8.ipp"
 #include "..\hli-stl\_mm_variance_epu8.ipp"
 #include "..\hli-stl\_mm_corr_epu8.ipp"
+#include "..\hli-stl\_mm_corr_epu8_perm.ipp"
 
 #include "..\hli-stl\_mm_rand_si128.ipp"
 #include "..\hli-stl\_mm_rescale_epu16.ipp"
-#include "..\hli-stl\_mm_permute_array.ipp"
+#include "..\hli-stl\_mm_permute_epu8_array.ipp"
+#include "..\hli-stl\_mm_permute_pd_array.ipp"
 #include "..\hli-stl\_mm_entropy_epu8.ipp"
+
 #include "..\hli-stl\_mm_mi_epu8.ipp"
+#include "..\hli-stl\_mm_mi_epu8_perm.ipp"
+
+
+void testAll() {
+
+	const size_t nExperiments = 1000;
+
+	hli::test::test_mm_hadd_epu8(10010, nExperiments, true);
+	hli::test::test_mm_variance_epu8(10010, nExperiments, true);
+	hli::test::test_mm_corr_epu8(1010, nExperiments, true);
+	hli::test::test_mm_corr_pd(1010, nExperiments, true);
+
+	hli::test::test_mm_rand_si128(1010, nExperiments, true);
+	hli::test::test_mm_rescale_epu16(2102, nExperiments, true);
+	hli::test::test_mm_permute_epu8_array(2102, nExperiments, true);
+	hli::test::test_mm_permute_pd_array(3102, nExperiments, true);
+
+	hli::test::test_mm_corr_epu8_perm(110, 1000, nExperiments, true);
+
+	hli::test::test_mm_entropy_epu8(100, nExperiments, true);
+	hli::test::test_mm_mi_epu8(100, nExperiments, true);
+	hli::test::test_mm_mi_epu8_perm(100, 1000, nExperiments, true);
+}
+
 
 int main()
 {
@@ -44,25 +71,12 @@ int main()
 	{
 		const auto start = std::chrono::system_clock::now();
 
-		const size_t nExperiments = 1000;
-		//hli::test_endianess();
-
-		//hli::test::test_mm_hadd_epu8(10010, nExperiments, true);
-		//hli::test::test_mm_variance_epu8(10010, nExperiments, true);
-		//hli::test::test_mm_corr_epu8(1010, nExperiments, true);
-		//hli::test::test_mm_corr_pd(1010, nExperiments, true);
-
-
-		//hli::test::test_mm_rand_si128(1010, nExperiments, true);
-		//hli::test::test_mm_rescale_epu16(2102, nExperiments, true);
-		//hli::test::test_mm_permute_epu8_array(2102, nExperiments, true);
-		//hli::test::test_mm_permute_dp_array(3102, nExperiments, true);
-
-		//hli::test::test_mm_corr_perm_epu8(110, 1000, nExperiments, true);
-
-		hli::test::test_mm_entropy_epu8(100, nExperiments, true);
-		//hli::test::test_mm_mi_epu8(100, nExperiments, true);
-		//hli::test::test_mm_mi_perm_epu8(100, 1000, nExperiments, true);
+		if (true) {
+			testAll();
+		} else {
+			const size_t nExperiments = 1000;
+			hli::test::test_mm_entropy_epu8(100, nExperiments, true);
+		}
 
 		const auto diff = std::chrono::system_clock::now() - start;
 		std::cout << std::endl

@@ -16,8 +16,8 @@ namespace hli {
 		{
 			//std::cout << "INFO: _mm_mi_corr_perm_epu8_method0: N_BITS1=" << N_BITS1 << "; N_BITS2=" << N_BITS2 << "; nElements="<< nElements << std::endl;
 			//MI stuff
-			const __m128d h1 = _mm_entropy_epu8<N_BITS1, HAS_MV>(data1, nElements);
-			const __m128d h2 = _mm_entropy_epu8<N_BITS2, HAS_MV>(data2, nElements);
+			const __m128d h1 = _mm_entropy_epu8<N_BITS1, HAS_MV, MV>(data1, nElements);
+			const __m128d h2 = _mm_entropy_epu8<N_BITS2, HAS_MV, MV>(data2, nElements);
 			const __m128d h1Plush2 = _mm_add_pd(h1, h2);
 
 			//Corr stuff
@@ -58,7 +58,7 @@ namespace hli {
 				_mm_permute_epu8_array(data3, nElements, swap, randInts);
 
 				// calc MI
-				const __m128d h1Andh2 = _mm_entropy_epu8<N_BITS1, N_BITS2, HAS_MV>(data1, data3, nElements);
+				const __m128d h1Andh2 = _mm_entropy_epu8<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data3, nElements);
 				const __m128d mi = _mm_sub_pd(h1Plush2, h1Andh2);
 
 #					if	_DEBUG

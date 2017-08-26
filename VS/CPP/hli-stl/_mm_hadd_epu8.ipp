@@ -335,7 +335,7 @@ namespace hli {
 						}
 					}
 				}
-				printf("[_mm_hadd_epu8 Ref]       : %2.5f Kcycles\n", min0);
+				printf("[_mm_hadd_epu8_method0]   : %2.5f Kcycles\n", min0);
 				printf("[_mm_hadd_epu8_method1<8>]: %2.5f Kcycles; %2.3f times faster than ref\n", min1, min0 / min1);
 				printf("[_mm_hadd_epu8_method1<7>]: %2.5f Kcycles; %2.3f times faster than ref\n", min2, min0 / min2);
 				printf("[_mm_hadd_epu8_method1<6>]: %2.5f Kcycles; %2.3f times faster than ref\n", min3, min0 / min3);

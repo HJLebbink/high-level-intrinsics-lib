@@ -259,17 +259,19 @@
     <ClInclude Include="timer.ipp" />
     <ClInclude Include="toString.ipp" />
     <ClInclude Include="_mm_mi_epu8.ipp" />
-    <ClInclude Include="_mm_permute_array.ipp" />
+    <ClInclude Include="_mm_permute_epu8_array.ipp" />
     <ClInclude Include="_mm_rand_si128.ipp" />
     <ClInclude Include="_mm_rescale_epu16.ipp" />
     <ClInclude Include="_mm_variance_epu8.ipp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="span.ipp" />
+    <None Include="swap.ipp" />
     <None Include="_mm_corr_epu8_perm.ipp" />
     <None Include="_mm_freq_epu8.ipp" />
     <None Include="_mm_mi_corr_epu8_perm.ipp" />
     <None Include="_mm_mi_epu8_perm.ipp" />
+    <None Include="_mm_permute_pd_array.ipp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -16,7 +16,7 @@
 
 #include "_mm_variance_epu8.ipp"
 #include "_mm_covar_epu8.ipp"
-#include "_mm_permute_array.ipp"
+#include "_mm_permute_pd_array.ipp"
 
 
 namespace hli {

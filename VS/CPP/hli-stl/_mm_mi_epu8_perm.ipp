@@ -23,8 +23,8 @@ namespace hli {
 		{
 			//std::cout << "INFO: _mm_mi_perm_epu8_method0: N_BITS1=" << N_BITS1 << "; N_BITS2=" << N_BITS2 << "; nElements="<< nElements << std::endl;
 
-			const __m128d h1 = _mm_entropy_epu8<N_BITS1, HAS_MV>(data1, nElements);
-			const __m128d h2 = _mm_entropy_epu8<N_BITS2, HAS_MV>(data2, nElements);
+			const __m128d h1 = _mm_entropy_epu8<N_BITS1, HAS_MV, MV>(data1, nElements);
+			const __m128d h2 = _mm_entropy_epu8<N_BITS2, HAS_MV, MV>(data2, nElements);
 			const __m128d h1Plush2 = _mm_add_pd(h1, h2);
 
 			auto data3 = deepCopy(data2);

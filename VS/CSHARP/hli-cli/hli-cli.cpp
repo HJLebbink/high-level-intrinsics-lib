@@ -97,9 +97,9 @@ namespace hli_cli {
 		bool has_Missing_Value)
 	{
 		if (has_Missing_Value)
-			return _mm_cvtsi128_si32(std::get<0>(hli::_mm_hadd_epu8<8, true>(hli::_mm_cast_m128i(data), nElements)));
+			return _mm_cvtsi128_si32(std::get<0>(hli::_mm_hadd_epu8<8, true, 0xFF>(hli::_mm_cast_m128i(data), nElements)));
 		else 
-			return _mm_cvtsi128_si32(std::get<0>(hli::_mm_hadd_epu8<8, false>(hli::_mm_cast_m128i(data), nElements)));
+			return _mm_cvtsi128_si32(std::get<0>(hli::_mm_hadd_epu8<8, false, 0xFF>(hli::_mm_cast_m128i(data), nElements)));
 	}
 
 #	pragma managed
@@ -156,9 +156,9 @@ namespace hli_cli {
 		bool has_Missing_Value)
 	{
 		if (has_Missing_Value)
-			return _mm_cvtsd_f64(hli::_mm_corr_pd<true>(hli::_mm_cast_m128d(data1), hli::_mm_cast_m128d(data2), nElements));
+			return _mm_cvtsd_f64(hli::_mm_corr_pd<true, 99999>(hli::_mm_cast_m128d(data1), hli::_mm_cast_m128d(data2), nElements));
 		else 
-			return _mm_cvtsd_f64(hli::_mm_corr_pd<false>(hli::_mm_cast_m128d(data1), hli::_mm_cast_m128d(data2), nElements));
+			return _mm_cvtsd_f64(hli::_mm_corr_pd<false, 99999>(hli::_mm_cast_m128d(data1), hli::_mm_cast_m128d(data2), nElements));
 	}
 
 #	pragma managed
@@ -191,7 +191,7 @@ namespace hli_cli {
 		__m128i randInts2 = _mm_set_epi32(randInts[3], randInts[2], randInts[1], randInts[0]);
 
 		if (has_Missing_Value) 
-			hli::_mm_corr_epu8_perm<8, true>(
+			hli::_mm_corr_epu8_perm<8, true, 0xFF>(
 				hli::_mm_cast_m128i(data1),
 				hli::_mm_cast_m128i(data2),
 				nElements,
@@ -199,7 +199,7 @@ namespace hli_cli {
 				nPermutations,
 				randInts2);
 		else
-			hli::_mm_corr_epu8_perm<8, false>(
+			hli::_mm_corr_epu8_perm<8, false, 0xFF>(
 				hli::_mm_cast_m128i(data1),
 				hli::_mm_cast_m128i(data2),
 				nElements,
@@ -362,7 +362,7 @@ namespace hli_cli {
 		__m128i randInts2 = _mm_set_epi32(randInts[3], randInts[2], randInts[1], randInts[0]);
 
 		if (has_Missing_Value)
-			hli::_mm_mi_epu8_perm<true>(
+			hli::_mm_mi_epu8_perm<true, 0xFF>(
 				hli::_mm_cast_m128i(data1),
 				nBits1,
 				hli::_mm_cast_m128i(data2),
@@ -372,7 +372,7 @@ namespace hli_cli {
 				nPermutations,
 				randInts2);
 		else
-			hli::_mm_mi_epu8_perm<false>(
+			hli::_mm_mi_epu8_perm<false, 0xFF>(
 				hli::_mm_cast_m128i(data1),
 				nBits1,
 				hli::_mm_cast_m128i(data2),
@@ -442,7 +442,7 @@ namespace hli_cli {
 		__m128i randInts2 = _mm_set_epi32(randInts[3], randInts[2], randInts[1], randInts[0]);
 
 		if (has_Missing_Value)
-			hli::_mm_mi_corr_epu8_perm<true>(
+			hli::_mm_mi_corr_epu8_perm<true, 0xFF>(
 				hli::_mm_cast_m128i(data1),
 				nBits1,
 				hli::_mm_cast_m128i(data2),
@@ -453,7 +453,7 @@ namespace hli_cli {
 				nPermutations,
 				randInts2);
 		else
-			hli::_mm_mi_corr_epu8_perm<false>(
+			hli::_mm_mi_corr_epu8_perm<false, 0xFF>(
 				hli::_mm_cast_m128i(data1),
 				nBits1,
 				hli::_mm_cast_m128i(data2),
