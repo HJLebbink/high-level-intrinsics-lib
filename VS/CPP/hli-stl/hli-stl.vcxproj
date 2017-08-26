@@ -267,6 +267,7 @@
   <ItemGroup>
     <None Include="span.ipp" />
     <None Include="_mm_corr_epu8_perm.ipp" />
+    <None Include="_mm_freq_epu8.ipp" />
     <None Include="_mm_mi_corr_epu8_perm.ipp" />
     <None Include="_mm_mi_epu8_perm.ipp" />
   </ItemGroup>

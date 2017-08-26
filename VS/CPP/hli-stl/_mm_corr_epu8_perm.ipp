@@ -25,7 +25,7 @@ namespace hli {
 	namespace priv {
 
 		// Uses Reference implementation
-		template <bool HAS_MV>
+		template <bool HAS_MV, U8 MV>
 		inline void _mm_corr_epu8_perm_method0(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
@@ -48,7 +48,7 @@ namespace hli {
 			_mm_free2(swap);
 		}
 
-		template <int N_BITS, bool HAS_MV>
+		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline void _mm_corr_epu8_perm_method1(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
@@ -62,8 +62,8 @@ namespace hli {
 			const size_t swap_array_nBytes = nBytes << 1;
 			auto swap = _mm_malloc_m128i(swap_array_nBytes);
 
-			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MV>(data1, nElements);
-			const auto tup2 = _mm_hadd_epu8<N_BITS, HAS_MV>(data2, nElements);
+			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data1, nElements);
+			const auto tup2 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data2, nElements);
 			const __m128d average1 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup1)), _mm_cvtepi32_pd(std::get<1>(tup1)));
 			const __m128d average2 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup2)), _mm_cvtepi32_pd(std::get<1>(tup2)));
 
@@ -77,7 +77,7 @@ namespace hli {
 			_mm_free2(swap);
 		}
 
-		template <int N_BITS, bool HAS_MV>
+		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline void _mm_corr_epu8_perm_method2(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
@@ -109,7 +109,7 @@ namespace hli {
 			_mm_free2(swap);
 		}
 
-		template <bool HAS_MV>
+		template <bool HAS_MV, U8 MV>
 		inline void _mm_corr_epu8_perm_method3(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
@@ -185,6 +185,7 @@ namespace hli {
 		{
 			const double delta = 0.000001;
 			const bool HAS_MV = false;
+			const U8 MV = 0xFF;
 			const size_t nElements = nBlocks * 16;
 			const int N_BITS1 = 5;
 			const int N_BITS2 = N_BITS1;
@@ -221,12 +222,12 @@ namespace hli {
 				for (size_t i = 0; i < nExperiments; ++i)
 				{
 					timer::reset_and_start_timer();
-					hli::priv::_mm_corr_epu8_perm_method0<HAS_MV>(data1, data2, nElements, results0, nPermutations, randInt0);
+					hli::priv::_mm_corr_epu8_perm_method0<HAS_MV, MV>(data1, data2, nElements, results0, nPermutations, randInt0);
 					min0 = std::min(min0, timer::get_elapsed_kcycles());
 
 					{
 						timer::reset_and_start_timer();
-						hli::priv::_mm_corr_epu8_perm_method1<N_BITS1, HAS_MV>(data1, data2, nElements, results1, nPermutations, randInt1);
+						hli::priv::_mm_corr_epu8_perm_method1<N_BITS1, HAS_MV, MV>(data1, data2, nElements, results1, nPermutations, randInt1);
 						min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 						//for (size_t block = 0; block < (nBytesResults >> 4); ++block) {
@@ -252,7 +253,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						hli::priv::_mm_corr_epu8_perm_method2<N_BITS1, HAS_MV>(data1, data2, nElements, results2, nPermutations, randInt2);
+						hli::priv::_mm_corr_epu8_perm_method2<N_BITS1, HAS_MV, MV>(data1, data2, nElements, results2, nPermutations, randInt2);
 						min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -273,7 +274,7 @@ namespace hli {
 					}
 					{
 						timer::reset_and_start_timer();
-						hli::priv::_mm_corr_epu8_perm_method3<HAS_MV>(data1, data2, nElements, results3, nPermutations, randInt3);
+						hli::priv::_mm_corr_epu8_perm_method3<HAS_MV, MV>(data1, data2, nElements, results3, nPermutations, randInt3);
 						min3 = std::min(min3, timer::get_elapsed_kcycles());
 
 						if (doTests) {
@@ -307,7 +308,7 @@ namespace hli {
 		}
 	}
 
-	template <int N_BITS, bool HAS_MV>
+	template <int N_BITS, bool HAS_MV, U8 MV>
 	inline void _mm_corr_epu8_perm(
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2,
@@ -316,7 +317,7 @@ namespace hli {
 		const size_t nPermutations,
 		__m128i& randInts)
 	{
-		priv::_mm_corr_epu8_perm_method3<HAS_MV>(data1, data2, nElements, results, nPermutations, randInts);
+		priv::_mm_corr_epu8_perm_method3<HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
 #		if _DEBUG
 		const double * const ptr = reinterpret_cast<double * const>(std::get<0>(results));
 		for (size_t i = 0; i < nPermutations; ++i) {

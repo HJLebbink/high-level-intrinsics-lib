@@ -351,7 +351,7 @@ namespace hli {
 			const __m128d var1 = calc_variance<N_BITS, HAS_MV, MV>(data1, nElements, data1_d);
 			const __m128d var2 = calc_variance<N_BITS, HAS_MV, MV>(data2, nElements, data2_d);
 			const __m128d var1_2 = _mm_sqrt_pd(_mm_mul_pd(var1, var2));
-			const __m128d corr = _mm_corr_dp_method3<HAS_MV>(data1_d, data2_d, nElements, var1_2);
+			const __m128d corr = _mm_corr_dp_method3<HAS_MV, MV>(data1_d, data2_d, nElements, var1_2);
 
 			_mm_free2(data1_d);
 			_mm_free2(data2_d);

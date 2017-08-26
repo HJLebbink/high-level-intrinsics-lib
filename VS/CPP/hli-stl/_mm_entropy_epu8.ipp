@@ -35,26 +35,39 @@ namespace hli {
 
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
-		inline void merge(
+		inline void merge_U8xU8_to_U8(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const std::tuple<__m128i * const, const size_t>& data3)
 		{
+#pragma region Tests
 			static_assert(N_BITS1 > 0, "NBITS_1 has to be larger than zero");
 			static_assert(N_BITS2 > 0, "NBITS_2 has to be larger than zero");
 			static_assert((N_BITS1 + N_BITS2) <= 8, "NBITS_1 + N_BITS_2 has to be smaller than 9");
 
-			const size_t nBlocks = std::get<1>(data1) >> 4;
-			if (HAS_MV) {
-				for (size_t block = 0; block < nBlocks; ++block) {
-					const __m128i d1 = std::get<0>(data1)[block];
-					const __m128i d2 = std::get<0>(data2)[block];
-					//TODO
+#if _DEBUG
+			if (std::get<1>(data1) != std::get<1>(data2)) std::cout << "WARNING: merge_U8xU8_to_U8: unequal length data1 and data2";
+			if (std::get<1>(data1) != std::get<1>(data3)) std::cout << "WARNING: merge_U8xU8_to_U8: unequal length data1 and data3";
+#endif
+#pragma endregion
 
-					std::get<0>(data3)[block] = _mm_or_si128(d1, _mm_slli_epi16(d2, N_BITS1));
+			const size_t nBlocks = std::get<1>(data1) >> 4;
+			if constexpr (HAS_MV) {
+				if constexpr (MV == 0xFF) {
+					//TODO
+				}
+				else
+				{
+					for (size_t block = 0; block < nBlocks; ++block) {
+						const __m128i d1 = std::get<0>(data1)[block];
+						const __m128i d2 = std::get<0>(data2)[block];
+						//TODO
+
+						std::get<0>(data3)[block] = _mm_or_si128(d1, _mm_slli_epi16(d2, N_BITS1));
+					}
 				}
 			}
-			else 
+			else
 			{
 				for (size_t block = 0; block < nBlocks; ++block) {
 					std::get<0>(data3)[block] = _mm_or_si128(std::get<0>(data1)[block], _mm_slli_epi16(std::get<0>(data2)[block], N_BITS1));
@@ -94,148 +107,6 @@ namespace hli {
 			*/
 		}
 
-		// 
-		template <int N_BITS>
-		inline __m128i _mm_freq_epu8(
-			const std::tuple<const __m128i * const, const size_t>& data)
-		{
-			switch (N_BITS) {
-				case 2: return _mm_freq_epu8_nBits2(data)
-				default: return _mm_setzero_si128();
-			}
-		}
-
-		inline __m128i _mm_freq_epu8_nBits2_method1(
-			const std::tuple<const __m128i * const, const size_t>& data)
-		{
-			const __m128i * const ptr = std::get<0>(data);
-
-			const __m128i mask0 = _mm_setzero_si128();
-			const __m128i mask1 = _mm_set1_epi8(1);
-			const __m128i mask2 = _mm_set1_epi8(2);
-			
-			__m128i freq = _mm_setzero_si128();
-
-			const size_t nBlocks = std::get<1>(data) >> 4;
-			size_t block;
-
-			for (block = 0; block < nBlocks - 4; block += 4) {
-
-				const __m128i d0 = ptr[block + 0];
-				const __m128i d1 = ptr[block + 1];
-				const __m128i d2 = ptr[block + 2];
-				const __m128i d3 = ptr[block + 3];
-
-				const int nBits0 = static_cast<int>(_mm_popcnt_u64(
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask0))) |
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d1, mask0)) << 2) |
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d2, mask0)) << 4) |
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d3, mask0)) << 5)));
-
-				const int nBits1 = static_cast<int>(_mm_popcnt_u64(
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask1))) |
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d1, mask1)) << 2) |
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d2, mask1)) << 4) |
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d3, mask1)) << 5)));
-
-				const int nBits2 = static_cast<int>(_mm_popcnt_u64(
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask2))) |
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d1, mask2)) << 2) |
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d2, mask2)) << 4) |
-					(_mm_movemask_epi8(_mm_cmpeq_epi8(d3, mask2)) << 6)));
-
-				freq = _mm_add_epi32(freq, _mm_set_epi32(nBits0, nBits1, nBits2, 0));
-			}
-
-			for (; block < nBlocks; ++block) {
-				const __m128i d0 = ptr[block];
-				const int nBits0 = static_cast<int>(_mm_popcnt_u64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask0))));
-				const int nBits1 = static_cast<int>(_mm_popcnt_u64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask1))));
-				const int nBits2 = static_cast<int>(_mm_popcnt_u64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask2))));
-				freq = _mm_add_epi32(freq, _mm_set_epi32(nBits0, nBits1, nBits2, 0));
-			}
-
-			return freq;
-		}
-
-		inline __m128i _mm_freq_epu8_nBits2_method2(
-			const std::tuple<const __m128i * const, const size_t>& data)
-		{
-			const __m128i * const ptr = std::get<0>(data);
-			
-			const __m128i mask_0_epu8 = _mm_setzero_si128();
-			const __m128i mask_1_epu8 = _mm_set1_epi8(1);
-			const __m128i mask_2_epu8 = _mm_set1_epi8(2);
-
-			__m128i freq = _mm_setzero_si128();
-			__m128i freq0 = _mm_setzero_si128();
-			__m128i freq1 = _mm_setzero_si128();
-			__m128i freq2 = _mm_setzero_si128();
-
-			const size_t nBlocks = std::get<1>(data) >> 4;
-			const size_t nLoops = nBlocks >> 6; //divide by 2^6=64
-
-			for (size_t block = 0; block < nBlocks; ++block) {
-				const __m128i d0 = ptr[block + 0];
-				freq0 = _mm_add_epi8(freq0, _mm_and_si128(_mm_cmpeq_epi8(d0, mask_0_epu8), mask_1_epu8));
-				freq1 = _mm_add_epi8(freq1, _mm_and_si128(_mm_cmpeq_epi8(d0, mask_1_epu8), mask_1_epu8));
-				freq2 = _mm_add_epi8(freq2, _mm_and_si128(_mm_cmpeq_epi8(d0, mask_2_epu8), mask_1_epu8));
-
-				if ((block & 0x80) == 0) {
-					freq0 = _mm_sad_epu8(freq0, mask_0_epu8);
-					freq = _mm_add_epi32(freq, _mm_shuffle_epi32(freq0, _MM_SHUFFLE_EPI32_INT(2,3,3,3)));
-					freq = _mm_add_epi32(freq, _mm_shuffle_epi32(freq0, _MM_SHUFFLE_EPI32_INT(0,3,3,3)));
-					freq0 = _mm_setzero_si128();
-				}
-			}
-			return freq;
-		}
-
-		inline __m128i _mm_freq_epu8_nBits2_method3(
-			const std::tuple<const __m128i * const, const size_t>& data)
-		{
-			const __m128i * const ptr = std::get<0>(data);
-			
-
-			__m128i freq = _mm_setzero_si128();
-
-			const size_t nBlocks = std::get<1>(data) >> 4;
-			size_t block;
-
-			for (block = 0; block < nBlocks - 4; block += 4) 
-			{
-				const __m128i d0 = ptr[block + 0];
-				const __m128i d1 = ptr[block + 1];
-				const __m128i d2 = ptr[block + 2];
-				const __m128i d3 = ptr[block + 3];
-
-
-				const __int64 bit0 =
-					(_mm_movemask_epi8(_mm_slli_si128(d0, 6)) |
-					(_mm_movemask_epi8(_mm_slli_si128(d1, 6)) << 2) |
-					(_mm_movemask_epi8(_mm_slli_si128(d2, 6)) << 4) |
-					(_mm_movemask_epi8(_mm_slli_si128(d3, 6)) << 6));
-				
-				const __int64 bit1 =
-					(_mm_movemask_epi8(_mm_slli_si128(d0, 7)) |
-					(_mm_movemask_epi8(_mm_slli_si128(d1, 7)) << 2) |
-					(_mm_movemask_epi8(_mm_slli_si128(d2, 7)) << 4) |
-					(_mm_movemask_epi8(_mm_slli_si128(d3, 7)) << 6));
-				
-				/*
-				const __m256i de0, de1;
-				const __int64 bit0e =
-					(_mm256_movemask_epi8(_mm256_slli_si256(de0, 7)) ||
-					(_mm256_movemask_epi8(_mm256_slli_si256(de1, 7)) << (1 * 32)));
-				*/
-
-
-
-			}
-			return _mm_setzero_si128();
-		}
-
-
 		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline __m128d _mm_entropy_epu8_method0(
 			const std::tuple<const __m128i * const, const size_t>& data,
@@ -252,20 +123,20 @@ namespace hli {
 
 			double h = 0;
 			if (HAS_MV) {
-				size_t nElements_NoMissing = 0;
+				size_t nElements_No_MV = 0;
 				for (size_t element = 0; element < nElements; ++element) {
 					const U8 mergedData = ptr1[element];
 					if (mergedData != MV) {
 						freq[mergedData]++;
-						nElements_NoMissing++;
+						nElements_No_MV++;
 					}
 				}
-				if (nElements_NoMissing > 0) {
+				if (nElements_No_MV > 0) {
 					for (int i = 0; i < N_DISTINCT_VALUES; ++i)
 					{
 						//std::cout << "INFO: _mm_entropy_epu8_method0: freq[" << i <<"]=" << freq[i] << std::endl;
 						if (freq[i] > 0) {
-							double prob = (static_cast<double>(freq[i]) / nElements_NoMissing);
+							double prob = (static_cast<double>(freq[i]) / nElements_No_MV);
 							h += prob * log2(prob);
 						}
 					}
@@ -341,44 +212,41 @@ namespace hli {
 			std::array<size_t, N_DISTINCT_VALUES> freq;
 			freq.fill(0);
 
+			size_t nEffectiveElements;
+
 			if (HAS_MV) {
-				size_t nElements_NoMissing = 0;
+				nEffectiveElements = 0;
 				for (size_t element = 0; element < nElements; ++element) {
 					const U8 d1 = ptr1[element];
 					const U8 d2 = ptr2[element];
 					if ((d1 != MV) && (d2 != MV)) {
 						const U8 mergedData = d1 | (d2 << N_BITS1);
 						freq[mergedData]++;
-						nElements_NoMissing++;
+						nEffectiveElements++;
 					}
 				}
-				double h = 0;
-				for (int i = 0; i < N_DISTINCT_VALUES; ++i)
-				{
-					//std::cout << "INFO: _mm_entropy_epu8_method1: freq[" << i <<"]=" << freq[i] << std::endl;
-					if (freq[i] > 0) {
-						double prob = (static_cast<double>(freq[i]) / nElements_NoMissing);
-						h += prob * log2(prob);
-					}
-				}
-				return _mm_set1_pd(-h);
 			}
-			else {
+			else 
+			{
+				nEffectiveElements = nElements;
 				for (size_t element = 0; element < nElements; ++element) {
-					const U8 mergedData = ptr1[element] | (ptr2[element] << N_BITS1);
+					const U8 d1 = ptr1[element];
+					const U8 d2 = ptr2[element];
+					const U8 mergedData = d1 | (d2 << N_BITS1);
 					freq[mergedData]++;
 				}
-				double h = 0;
-				for (int i = 0; i < N_DISTINCT_VALUES; ++i)
-				{
-					//std::cout << "INFO: _mm_entropy_epu8_method1: freq[" << i <<"]=" << freq[i] << std::endl;
-					if (freq[i] > 0) {
-						double prob = (static_cast<double>(freq[i]) / nElements);
-						h += prob * log2(prob);
-					}
-				}
-				return _mm_set1_pd(-h);
 			}
+
+			double h = 0;
+			for (int i = 0; i < N_DISTINCT_VALUES; ++i)
+			{
+				//std::cout << "INFO: _mm_entropy_epu8_method1: freq[" << i <<"]=" << freq[i] << std::endl;
+				if (freq[i] > 0) {
+					double prob = (static_cast<double>(freq[i]) / nEffectiveElements);
+					h += prob * log2(prob);
+				}
+			}
+			return _mm_set1_pd(-h);
 		}
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
@@ -388,7 +256,7 @@ namespace hli {
 			const size_t nElements)
 		{
 			const std::tuple<__m128i * const, const size_t> data3 = _mm_malloc_m128i(std::get<1>(data1));
-			merge<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, data3);
+			merge_U8xU8_to_U8<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, data3);
 			const int N_BITS3 = N_BITS1 + N_BITS2;
 			const __m128d result = _mm_entropy_epu8<N_BITS3, HAS_MV, MV>(data3, nElements);
 			_mm_free2(data3);
@@ -502,7 +370,8 @@ namespace hli {
 		const size_t nElements)
 	{
 		const __m128d result = priv::_mm_entropy_epu8_method0<N_BITS, HAS_MV, MV>(data, nElements);
-#		if	_DEBUG
+
+#		if _DEBUG
 		if (isnan(result.m128d_f64[0])) std::cout << "WARNING: _mm_entropy_epu8: result is NAN" << std::endl;
 		if (result.m128d_f64[0] < 0)    std::cout << "WARNING: _mm_entropy_epu8: result is smaller than 0. result=" << result.m128d_f64[0] << std::endl;
 		if (result.m128d_f64[0] > N_BITS) std::cout << "WARNING: _mm_entropy_epu8: result is larger than N_BITS=" << N_BITS << ". result=" << result.m128d_f64[0] << std::endl;
@@ -516,6 +385,10 @@ namespace hli {
 		const int nBits,
 		const size_t nElements)
 	{
+		#if _DEBUG
+		if (nBits > 8) || (nBits < 1) throw new Exception();
+		#endif
+
 		switch (nBits) {
 		case 1: return _mm_entropy_epu8<1, HAS_MV, MV>(data, nElements);
 		case 2: return _mm_entropy_epu8<2, HAS_MV, MV>(data, nElements);
@@ -553,6 +426,11 @@ namespace hli {
 		const int nBits2,
 		const size_t nElements)
 	{
+		#if _DEBUG
+		if (nBits1 > 8) || (nBits1 < 1) throw new Exception();
+		if (nBits2 > 8) || (nBits2 < 1) throw new Exception();
+		#endif
+
 		switch (nBits1) {
 		case 1:
 			switch (nBits2)

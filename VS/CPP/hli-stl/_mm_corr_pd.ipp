@@ -53,7 +53,7 @@ namespace hli {
 			return _mm_set1_pd(corr);
 		}
 
-		template <bool HAS_MV>
+		template <bool HAS_MV, int MV>
 		inline __m128d _mm_corr_pd_method1(
 			const std::tuple<const __m128d * const, const size_t>& data1,
 			const std::tuple<const __m128d * const, const size_t>& data2,
@@ -91,7 +91,7 @@ namespace hli {
 			return corr;
 		}
 
-		template <bool HAS_MV>
+		template <bool HAS_MV, int MV>
 		inline __m128d _mm_corr_dp_method3(
 			const std::tuple<const __m128d * const, const size_t>& data1,
 			const std::tuple<const __m128d * const, const size_t>& data2,
@@ -179,7 +179,7 @@ namespace hli {
 
 				{
 					timer::reset_and_start_timer();
-					result1 = hli::priv::_mm_corr_pd_method1<HAS_MV>(data1, data2, nElements);
+					result1 = hli::priv::_mm_corr_pd_method1<HAS_MV, MV>(data1, data2, nElements);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -198,13 +198,13 @@ namespace hli {
 		}
 	}
 
-	template <bool HAS_MV>
+	template <bool HAS_MV, int MV>
 	inline __m128d _mm_corr_pd(
 		const std::tuple<const __m128d * const, const size_t>& data1,
 		const std::tuple<const __m128d * const, const size_t>& data2,
 		const size_t nElements)
 	{
-		return priv::_mm_corr_pd_method0<HAS_MV>(data1, data2, nElements);
+		return priv::_mm_corr_pd_method0<HAS_MV, MV>(data1, data2, nElements);
 		//return priv::_mm_corr_pd_method1<HAS_MV>(data1, data2);
 	}
 }

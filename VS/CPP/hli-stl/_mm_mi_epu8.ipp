@@ -108,17 +108,17 @@ namespace hli {
 
 	}
 
-	template <int N_BITS1, int N_BITS2, bool HAS_MV>
+	template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 	inline __m128d _mm_mi_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2,
 		const size_t nElements)
 	{
-		return priv::_mm_mi_epu8_method0<N_BITS1, N_BITS2, HAS_MV>(data1, data2, nElements);
-		//return priv::_mm_mi_epu8_method1<N_BITS1, N_BITS2, HAS_MV>(data1, data2, nElements);
+		return priv::_mm_mi_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
+		//return priv::_mm_mi_epu8_method1<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
 	}
 
-	template <bool HAS_MV>
+	template <bool HAS_MV, U8 MV>
 	inline __m128d _mm_mi_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const int nBits1,
@@ -130,64 +130,64 @@ namespace hli {
 		case 1:
 			switch (nBits2) 
 			{
-			case 1: return _mm_mi_epu8<1, 1, HAS_MV>(data1, data2, nElements);
-			case 2: return _mm_mi_epu8<1, 2, HAS_MV>(data1, data2, nElements);
-			case 3: return _mm_mi_epu8<1, 3, HAS_MV>(data1, data2, nElements);
-			case 4: return _mm_mi_epu8<1, 4, HAS_MV>(data1, data2, nElements);
-			case 5: return _mm_mi_epu8<1, 5, HAS_MV>(data1, data2, nElements);
-			case 6: return _mm_mi_epu8<1, 6, HAS_MV>(data1, data2, nElements);
-			case 7: return _mm_mi_epu8<1, 7, HAS_MV>(data1, data2, nElements);
+			case 1: return _mm_mi_epu8<1, 1, HAS_MV, MV>(data1, data2, nElements);
+			case 2: return _mm_mi_epu8<1, 2, HAS_MV, MV>(data1, data2, nElements);
+			case 3: return _mm_mi_epu8<1, 3, HAS_MV, MV>(data1, data2, nElements);
+			case 4: return _mm_mi_epu8<1, 4, HAS_MV, MV>(data1, data2, nElements);
+			case 5: return _mm_mi_epu8<1, 5, HAS_MV, MV>(data1, data2, nElements);
+			case 6: return _mm_mi_epu8<1, 6, HAS_MV, MV>(data1, data2, nElements);
+			case 7: return _mm_mi_epu8<1, 7, HAS_MV, MV>(data1, data2, nElements);
 			default: return _mm_setzero_pd();
 			}
 		case 2:
 			switch (nBits2)
 			{
-			case 1: return _mm_mi_epu8<2, 1, HAS_MV>(data1, data2, nElements);
-			case 2: return _mm_mi_epu8<2, 2, HAS_MV>(data1, data2, nElements);
-			case 3: return _mm_mi_epu8<2, 3, HAS_MV>(data1, data2, nElements);
-			case 4: return _mm_mi_epu8<2, 4, HAS_MV>(data1, data2, nElements);
-			case 5: return _mm_mi_epu8<2, 5, HAS_MV>(data1, data2, nElements);
-			case 6: return _mm_mi_epu8<2, 6, HAS_MV>(data1, data2, nElements);
+			case 1: return _mm_mi_epu8<2, 1, HAS_MV, MV>(data1, data2, nElements);
+			case 2: return _mm_mi_epu8<2, 2, HAS_MV, MV>(data1, data2, nElements);
+			case 3: return _mm_mi_epu8<2, 3, HAS_MV, MV>(data1, data2, nElements);
+			case 4: return _mm_mi_epu8<2, 4, HAS_MV, MV>(data1, data2, nElements);
+			case 5: return _mm_mi_epu8<2, 5, HAS_MV, MV>(data1, data2, nElements);
+			case 6: return _mm_mi_epu8<2, 6, HAS_MV, MV>(data1, data2, nElements);
 			default: return _mm_setzero_pd();
 			}
 		case 3:
 			switch (nBits2)
 			{
-			case 1: return _mm_mi_epu8<3, 1, HAS_MV>(data1, data2, nElements);
-			case 2: return _mm_mi_epu8<3, 2, HAS_MV>(data1, data2, nElements);
-			case 3: return _mm_mi_epu8<3, 3, HAS_MV>(data1, data2, nElements);
-			case 4: return _mm_mi_epu8<3, 4, HAS_MV>(data1, data2, nElements);
-			case 5: return _mm_mi_epu8<3, 5, HAS_MV>(data1, data2, nElements);
+			case 1: return _mm_mi_epu8<3, 1, HAS_MV, MV>(data1, data2, nElements);
+			case 2: return _mm_mi_epu8<3, 2, HAS_MV, MV>(data1, data2, nElements);
+			case 3: return _mm_mi_epu8<3, 3, HAS_MV, MV>(data1, data2, nElements);
+			case 4: return _mm_mi_epu8<3, 4, HAS_MV, MV>(data1, data2, nElements);
+			case 5: return _mm_mi_epu8<3, 5, HAS_MV, MV>(data1, data2, nElements);
 			default: return _mm_setzero_pd();
 			}
 		case 4:
 			switch (nBits2)
 			{
-			case 1: return _mm_mi_epu8<4, 1, HAS_MV>(data1, data2, nElements);
-			case 2: return _mm_mi_epu8<4, 2, HAS_MV>(data1, data2, nElements);
-			case 3: return _mm_mi_epu8<4, 3, HAS_MV>(data1, data2, nElements);
-			case 4: return _mm_mi_epu8<4, 4, HAS_MV>(data1, data2, nElements);
+			case 1: return _mm_mi_epu8<4, 1, HAS_MV, MV>(data1, data2, nElements);
+			case 2: return _mm_mi_epu8<4, 2, HAS_MV, MV>(data1, data2, nElements);
+			case 3: return _mm_mi_epu8<4, 3, HAS_MV, MV>(data1, data2, nElements);
+			case 4: return _mm_mi_epu8<4, 4, HAS_MV, MV>(data1, data2, nElements);
 			default: return _mm_setzero_pd();
 			}
 		case 5:
 			switch (nBits2)
 			{
-			case 1: return _mm_mi_epu8<5, 1, HAS_MV>(data1, data2, nElements);
-			case 2: return _mm_mi_epu8<5, 2, HAS_MV>(data1, data2, nElements);
-			case 3: return _mm_mi_epu8<5, 3, HAS_MV>(data1, data2, nElements);
+			case 1: return _mm_mi_epu8<5, 1, HAS_MV, MV>(data1, data2, nElements);
+			case 2: return _mm_mi_epu8<5, 2, HAS_MV, MV>(data1, data2, nElements);
+			case 3: return _mm_mi_epu8<5, 3, HAS_MV, MV>(data1, data2, nElements);
 			default: return _mm_setzero_pd();
 			}
 		case 6:
 			switch (nBits2)
 			{
-			case 1: return _mm_mi_epu8<6, 1, HAS_MV>(data1, data2, nElements);
-			case 2: return _mm_mi_epu8<6, 2, HAS_MV>(data1, data2, nElements);
+			case 1: return _mm_mi_epu8<6, 1, HAS_MV, MV>(data1, data2, nElements);
+			case 2: return _mm_mi_epu8<6, 2, HAS_MV, MV>(data1, data2, nElements);
 			default: return _mm_setzero_pd();
 			}
 		case 7:
 			switch (nBits2)
 			{
-			case 1: return _mm_mi_epu8<7, 1, HAS_MV>(data1, data2, nElements);
+			case 1: return _mm_mi_epu8<7, 1, HAS_MV, MV>(data1, data2, nElements);
 			default: return _mm_setzero_pd();
 			}
 		default: return _mm_setzero_pd();
