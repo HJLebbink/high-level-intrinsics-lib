@@ -16,6 +16,8 @@
 
 #include "tools.ipp"
 #include "timer.ipp"
+#include "span.ipp"
+
 
 #include "_mm_rand_si128.ipp"
 
@@ -27,7 +29,7 @@ namespace hli {
 		// Uses Reference implementation
 		template <bool HAS_MV, U8 MV>
 		inline void _mm_corr_epu8_perm_method0(
-			const std::tuple<const __m128i * const, const size_t>& data1,
+			const span<const __m128i>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements,
 			const std::tuple<__m128d * const, const size_t>& results,
