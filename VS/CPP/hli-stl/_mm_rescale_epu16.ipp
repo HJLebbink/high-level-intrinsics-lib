@@ -116,7 +116,7 @@ namespace hli {
 
 	namespace test {
 
-		void test_mm_rescale_epu16(
+		void _mm_rescale_epu16_speed_test_1(
 			const size_t nBlocks,
 			const size_t nExperiments,
 			const bool doTests)

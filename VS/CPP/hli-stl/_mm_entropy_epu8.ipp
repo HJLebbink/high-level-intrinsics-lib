@@ -286,7 +286,7 @@ namespace hli {
 
 	namespace test
 	{
-		void test_mm_entropy_epu8(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		void _mm_entropy_epu8_speed_test_1(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 		{
 			const double delta = 0.0000001;
 			const bool HAS_MV = false;
@@ -386,7 +386,7 @@ namespace hli {
 		const size_t nElements)
 	{
 		#if _DEBUG
-		if (nBits > 8) || (nBits < 1) throw new Exception();
+		if ((nBits > 8) || (nBits < 1)) std::cout << "WARNING: _mm_entropy_epu8: nBits=" << nBits << " has to be in range[1..8]" << std::endl;
 		#endif
 
 		switch (nBits) {
@@ -427,8 +427,8 @@ namespace hli {
 		const size_t nElements)
 	{
 		#if _DEBUG
-		if (nBits1 > 8) || (nBits1 < 1) throw new Exception();
-		if (nBits2 > 8) || (nBits2 < 1) throw new Exception();
+		if ((nBits1 > 8) || (nBits1 < 1)) std::cout << "WARNING: _mm_entropy_epu8: nBits1=" << nBits1 << " has to be in range[1..8]" << std::endl;
+		if ((nBits2 > 8) || (nBits2 < 1)) std::cout << "WARNING: _mm_entropy_epu8: nBits2=" << nBits2 << " has to be in range[1..8]" << std::endl;
 		#endif
 
 		switch (nBits1) {

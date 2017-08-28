@@ -237,7 +237,7 @@ namespace hli {
 
 	namespace test {
 
-		void test_mm_hadd_epu8(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		void _mm_hadd_epu8_speed_test_1(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 		{
 			const bool HAS_MV = false;
 			const U8 MV = 0xFF;

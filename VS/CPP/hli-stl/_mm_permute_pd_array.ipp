@@ -14,6 +14,7 @@
 //#include "ammintrin.h"  // AMD-specific intrinsics
 
 #include "tools.ipp"
+#include "equal.ipp"
 #include "swap.ipp"
 
 #include "_mm_rand_si128.ipp"
@@ -60,7 +61,7 @@ namespace hli {
 
 	namespace test {
 
-		void test_mm_permute_pd_array(
+		void _mm_permute_pd_array_speed_test_1(
 			const size_t nBlocks,
 			const size_t nExperiments,
 			const bool doTests)

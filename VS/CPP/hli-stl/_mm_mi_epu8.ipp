@@ -52,7 +52,8 @@ namespace hli {
 
 	namespace test {
 
-		void test_mm_mi_epu8(
+		// Test speed of mutual information 8-bits unsigned integers no missing values
+		void _mm_mi_epu8_speed_test_1(
 			const size_t nBlocks, 
 			const size_t nExperiments, 
 			const bool doTests)
@@ -64,7 +65,6 @@ namespace hli {
 			const size_t nElements = 16 * nBlocks;
 			const int N_BITS1 = 2;
 			const int N_BITS2 = 2;
-
 
 			auto data1_r = _mm_malloc_m128i(nElements);
 			auto data2_r = _mm_malloc_m128i(nElements);

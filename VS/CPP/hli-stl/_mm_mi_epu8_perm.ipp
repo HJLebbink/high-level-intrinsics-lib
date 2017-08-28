@@ -64,7 +64,7 @@ namespace hli {
 
 	namespace test {
 
-		void test_mm_mi_epu8_perm(
+		void _mm_mi_epu8_perm_speed_test_1(
 			const size_t nBlocks,
 			const size_t nPermutations,
 			const size_t nExperiments,

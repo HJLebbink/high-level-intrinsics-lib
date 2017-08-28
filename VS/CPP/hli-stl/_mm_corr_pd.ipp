@@ -146,7 +146,7 @@ namespace hli {
 
 	namespace test {
 
-		void test_mm_corr_pd(
+		void _mm_corr_pd_speed_test_1(
 			const size_t nBlocks, 
 			const size_t nExperiments, 
 			const bool doTests)

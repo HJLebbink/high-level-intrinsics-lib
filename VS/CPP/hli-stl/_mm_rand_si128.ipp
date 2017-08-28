@@ -105,7 +105,7 @@ namespace hli {
 
 	namespace test {
 
-		void test_mm_rand_si128(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		void _mm_rand_si128_speed_test_1(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 		{
 			auto data1 = _mm_malloc_m128i(16 * nBlocks);
 			auto data2 = _mm_malloc_m128i(16 * nBlocks);

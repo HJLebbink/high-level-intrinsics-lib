@@ -102,7 +102,7 @@ namespace hli {
 
 	namespace test {
 
-		void test_mm_permute_epu8_array(
+		void _mm_permute_epu8_array_speed_test_1(
 			const size_t nBlocks, 
 			const size_t nExperiments, 
 			const bool doTests)

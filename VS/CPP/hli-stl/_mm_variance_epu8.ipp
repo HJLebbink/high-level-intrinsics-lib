@@ -106,7 +106,7 @@ namespace hli {
 
 	namespace test {
 
-		void test_mm_variance_epu8(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		void _mm_variance_epu8_speed_test_1(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 		{
 			const double delta = 0.0000001;
 			const bool HAS_MV = false;

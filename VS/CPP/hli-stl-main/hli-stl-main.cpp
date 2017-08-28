@@ -43,21 +43,21 @@ void testAll() {
 
 	const size_t nExperiments = 1000;
 
-	hli::test::test_mm_hadd_epu8(10010, nExperiments, true);
-	hli::test::test_mm_variance_epu8(10010, nExperiments, true);
-	hli::test::test_mm_corr_epu8(1010, nExperiments, true);
-	hli::test::test_mm_corr_pd(1010, nExperiments, true);
+	hli::test::_mm_hadd_epu8_speed_test_1(10010, nExperiments, true);
+	hli::test::_mm_variance_epu8_speed_test_1(10010, nExperiments, true);
+	hli::test::_mm_corr_epu8_speed_test_1(1010, nExperiments, true);
+	hli::test::_mm_corr_pd_speed_test_1(1010, nExperiments, true);
 
-	hli::test::test_mm_rand_si128(1010, nExperiments, true);
-	hli::test::test_mm_rescale_epu16(2102, nExperiments, true);
-	hli::test::test_mm_permute_epu8_array(2102, nExperiments, true);
-	hli::test::test_mm_permute_pd_array(3102, nExperiments, true);
+	hli::test::_mm_rand_si128_speed_test_1(1010, nExperiments, true);
+	hli::test::_mm_rescale_epu16_speed_test_1(2102, nExperiments, true);
+	hli::test::_mm_permute_epu8_array_speed_test_1(2102, nExperiments, true);
+	hli::test::_mm_permute_pd_array_speed_test_1(3102, nExperiments, true);
 
-	hli::test::test_mm_corr_epu8_perm(110, 1000, nExperiments, true);
+	hli::test::_mm_corr_epu8_perm_speed_test_1(110, 1000, nExperiments, true);
 
-	hli::test::test_mm_entropy_epu8(100, nExperiments, true);
-	hli::test::test_mm_mi_epu8(100, nExperiments, true);
-	hli::test::test_mm_mi_epu8_perm(100, 1000, nExperiments, true);
+	hli::test::_mm_entropy_epu8_speed_test_1(100, nExperiments, true);
+	hli::test::_mm_mi_epu8_speed_test_1(100, nExperiments, true);
+	hli::test::_mm_mi_epu8_perm_speed_test_1(100, 1000, nExperiments, true);
 }
 
 
@@ -71,11 +71,11 @@ int main()
 	{
 		const auto start = std::chrono::system_clock::now();
 
-		if (true) {
+		if (false) {
 			testAll();
 		} else {
 			const size_t nExperiments = 1000;
-			hli::test::test_mm_entropy_epu8(100, nExperiments, true);
+			hli::test::_mm_mi_epu8_speed_test_1()
 		}
 
 		const auto diff = std::chrono::system_clock::now() - start;
