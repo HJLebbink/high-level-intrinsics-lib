@@ -9,7 +9,7 @@ namespace hli {
 	inline void swapElement(
 		T * const data,
 		const int pos1,
-		const unsigned __int16 pos2)
+		const U16 pos2)
 	{
 		const T temp = data[pos1];
 		//std::cout << "INFO: _mm_permute_array::swapElement: swapping pos1=" << pos1 << " with pos2=" << pos2 << "; data=" << temp << std::endl;
@@ -20,17 +20,17 @@ namespace hli {
 	template <class T>
 	inline void swapArray(
 		T * const data,
-		const unsigned __int16 * const swap_array,
+		const U16 * const swap_array,
 		const size_t nElements)
 	{
 		for (int i = static_cast<int>(nElements) - 1; i > 0; --i) {
 #		if	_DEBUG 
 			if (i >= static_cast<int>(nElements)) {
-				std::cout << "ERROR: _mm_permutate_array:swapArray i=" << i << "; nElements=" << nElements << std::endl;
+				std::cout << "ERROR: hli::swapArray i=" << i << "; nElements=" << nElements << std::endl;
 				return;
 			}
 			if (swap_array[i] >= nElements) {
-				std::cout << "ERROR: _mm_permutate_array:swapArray i=" << i << "; swap_array[i]=" << swap_array[i] << "; nElements = " << nElements << std::endl;
+				std::cout << "ERROR: hli::swapArray i=" << i << "; swap_array[i]=" << swap_array[i] << "; nElements = " << nElements << std::endl;
 				return;
 			}
 #		endif

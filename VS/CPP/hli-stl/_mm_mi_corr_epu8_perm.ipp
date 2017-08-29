@@ -21,8 +21,8 @@ namespace hli {
 			const __m128d h1Plush2 = _mm_add_pd(h1, h2);
 
 			//Corr stuff
-			const __int8 * const ptr1 = reinterpret_cast<const __int8 * const>(std::get<0>(data1));
-			const __int8 * const ptr2 = reinterpret_cast<const __int8 * const>(std::get<0>(data2));
+			const U8 * const ptr1 = reinterpret_cast<const U8 * const>(std::get<0>(data1));
+			const U8 * const ptr2 = reinterpret_cast<const U8 * const>(std::get<0>(data2));
 
 			__int32 s11 = 0;
 			__int32 s22 = 0;
@@ -31,8 +31,8 @@ namespace hli {
 
 			for (size_t i = 0; i < nElements; ++i)
 			{
-				const unsigned __int8 d1 = ptr1[i];
-				const unsigned __int8 d2 = ptr2[i];
+				const U8 d1 = ptr1[i];
+				const U8 d2 = ptr2[i];
 				s11 += d1 * d1;
 				s22 += d2 * d2;
 				s1 += d1;
@@ -50,7 +50,7 @@ namespace hli {
 
 			double * const results_mi_double = reinterpret_cast<double * const>(std::get<0>(results_mi));
 			double * const results_corr_Double = reinterpret_cast<double * const>(std::get<0>(results_corr));
-			const __int8 * const ptr3 = reinterpret_cast<const __int8 * const>(std::get<0>(data3));
+			const U8 * const ptr3 = reinterpret_cast<const U8 * const>(std::get<0>(data3));
 
 			for (size_t permutation = 0; permutation < nPermutations; ++permutation)
 			{
@@ -71,8 +71,8 @@ namespace hli {
 				__int32 s12 = 0;
 				for (size_t i = 0; i < nElements; ++i)
 				{
-					const unsigned __int8 d1 = ptr1[i];
-					const unsigned __int8 d2 = ptr3[i];
+					const U8 d1 = ptr1[i];
+					const U8 d2 = ptr3[i];
 					s12 += d1 * d2;
 				}
 				const double s12d = static_cast<double>(s12);

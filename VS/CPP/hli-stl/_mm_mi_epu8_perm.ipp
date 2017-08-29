@@ -23,28 +23,74 @@ namespace hli {
 		{
 			//std::cout << "INFO: _mm_mi_perm_epu8_method0: N_BITS1=" << N_BITS1 << "; N_BITS2=" << N_BITS2 << "; nElements="<< nElements << std::endl;
 
-			const __m128d h1 = _mm_entropy_epu8<N_BITS1, HAS_MV, MV>(data1, nElements);
-			const __m128d h2 = _mm_entropy_epu8<N_BITS2, HAS_MV, MV>(data2, nElements);
-			const __m128d h1Plush2 = _mm_add_pd(h1, h2);
+			if constexpr (HAS_MV) {
 
-			auto data3 = deepCopy(data2);
-			auto swap = _mm_malloc_m128i(nElements << 1);
+				auto data1b = deepCopy(data1);
+				auto data2b = deepCopy(data2);
+				auto swap = _mm_malloc_m128i(nElements << 1);
 
-			double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
-			for (size_t permutation = 0; permutation < nPermutations; ++permutation)
-			{
-				_mm_permute_epu8_array(data3, nElements, swap, randInts);
-				const __m128d h1Andh2 = _mm_entropy_epu8<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data3, nElements);
-				const __m128d mi = _mm_sub_pd(h1Plush2, h1Andh2);
+				double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
+				const U8 * const data1_ptr = reinterpret_cast<const U8 * const>(std::get<0>(data1));
+				const U8 * const data2_ptr = reinterpret_cast<const U8 * const>(std::get<0>(data2));
+				U8 * const data1b_ptr = reinterpret_cast<U8 * const>(std::get<0>(data1b));
+				U8 * const data2b_ptr = reinterpret_cast<U8 * const>(std::get<0>(data2b));
 
-#					if	_DEBUG
-				if (isnan(mi.m128d_f64[0])) std::cout << "WARNING: _mm_mi_perm_epu8_method0<" << N_BITS1 << "," << N_BITS2 << ">: mi is NAN" << std::endl;
-				if (mi.m128d_f64[0] <= 0)   std::cout << "WARNING: _mm_mi_perm_epu8_method0<" << N_BITS1 << "," << N_BITS2 << ">: permutation=" << permutation << ": mi=" << mi.m128d_f64[0] << " is smaller than 0. h1=" << h1.m128d_f64[0] << "; h2 = " << h2.m128d_f64[0] << "; h1Plush2std = " << h1Plush2.m128d_f64[0] << "; h1Andh2 = " << h1Andh2.m128d_f64[0] << std::endl;
-#					endif
-				results_double[permutation] = mi.m128d_f64[0];
+				for (size_t permutation = 0; permutation < nPermutations; ++permutation)
+				{
+					for (int i = 0; i < nElements; ++i) {
+						data1b_ptr[i] = data1_ptr[i];
+						data2b_ptr[i] = data2_ptr[i];
+					}
+					_mm_permute_epu8_array(data2b, nElements, swap, randInts);
+					// copy the missing value to both data columns, this to make the separate entropy calculation correct.
+					for (int i = 0; i < nElements; ++i) {
+						if ((data1b_ptr[i] == MV) || (data2b_ptr[i] == MV)) {
+							data1b_ptr[i] = MV;
+							data2b_ptr[i] = MV;
+						}
+					}
+
+					const __m128d h1 = _mm_entropy_epu8<N_BITS1, HAS_MV, MV>(data1b, nElements);
+					const __m128d h2 = _mm_entropy_epu8<N_BITS2, HAS_MV, MV>(data2b, nElements);
+					const __m128d h1_Plus_h2 = _mm_add_pd(h1, h2);
+					const __m128d h1_And_h2 = _mm_entropy_epu8<N_BITS1, N_BITS2, HAS_MV, MV>(data1b, data2b, nElements);
+					const __m128d mi = _mm_sub_pd(h1_Plus_h2, h1_And_h2);
+
+#				if	_DEBUG
+					if (isnan(mi.m128d_f64[0])) std::cout << "WARNING: _mm_mi_perm_epu8_method0<" << N_BITS1 << "," << N_BITS2 << "," << HAS_MV << "," << (int)MV << ">: mi is NAN" << std::endl;
+					if (mi.m128d_f64[0] < 0)   std::cout << "WARNING: _mm_mi_perm_epu8_method0<" << N_BITS1 << "," << N_BITS2 << "," << HAS_MV << "," << (int)MV << ">: permutation=" << permutation << ": mi=" << mi.m128d_f64[0] << " is smaller than 0. h1=" << h1.m128d_f64[0] << "; h2 = " << h2.m128d_f64[0] << "; h1Plush2std = " << h1_Plus_h2.m128d_f64[0] << "; h1Andh2 = " << h1_And_h2.m128d_f64[0] << std::endl;
+#				endif
+					results_double[permutation] = mi.m128d_f64[0];
+				}
+				_mm_free2(data1b);
+				_mm_free2(data2b);
+				_mm_free2(swap);
 			}
-			_mm_free2(data3);
-			_mm_free2(swap);
+			else
+			{
+				const __m128d h1 = _mm_entropy_epu8<N_BITS1, HAS_MV, MV>(data1, nElements);
+				const __m128d h2 = _mm_entropy_epu8<N_BITS2, HAS_MV, MV>(data2, nElements);
+				const __m128d h1_Plus_h2 = _mm_add_pd(h1, h2);
+
+				auto data2b = deepCopy(data2);
+				auto swap = _mm_malloc_m128i(nElements << 1);
+
+				double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
+				for (size_t permutation = 0; permutation < nPermutations; ++permutation)
+				{
+					_mm_permute_epu8_array(data2b, nElements, swap, randInts);
+					const __m128d h1_And_h2 = _mm_entropy_epu8<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2b, nElements);
+					const __m128d mi = _mm_sub_pd(h1_Plus_h2, h1_And_h2);
+
+#				if	_DEBUG
+					if (isnan(mi.m128d_f64[0])) std::cout << "WARNING: _mm_mi_perm_epu8_method0<" << N_BITS1 << "," << N_BITS2 << "," << HAS_MV << "," << MV << ">: mi is NAN" << std::endl;
+					if (mi.m128d_f64[0] <= 0)   std::cout << "WARNING: _mm_mi_perm_epu8_method0<" << N_BITS1 << "," << N_BITS2 << "," << HAS_MV << "," << MV << ">: permutation=" << permutation << ": mi=" << mi.m128d_f64[0] << " is smaller than 0. h1=" << h1.m128d_f64[0] << "; h2 = " << h2.m128d_f64[0] << "; h1Plush2std = " << h1_Plus_h2.m128d_f64[0] << "; h1Andh2 = " << h1_And_h2.m128d_f64[0] << std::endl;
+#				endif
+					results_double[permutation] = mi.m128d_f64[0];
+				}
+				_mm_free2(data2b);
+				_mm_free2(swap);
+			}
 		}
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
@@ -59,7 +105,6 @@ namespace hli {
 			//TODO
 			return _mm_mi_epu8_perm_method1<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
 		}
-
 	}
 
 	namespace test {
@@ -135,6 +180,7 @@ namespace hli {
 		__m128i& randInts)
 	{
 		priv::_mm_mi_epu8_perm_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+		//priv::_mm_mi_epu8_perm_method1<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
 	}
 
 	template <bool HAS_MV, U8 MV>

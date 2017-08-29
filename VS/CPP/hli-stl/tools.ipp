@@ -6,7 +6,7 @@
 namespace hli {
 
 	using U8 = unsigned __int8;
-
+	using U16 = unsigned __int16;
 
 
 
@@ -98,27 +98,27 @@ namespace hli {
 		_mm_free(const_cast<void *>(ptr));
 	}
 
-	inline std::tuple<__int8 * const, const size_t> _mm_malloc_xmm(size_t nBytes) {
+	inline std::tuple<U8 * const, const size_t> _mm_malloc_xmm(size_t nBytes) {
 		const size_t nBytes2 = resizeNBytes<16>(nBytes);
-		return std::make_tuple(static_cast<__int8 * const>(_mm_malloc(nBytes2, 16)), nBytes2);
+		return std::make_tuple(static_cast<U8 * const>(_mm_malloc(nBytes2, 16)), nBytes2);
 	}
 	inline std::tuple<__m128d * const, const size_t> _mm_cast_m128d(
-		const std::tuple<__int8 * const, const size_t>& data)
+		const std::tuple<U8 * const, const size_t>& data)
 	{
 		return std::make_tuple(reinterpret_cast<__m128d * const>(std::get<0>(data)), std::get<1>(data));
 	}
 	inline std::tuple<const __m128d * const, const size_t> _mm_cast_m128d(
-		const std::tuple<const __int8 * const, const size_t>& data)
+		const std::tuple<const U8 * const, const size_t>& data)
 	{
 		return std::make_tuple(reinterpret_cast<const __m128d * const>(std::get<0>(data)), std::get<1>(data));
 	}
 	inline std::tuple<__m128i * const, const size_t> _mm_cast_m128i(
-		const std::tuple<__int8 * const, const size_t>& data)
+		const std::tuple<U8 * const, const size_t>& data)
 	{
 		return std::make_tuple(reinterpret_cast<__m128i * const>(std::get<0>(data)), std::get<1>(data));
 	}
 	inline std::tuple<const __m128i * const, const size_t> _mm_cast_m128i(
-		const std::tuple<const __int8 * const, const size_t>& data)
+		const std::tuple<const U8 * const, const size_t>& data)
 	{
 		return std::make_tuple(reinterpret_cast<const __m128i * const>(std::get<0>(data)), std::get<1>(data));
 	}

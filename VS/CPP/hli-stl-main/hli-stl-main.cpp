@@ -75,7 +75,7 @@ int main()
 			testAll();
 		} else {
 			const size_t nExperiments = 1000;
-			hli::test::_mm_mi_epu8_speed_test_1()
+			hli::test::_mm_permute_epu8_array_speed_test_1(139, nExperiments, true);
 		}
 
 		const auto diff = std::chrono::system_clock::now() - start;

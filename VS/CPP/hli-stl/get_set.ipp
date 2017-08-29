@@ -2,6 +2,8 @@
 #include "emmintrin.h"  // SSE
 #include "immintrin.h"  // AVX
 
+#include "tools.ipp"
+
 
 namespace hli {
 
@@ -104,63 +106,63 @@ namespace hli {
 		converter.v = V;
 		return converter.a[i];
 	}
-	inline __int16 get_i16(const __m128i& V, const size_t i)
+	inline signed __int16 get_i16(const __m128i& V, const size_t i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 8, "");
 		union {
 			__m128i v;
-			__int16 a[8];
+			signed __int16 a[8];
 		} converter;
 		converter.v = V;
 		return converter.a[i];
 	}
-	inline __int16 get_i16(const __m64& V, const size_t i)
+	inline signed __int16 get_i16(const __m64& V, const size_t i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 4, "");
 		union {
 			__m64 v;
-			__int16 a[4];
+			signed __int16 a[4];
 		} converter;
 		converter.v = V;
 		return converter.a[i];
 	}
-	inline unsigned __int16 get_u16(const __m128i& V, const size_t i)
+	inline U16 get_u16(const __m128i& V, const size_t i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 8, "");
 		union {
 			__m128i v;
-			unsigned __int16 a[8];
+			U16 a[8];
 		} converter;
 		converter.v = V;
 		return converter.a[i];
 	}
-	inline unsigned __int8 get_u8(const __m128i& V, const size_t i)
+	inline U8 get_u8(const __m128i& V, const size_t i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 16, "");
 		union {
 			__m128i v;
-			unsigned __int8 a[16];
+			U8 a[16];
 		} converter;
 		converter.v = V;
 		return converter.a[i];
 	}
-	inline unsigned __int8 get_u8(const __m128& V, const size_t i)
+	inline U8 get_u8(const __m128& V, const size_t i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 16, "");
 		union {
 			__m128 v;
-			unsigned __int8 a[16];
+			U8 a[16];
 		} converter;
 		converter.v = V;
 		return converter.a[i];
 	}
-	/*	inline unsigned __int8 get_u8(const __m256i V, const size_t i)
+	/*	inline U8 get_u8(const __m256i V, const size_t i)
 	{
 	BOOST_ASSERT_MSG_HJ(i < 32, "");
 	union
 	{
 	__m256i v;
-	unsigned __int8 a[32];
+	U8 a[32];
 	} converter;
 	converter.v = V;
 	return converter.a[i];
@@ -180,23 +182,23 @@ namespace hli {
 	/******************************************
 	* set
 	*******************************************/
-	inline void set_u8(__m128i& v, const size_t i, const unsigned __int8 d)
+	inline void set_u8(__m128i& v, const size_t i, const U8 d)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 16, "");
 		union {
 			__m128i v;
-			unsigned __int8 a[16];
+			U8 a[16];
 		} converter;
 		converter.v = v;
 		converter.a[i] = d;
 		v = converter.v;
 	}
-	inline void set_u16(__m128i& v, const size_t i, const unsigned __int16 d)
+	inline void set_u16(__m128i& v, const size_t i, const U16 d)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 8, "");
 		union {
 			__m128i v;
-			unsigned __int16 a[8];
+			U16 a[8];
 		} converter;
 		converter.v = v;
 		converter.a[i] = d;

@@ -161,24 +161,24 @@ namespace hli {
 	}
 
 	template <int N_BITS>
-	void fillRand_epu8(__int8 * const mem_addr, const size_t nBytes)
+	void fillRand_epu8(U8 * const mem_addr, const size_t nBytes)
 	{
 		const int mask = (1 << N_BITS) - 1;
 		for (size_t i = 0; i < nBytes; ++i) {
-			mem_addr[i] = static_cast<__int8>(mask & rand());
+			mem_addr[i] = static_cast<U8>(mask & rand());
 		}
 	}
 
 	template <int N_BITS>
 	void fillRand_epu8(__m128i * const mem_addr, const size_t nBytes)
 	{
-		fillRand_epu8<N_BITS>(reinterpret_cast<__int8 * const>(mem_addr), nBytes);
+		fillRand_epu8<N_BITS>(reinterpret_cast<U8 * const>(mem_addr), nBytes);
 	}
 
 	template <int N_BITS>
 	void fillRand_epu8(__m256i * const mem_addr, const size_t nBytes)
 	{
-		fillRand_epu8<N_BITS>(reinterpret_cast<__int8 * const>(mem_addr), nBytes);
+		fillRand_epu8<N_BITS>(reinterpret_cast<U8 * const>(mem_addr), nBytes);
 	}
 
 	template <int N_BITS>

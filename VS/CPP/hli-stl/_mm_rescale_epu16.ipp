@@ -29,18 +29,18 @@ namespace hli {
 			const bool showInfo = false;
 
 			if (showInfo) std::cout << "_mm_rescale_epu16_method0: nElements=" << nElements << std::endl;
-			unsigned __int16 * const ptr2 = reinterpret_cast<unsigned __int16 * const>(std::get<0>(data));
+			U16 * const ptr2 = reinterpret_cast<U16 * const>(std::get<0>(data));
 
 			for (size_t i = 0; i < nElements; ++i) {
 				//const size_t block = nElements >> 3;
 				//if (block == 178-1) std::cout << "_mm_rescale_epu16_method0: input: i=" << i << ":" << ptr2[i] << std::endl;
 
-				const unsigned __int16 original = ptr2[i];
+				const U16 original = ptr2[i];
 				const unsigned int product = original * static_cast<unsigned int>(i + 1);
 				const unsigned int result = product >> 16;
 				//if (block == 178) std::cout << "_mm_rescale_epu16_method0: i=" << i << "; original " << original << "; product " << product << "; result " << result << std::endl;
 
-				ptr2[i] = static_cast<unsigned __int16>(result);
+				ptr2[i] = static_cast<U16>(result);
 				//std::cout << "rescaleVector: after: i=" << i << ":" << ptr[i] << std::endl;
 			}
 		}
@@ -184,7 +184,7 @@ namespace hli {
 				}
 			}
 			if (doTests) {
-				__int16 k = 0;
+				U16 k = 0;
 				for (size_t block = 0; block < nBlocks; ++block) {
 					for (size_t j = 0; j < 8; ++j) {
 						if (std::get<0>(data0)[block].m128i_u16[j] > k) {

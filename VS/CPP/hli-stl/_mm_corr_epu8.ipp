@@ -24,25 +24,32 @@ namespace hli {
 
 	namespace priv {
 
-		template <bool HAS_MV, U8 MV>
+		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_ref(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
-			//const double std_dev_d1 = sqrt(var_pop_ref(data1, nElements));
-			//const double std_dev_d2 = sqrt(var_pop_ref(data1, nElements));
-			//return covar_pop_ref(data1, data2, nElements) / (std_dev_d1 * std_dev_d2);
+			if constexpr (HAS_MV) { //TODO
+				std::cout << "WARNING: _mm_corr_epu8_ref: Not implemented yet" << std::endl;
+				return _mm_setzero_pd();
+			}
+			else
+			{
+				//const double std_dev_d1 = sqrt(var_pop_ref(data1, nElements));
+				//const double std_dev_d2 = sqrt(var_pop_ref(data1, nElements));
+				//return covar_pop_ref(data1, data2, nElements) / (std_dev_d1 * std_dev_d2);
 
-			const __m128d var1 = _mm_variance_epu8_method0<HAS_MV, MV>(data1, nElements);
-			const __m128d var2 = _mm_variance_epu8_method0<HAS_MV, MV>(data2, nElements);
-			const __m128d covar = _mm_covar_epu8_ref<HAS_MV, MV>(data1, data2, nElements);
-			const __m128d corr = _mm_div_pd(covar, _mm_mul_pd(_mm_sqrt_pd(var1), _mm_sqrt_pd(var2)));
-			//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_ref: var1=" << var1.m128d_f64[0] << "; var2=" << var2.m128d_f64[0] << "; covar=" << covar.m128d_f64[0] << "; corr=" << corr.m128d_f64[0] << std::endl;
-			return corr;
+				const __m128d var1 = _mm_variance_epu8_method0<HAS_MV, MV>(data1, nElements);
+				const __m128d var2 = _mm_variance_epu8_method0<HAS_MV, MV>(data2, nElements);
+				const __m128d covar = _mm_covar_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
+				const __m128d corr = _mm_div_pd(covar, _mm_mul_pd(_mm_sqrt_pd(var1), _mm_sqrt_pd(var2)));
+				//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_ref: var1=" << var1.m128d_f64[0] << "; var2=" << var2.m128d_f64[0] << "; covar=" << covar.m128d_f64[0] << "; corr=" << corr.m128d_f64[0] << std::endl;
+				return corr;
+			}
 		}
 
-		template <int N_BITS, bool HAS_MV, U8 MV>
+		template <bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method0(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
@@ -50,14 +57,19 @@ namespace hli {
 			const __m128d average1,
 			const __m128d average2)
 		{
+			if constexpr (HAS_MV) { //TODO
+				std::cout << "WARNING: _mm_corr_epu8_method0: Not implemented yet" << std::endl;
+				return _mm_setzero_pd();
+			}
+
 			double covar = 0;
 			double var1 = 0;
 			double var2 = 0;
 			const double a1 = average1.m128d_f64[0];
 			const double a2 = average2.m128d_f64[0];
 
-			const __int8 * const ptr1 = reinterpret_cast<const __int8 * const>(std::get<0>(data1));
-			const __int8 * const ptr2 = reinterpret_cast<const __int8 * const>(std::get<0>(data2));
+			auto ptr1 = reinterpret_cast<const U8 * const>(std::get<0>(data1));
+			auto ptr2 = reinterpret_cast<const U8 * const>(std::get<0>(data2));
 
 			const size_t nBytes = std::get<1>(data1);
 
@@ -79,20 +91,20 @@ namespace hli {
 			return _mm_set1_pd(corr);
 		}
 
-		template <int N_BITS, bool HAS_MV, U8 MV>
+		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method0(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
-			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data1, nElements);
-			const auto tup2 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data2, nElements);
+			const auto tup1 = _mm_hadd_epu8<N_BITS1, HAS_MV, MV>(data1, nElements);
+			const auto tup2 = _mm_hadd_epu8<N_BITS2, HAS_MV, MV>(data2, nElements);
 			const __m128d average1 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup1)), _mm_cvtepi32_pd(std::get<1>(tup1)));
 			const __m128d average2 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup2)), _mm_cvtepi32_pd(std::get<1>(tup2)));
-			return _mm_corr_epu8_method0<N_BITS, HAS_MV, MV>(data1, data2, nElements, average1, average2);
+			return _mm_corr_epu8_method0<HAS_MV, MV>(data1, data2, nElements, average1, average2);
 		}
 
-		template <int N_BITS, bool HAS_MV, U8 MV>
+		template <bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method1(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
@@ -100,6 +112,11 @@ namespace hli {
 			const __m128d average1,
 			const __m128d average2)
 		{
+			if constexpr (HAS_MV) { //TODO
+				std::cout << "WARNING: _mm_corr_epu8_method1: Not implemented yet" << std::endl;
+				return _mm_setzero_pd();
+			}
+
 			__m128d covar = _mm_setzero_pd();
 			__m128d var1 = _mm_setzero_pd();
 			__m128d var2 = _mm_setzero_pd();
@@ -148,17 +165,17 @@ namespace hli {
 			return corr;
 		}
 
-		template <int N_BITS, bool HAS_MV, U8 MV>
+		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method1(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
-			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data1, nElements);
-			const auto tup2 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data2, nElements);
+			const auto tup1 = _mm_hadd_epu8<N_BITS1, HAS_MV, MV>(data1, nElements);
+			const auto tup2 = _mm_hadd_epu8<N_BITS2, HAS_MV, MV>(data2, nElements);
 			const __m128d average1 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup1)), _mm_cvtepi32_pd(std::get<1>(tup1)));
 			const __m128d average2 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup2)), _mm_cvtepi32_pd(std::get<1>(tup2)));
-			return _mm_corr_epu8_method1<N_BITS, HAS_MV, MV>(data1, data2, nElements, average1, average2);
+			return _mm_corr_epu8_method1<HAS_MV, MV>(data1, data2, nElements, average1, average2);
 		}
 
 		template <bool HAS_MV, U8 MV>
@@ -177,14 +194,14 @@ namespace hli {
 			return corr;
 		}
 
-		template <int N_BITS, bool HAS_MV, U8 MV>
+		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method2(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
-			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data1, nElements);
-			const auto tup2 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data2, nElements);
+			const auto tup1 = _mm_hadd_epu8<N_BITS1, HAS_MV, MV>(data1, nElements);
+			const auto tup2 = _mm_hadd_epu8<N_BITS2, HAS_MV, MV>(data2, nElements);
 			const __m128d average1 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup1)), _mm_cvtepi32_pd(std::get<1>(tup1)));
 			const __m128d average2 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup2)), _mm_cvtepi32_pd(std::get<1>(tup2)));
 			return _mm_corr_epu8_method2<HAS_MV, MV>(data1, data2, nElements, average1, average2);
@@ -196,6 +213,11 @@ namespace hli {
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
+			if constexpr (HAS_MV) { //TODO
+				std::cout << "WARNING: _mm_corr_epu8_method3: Not implemented yet" << std::endl;
+				return _mm_setzero_pd();
+			}
+
 			const size_t nBytes = std::get<1>(data1);
 			const size_t nBlocks = nBytes >> 4;
 
@@ -203,8 +225,8 @@ namespace hli {
 				std::cout << "WARNING: _mm_corr_epu8: _mm_corr_epu8_method3: nElements=" << nElements << " which is larger than 0xFFFF." << std::endl;
 			}
 
-			const unsigned __int8 * const ptr1 = reinterpret_cast<const unsigned __int8 * const>(std::get<0>(data1));
-			const unsigned __int8 * const ptr2 = reinterpret_cast<const unsigned __int8 * const>(std::get<0>(data2));
+			auto ptr1 = reinterpret_cast<const U8 * const>(std::get<0>(data1));
+			auto ptr2 = reinterpret_cast<const U8 * const>(std::get<0>(data2));
 
 			__int32 s12 = 0;
 			__int32 s11 = 0;
@@ -266,76 +288,7 @@ namespace hli {
 			return _mm_set1_pd(corr);
 		}
 
-		template <int N_BITS, bool HAS_MV, U8 MV>
-		inline __m128d calc_variance(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const size_t nElements,
-			const std::tuple<__m128d * const, const size_t>& data_double_out)
-		{
-			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data1, nElements);
-			const __m128d nTrueElements = _mm_cvtepi32_pd(std::get<1>(tup1));
-			const __m128d average = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup1)), nTrueElements);
-
-			const size_t nBytes = std::get<1>(data1);
-			const size_t nBlocksData = nBytes >> 4;
-
-			__m128d * const data_double = std::get<0>(data_double_out);
-			__m128d var = _mm_setzero_pd();
-
-			for (size_t block = 0; block < nBlocksData; ++block) {
-				const __m128i data = std::get<0>(data1)[block];
-				{
-					const __m128i d = _mm_cvtepu8_epi32(data);
-					const __m128d da = _mm_sub_pd(_mm_cvtepi32_pd(d), average);
-					const __m128d db = _mm_sub_pd(_mm_cvtepi32_pd(_mm_shuffle_epi32(d, 0b01011110)), average);
-					var = _mm_add_pd(var, _mm_mul_pd(da, da));
-					var = _mm_add_pd(var, _mm_mul_pd(db, db));
-					data_double[(8 * block) + 0] = da;
-					data_double[(8 * block) + 1] = db;
-					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 0) << "; d=" << toString_f64(da) << std::endl;
-					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 1) << "; d=" << toString_f64(db) << std::endl;
-				}
-				{
-					const __m128i d = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data, 0b01010101));
-					const __m128d da = _mm_sub_pd(_mm_cvtepi32_pd(d), average);
-					const __m128d db = _mm_sub_pd(_mm_cvtepi32_pd(_mm_shuffle_epi32(d, 0b01011110)), average);
-					var = _mm_add_pd(var, _mm_mul_pd(da, da));
-					var = _mm_add_pd(var, _mm_mul_pd(db, db));
-					data_double[(8 * block) + 2] = da;
-					data_double[(8 * block) + 3] = db;
-					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 2) << "; d=" << toString_f64(da) << std::endl;
-					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 3) << "; d=" << toString_f64(db) << std::endl;
-				}
-				{
-					const __m128i d = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data, 0b10101010));
-					const __m128d da = _mm_sub_pd(_mm_cvtepi32_pd(d), average);
-					const __m128d db = _mm_sub_pd(_mm_cvtepi32_pd(_mm_shuffle_epi32(d, 0b01011110)), average);
-					var = _mm_add_pd(var, _mm_mul_pd(da, da));
-					var = _mm_add_pd(var, _mm_mul_pd(db, db));
-					data_double[(8 * block) + 4] = da;
-					data_double[(8 * block) + 5] = db;
-					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 4) << "; d=" << toString_f64(da) << std::endl;
-					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 5) << "; d=" << toString_f64(db) << std::endl;
-				}
-				{
-					const __m128i d = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data, 0b11111111));
-					const __m128d da = _mm_sub_pd(_mm_cvtepi32_pd(d), average);
-					const __m128d db = _mm_sub_pd(_mm_cvtepi32_pd(_mm_shuffle_epi32(d, 0b01011110)), average);
-					var = _mm_add_pd(var, _mm_mul_pd(da, da));
-					var = _mm_add_pd(var, _mm_mul_pd(db, db));
-					data_double[(8 * block) + 6] = da;
-					data_double[(8 * block) + 7] = db;
-					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 6) << "; d=" << toString_f64(da) << std::endl;
-					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 7) << "; d=" << toString_f64(db) << std::endl;
-				}
-			}
-			//for (size_t block = 0; block < (nBlocksData * 8); ++block) {
-			//	std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << block << "; d=" << toString_f64(data_double[block]) << std::endl;
-			//}
-			return _mm_div_pd(_mm_hadd_pd(var, var), nTrueElements);
-		}
-
-		template <int N_BITS, bool HAS_MV, U8 MV>
+		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method4(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
@@ -348,8 +301,8 @@ namespace hli {
 			auto data1_d = _mm_malloc_m128d(nBlocksDouble * 16);
 			auto data2_d = _mm_malloc_m128d(nBlocksDouble * 16);
 
-			const __m128d var1 = calc_variance<N_BITS, HAS_MV, MV>(data1, nElements, data1_d);
-			const __m128d var2 = calc_variance<N_BITS, HAS_MV, MV>(data2, nElements, data2_d);
+			const __m128d var1 = priv::_mm_variance_epu8_method1<N_BITS1, HAS_MV, MV>(data1, nElements, data1_d);
+			const __m128d var2 = priv::_mm_variance_epu8_method1<N_BITS2, HAS_MV, MV>(data2, nElements, data2_d);
 			const __m128d var1_2 = _mm_sqrt_pd(_mm_mul_pd(var1, var2));
 			const __m128d corr = _mm_corr_dp_method3<HAS_MV, MV>(data1_d, data2_d, nElements, var1_2);
 
@@ -357,7 +310,6 @@ namespace hli {
 			_mm_free2(data2_d);
 			return corr;
 		}
-
 	}
 
 	namespace test {
@@ -381,10 +333,11 @@ namespace hli {
 				fillRand_epu8<5>(data1_r);
 				fillRand_epu8<5>(data2_r);
 
-				__int8 * const ptr1i = reinterpret_cast<__int8 * const>(std::get<0>(data1_r));
-				double * const ptr1d = reinterpret_cast<double * const>(std::get<0>(data1_D_r));
-				__int8 * const ptr2i = reinterpret_cast<__int8 * const>(std::get<0>(data2_r));
-				double * const ptr2d = reinterpret_cast<double * const>(std::get<0>(data2_D_r));
+				auto ptr1i = reinterpret_cast<U8 * const>(std::get<0>(data1_r));
+				auto ptr1d = reinterpret_cast<double * const>(std::get<0>(data1_D_r));
+				auto ptr2i = reinterpret_cast<U8 * const>(std::get<0>(data2_r));
+				auto ptr2d = reinterpret_cast<double * const>(std::get<0>(data2_D_r));
+				
 				for (size_t i = 0; i < std::get<1>(data1_r); ++i) {
 					ptr1d[i] = static_cast<double>(ptr1i[i]);
 					ptr2d[i] = static_cast<double>(ptr2i[i]);
@@ -412,12 +365,12 @@ namespace hli {
 			for (size_t i = 0; i < nExperiments; ++i)
 			{
 				timer::reset_and_start_timer();
-				result_ref = hli::priv::_mm_corr_epu8_ref<HAS_MV, MV>(data1, data2, nElements);
+				result_ref = hli::priv::_mm_corr_epu8_ref<8, 8, HAS_MV, MV>(data1, data2, nElements);
 				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
 
 				{
 					timer::reset_and_start_timer();
-					result1 = hli::priv::_mm_corr_epu8_method0<8, HAS_MV, MV>(data1, data2, nElements);
+					result1 = hli::priv::_mm_corr_epu8_method0<8, 8, HAS_MV, MV>(data1, data2, nElements);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -429,7 +382,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					result2 = hli::priv::_mm_corr_epu8_method0<6, HAS_MV, MV>(data1, data2, nElements);
+					result2 = hli::priv::_mm_corr_epu8_method0<6, 6, HAS_MV, MV>(data1, data2, nElements);
 					min2 = std::min(min2, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -442,7 +395,7 @@ namespace hli {
 
 				{
 					timer::reset_and_start_timer();
-					result3 = hli::priv::_mm_corr_epu8_method1<8, HAS_MV, MV>(data1, data2, nElements);
+					result3 = hli::priv::_mm_corr_epu8_method1<8, 8, HAS_MV, MV>(data1, data2, nElements);
 					min3 = std::min(min3, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -454,7 +407,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					result4 = hli::priv::_mm_corr_epu8_method1<6, HAS_MV, MV>(data1, data2, nElements);
+					result4 = hli::priv::_mm_corr_epu8_method1<6, 6, HAS_MV, MV>(data1, data2, nElements);
 					min4 = std::min(min4, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -467,7 +420,7 @@ namespace hli {
 
 				{
 					timer::reset_and_start_timer();
-					result5 = hli::priv::_mm_corr_epu8_method2<8, HAS_MV, MV>(data1, data2, nElements);
+					result5 = hli::priv::_mm_corr_epu8_method2<8, 8, HAS_MV, MV>(data1, data2, nElements);
 					min5 = std::min(min5, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -479,7 +432,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					result6 = hli::priv::_mm_corr_epu8_method0<6, HAS_MV, MV>(data1, data2, nElements);
+					result6 = hli::priv::_mm_corr_epu8_method0<6, 6, HAS_MV, MV>(data1, data2, nElements);
 					min6 = std::min(min6, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -503,7 +456,7 @@ namespace hli {
 				}
 				{
 					timer::reset_and_start_timer();
-					result8 = hli::priv::_mm_corr_epu8_method4<8, HAS_MV, MV>(data1, data2, nElements);
+					result8 = hli::priv::_mm_corr_epu8_method4<8, 8, HAS_MV, MV>(data1, data2, nElements);
 					min8 = std::min(min8, timer::get_elapsed_kcycles());
 
 					if (doTests) {
@@ -543,14 +496,100 @@ namespace hli {
 
 	}
 
-	template <int N_BITS, bool HAS_MV, U8 MV>
+	template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 	inline __m128d _mm_corr_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data1,
 		const std::tuple<const __m128i * const, const size_t>& data2,
 		const size_t nElements)
 	{
-//		return priv::_mm_corr_epu8_method2<N_BITS, HAS_MV, MV>(data1, data2, nElements);
-		return priv::_mm_corr_epu8_method3<HAS_MV, MV>(data1, data2, nElements);
+		if constexpr (HAS_MV) 
+		{
+			return priv::_mm_corr_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
+		}
+		else 
+		{
+			return priv::_mm_corr_epu8_method3<HAS_MV, MV>(data1, data2, nElements);
+		}
 	}
 
+	template <bool HAS_MV, U8 MV>
+	inline __m128d _mm_corr_epu8(
+		const std::tuple<const __m128i * const, const size_t>& data1,
+		const int nBits1,
+		const std::tuple<const __m128i * const, const size_t>& data2,
+		const int nBits2,
+		const size_t nElements)
+	{
+#if _DEBUG
+		if ((nBits1 > 8) || (nBits1 < 1)) std::cout << "WARNING: _mm_corr_epu8: nBits1=" << nBits1 << " has to be in range[1..8]" << std::endl;
+		if ((nBits2 > 8) || (nBits2 < 1)) std::cout << "WARNING: _mm_corr_epu8: nBits2=" << nBits2 << " has to be in range[1..8]" << std::endl;
+#endif
+
+		switch (nBits1) {
+		case 1:
+			switch (nBits2)
+			{
+			case 1: return _mm_corr_epu8<1, 1, HAS_MV, MV>(data1, data2, nElements);
+			case 2: return _mm_corr_epu8<1, 2, HAS_MV, MV>(data1, data2, nElements);
+			case 3: return _mm_corr_epu8<1, 3, HAS_MV, MV>(data1, data2, nElements);
+			case 4: return _mm_corr_epu8<1, 4, HAS_MV, MV>(data1, data2, nElements);
+			case 5: return _mm_corr_epu8<1, 5, HAS_MV, MV>(data1, data2, nElements);
+			case 6: return _mm_corr_epu8<1, 6, HAS_MV, MV>(data1, data2, nElements);
+			case 7: return _mm_corr_epu8<1, 7, HAS_MV, MV>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 2:
+			switch (nBits2)
+			{
+			case 1: return _mm_corr_epu8<2, 1, HAS_MV, MV>(data1, data2, nElements);
+			case 2: return _mm_corr_epu8<2, 2, HAS_MV, MV>(data1, data2, nElements);
+			case 3: return _mm_corr_epu8<2, 3, HAS_MV, MV>(data1, data2, nElements);
+			case 4: return _mm_corr_epu8<2, 4, HAS_MV, MV>(data1, data2, nElements);
+			case 5: return _mm_corr_epu8<2, 5, HAS_MV, MV>(data1, data2, nElements);
+			case 6: return _mm_corr_epu8<2, 6, HAS_MV, MV>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 3:
+			switch (nBits2)
+			{
+			case 1: return _mm_corr_epu8<3, 1, HAS_MV, MV>(data1, data2, nElements);
+			case 2: return _mm_corr_epu8<3, 2, HAS_MV, MV>(data1, data2, nElements);
+			case 3: return _mm_corr_epu8<3, 3, HAS_MV, MV>(data1, data2, nElements);
+			case 4: return _mm_corr_epu8<3, 4, HAS_MV, MV>(data1, data2, nElements);
+			case 5: return _mm_corr_epu8<3, 5, HAS_MV, MV>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 4:
+			switch (nBits2)
+			{
+			case 1: return _mm_corr_epu8<4, 1, HAS_MV, MV>(data1, data2, nElements);
+			case 2: return _mm_corr_epu8<4, 2, HAS_MV, MV>(data1, data2, nElements);
+			case 3: return _mm_corr_epu8<4, 3, HAS_MV, MV>(data1, data2, nElements);
+			case 4: return _mm_corr_epu8<4, 4, HAS_MV, MV>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 5:
+			switch (nBits2)
+			{
+			case 1: return _mm_corr_epu8<5, 1, HAS_MV, MV>(data1, data2, nElements);
+			case 2: return _mm_corr_epu8<5, 2, HAS_MV, MV>(data1, data2, nElements);
+			case 3: return _mm_corr_epu8<5, 3, HAS_MV, MV>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 6:
+			switch (nBits2)
+			{
+			case 1: return _mm_corr_epu8<6, 1, HAS_MV, MV>(data1, data2, nElements);
+			case 2: return _mm_corr_epu8<6, 2, HAS_MV, MV>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		case 7:
+			switch (nBits2)
+			{
+			case 1: return _mm_corr_epu8<7, 1, HAS_MV, MV>(data1, data2, nElements);
+			default: return _mm_setzero_pd();
+			}
+		default: return _mm_setzero_pd();
+		}
+	}
 }

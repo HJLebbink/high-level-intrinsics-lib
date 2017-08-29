@@ -36,8 +36,8 @@ namespace hli {
 		{
 			_mm_rand_si128_ref(swap, randInts);
 			_mm_rescale_epu16_method0(swap);
-			unsigned __int8 * const data_ptr = reinterpret_cast<unsigned __int8 * const>(std::get<0>(data));
-			unsigned __int16 * const swap_array_int = reinterpret_cast<unsigned __int16 * const>(std::get<0>(swap));
+			U8 * const data_ptr = reinterpret_cast<U8 * const>(std::get<0>(data));
+			U16 * const swap_array_int = reinterpret_cast<U16 * const>(std::get<0>(swap));
 			swapArray(data_ptr, swap_array_int, nElements);
 		}
 
@@ -49,8 +49,8 @@ namespace hli {
 		{
 			_mm_lfsr32_epu32(swap, randInts);
 			_mm_rescale_epu16_method1(swap);
-			unsigned __int8 * const data_ptr = reinterpret_cast<unsigned __int8 * const>(std::get<0>(data));
-			unsigned __int16 * const swap_array_int = reinterpret_cast<unsigned __int16 * const>(std::get<0>(swap));
+			U8 * const data_ptr = reinterpret_cast<U8 * const>(std::get<0>(data));
+			U16 * const swap_array_int = reinterpret_cast<U16 * const>(std::get<0>(swap));
 			swapArray(data_ptr, swap_array_int, nElements);
 		}
 
@@ -62,8 +62,8 @@ namespace hli {
 		{
 			_mm_lfsr32_epu32(swap, randInts);
 			_mm_rescale_epu16_method2(swap);
-			unsigned __int8 * const data_ptr = reinterpret_cast<unsigned __int8 * const>(std::get<0>(data));
-			unsigned __int16 * const swap_array_int = reinterpret_cast<unsigned __int16 * const>(std::get<0>(swap));
+			U8 * const data_ptr = reinterpret_cast<U8 * const>(std::get<0>(data));
+			U16 * const swap_array_int = reinterpret_cast<U16 * const>(std::get<0>(swap));
 			swapArray(data_ptr, swap_array_int, nElements);
 		}
 
@@ -73,10 +73,13 @@ namespace hli {
 			const std::tuple<__m128i * const, const size_t>& swap,
 			__m128i& randInts)
 		{
-			if (false) {
+			if (true) {
 				_mm_lfsr32_epu32(swap, randInts);
 				_mm_rescale_epu16_method2(swap);
 			} else {
+
+				//following code seems broken
+
 				__m128i * const ptr = std::get<0>(swap);
 				const size_t nBytes = std::get<1>(swap);
 				const size_t nBlocks = nBytes >> 4;
@@ -93,11 +96,10 @@ namespace hli {
 					m = _mm_add_epi16(m, increment);
 				}
 			}
-			unsigned __int8 * const data_ptr = reinterpret_cast<unsigned __int8 * const>(std::get<0>(data));
-			unsigned __int16 * const swap_array_int = reinterpret_cast<unsigned __int16 * const>(std::get<0>(swap));
+			U8 * const data_ptr = reinterpret_cast<U8 * const>(std::get<0>(data));
+			U16 * const swap_array_int = reinterpret_cast<U16 * const>(std::get<0>(swap));
 			swapArray(data_ptr, swap_array_int, nElements);
 		}
-
 	}
 
 	namespace test {
@@ -112,7 +114,7 @@ namespace hli {
 				return;
 			}
 
-			const bool HAS_MV = false;
+			const bool HAS_MV = true;
 			const U8 MV = 0xFF;
 
 			const size_t nElements = 8 * nBlocks;
@@ -245,7 +247,18 @@ namespace hli {
 		const std::tuple<__m128i * const, const size_t>& swap,
 		__m128i& randInts)
 	{
-		//std::cout << "INFO: _mm_permute_array::_mm_permute_epu8_array: nBytes=" << nBytes << std::endl;
-		priv::_mm_permute_epu8_array_method3(data, nElements, swap, randInts);
+#if _DEBUG
+		size_t nBytes_Data = std::get<1>(data);
+		if (nBytes_Data < nElements) std::cout << "ERROR: _mm_permute_epu8_array: nBytes_Data=" << nBytes_Data << " is smaller than nElements=" << nElements << ".";
+		size_t nBytes_Swap = std::get<1>(swap);
+		if (nBytes_Swap < nElements*2) std::cout << "ERROR: _mm_permute_epu8_array: nBytes_Swap=" << nBytes_Swap << " is smaller than nElements*2=" << nElements*2 << ".";
+		//printf("INFO: _mm_permute_epu8_array: nElements=%d; data.nBytes=%d; swap.nBytes=%d\n", nElements, std::get<1>(data), std::get<1>(swap));
+#endif
+
+		priv::_mm_permute_epu8_array_method0(data, nElements, swap, randInts);
+		// there seems to be a bug with the other methods
+		//priv::_mm_permute_epu8_array_method1(data, nElements, swap, randInts);
+		//priv::_mm_permute_epu8_array_method2(data, nElements, swap, randInts);
+		//priv::_mm_permute_epu8_array_method3(data, nElements, swap, randInts);
 	}
 }

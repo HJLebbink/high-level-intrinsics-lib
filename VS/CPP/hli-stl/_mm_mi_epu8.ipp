@@ -24,18 +24,55 @@ namespace hli {
 
 	namespace priv {
 
+		const double MARGIN = 1E-15;
+
+
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_mi_epu8_method0(
 			const std::tuple<const __m128i * const, const size_t>& data1,
 			const std::tuple<const __m128i * const, const size_t>& data2,
 			const size_t nElements)
 		{
-			const __m128d h1 = priv::_mm_entropy_epu8_method0<N_BITS1, HAS_MV, MV>(data1, nElements);
-			const __m128d h2 = priv::_mm_entropy_epu8_method0<N_BITS2, HAS_MV, MV>(data2, nElements);
-			const __m128d h1Plush2 = _mm_add_pd(h1, h2);
-			const __m128d h1Andh2 = priv::_mm_entropy_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
-			const __m128d mi = _mm_sub_pd(h1Plush2, h1Andh2);
-			return mi;
+
+			if constexpr (HAS_MV) {
+
+				auto data1b = deepCopy(data1);
+				auto data2b = deepCopy(data2);
+				auto data1b_ptr = reinterpret_cast<U8 * const>(std::get<0>(data1b));
+				auto data2b_ptr = reinterpret_cast<U8 * const>(std::get<0>(data2b));
+
+				// copy the missing value to both data columns, this to make the separate entropy calculation correct.
+				for (int i = 0; i < nElements; ++i) {
+					if ((data1b_ptr[i] == MV) || (data2b_ptr[i] == MV)) {
+						data1b_ptr[i] = MV;
+						data2b_ptr[i] = MV;
+					}
+				}
+
+				const __m128d h1 = _mm_entropy_epu8<N_BITS1, HAS_MV, MV>(data1b, nElements);
+				const __m128d h2 = _mm_entropy_epu8<N_BITS2, HAS_MV, MV>(data2b, nElements);
+				const __m128d h1_Plus_h2 = _mm_add_pd(h1, h2);
+				const __m128d h1_And_h2 = _mm_entropy_epu8<N_BITS1, N_BITS2, HAS_MV, MV>(data1b, data2b, nElements);
+				const __m128d mi = _mm_sub_pd(h1_Plus_h2, h1_And_h2);
+
+#				if	_DEBUG
+				if (isnan(mi.m128d_f64[0])) std::cout << "WARNING: _mm_mi_epu8_method0<" << N_BITS1 << "," << N_BITS2 << "," << HAS_MV << "," << (int)MV << ">: mi is NAN" << std::endl;
+				if (mi.m128d_f64[0] < -MARGIN)   std::cout << "WARNING: _mm_mi_epu8_method0<" << N_BITS1 << "," << N_BITS2 << "," << HAS_MV << "," << (int)MV << ">: mi=" << mi.m128d_f64[0] << " is smaller than 0. h1=" << h1.m128d_f64[0] << "; h2 = " << h2.m128d_f64[0] << "; h1Plush2std = " << h1_Plus_h2.m128d_f64[0] << "; h1Andh2 = " << h1_And_h2.m128d_f64[0] << std::endl;
+#				endif
+
+				_mm_free2(data1b);
+				_mm_free2(data2b);
+				return mi;
+			}
+			else 
+			{
+				const __m128d h1 = priv::_mm_entropy_epu8_method0<N_BITS1, HAS_MV, MV>(data1, nElements);
+				const __m128d h2 = priv::_mm_entropy_epu8_method0<N_BITS2, HAS_MV, MV>(data2, nElements);
+				const __m128d h1Plush2 = _mm_add_pd(h1, h2);
+				const __m128d h1Andh2 = priv::_mm_entropy_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
+				const __m128d mi = _mm_sub_pd(h1Plush2, h1Andh2);
+				return mi;
+			}
 		}
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
@@ -47,7 +84,6 @@ namespace hli {
 			//TODO
 			return _mm_mi_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
 		}
-
 	}
 
 	namespace test {
@@ -126,6 +162,11 @@ namespace hli {
 		const int nBits2,
 		const size_t nElements)
 	{
+#if _DEBUG
+		if ((nBits1 > 8) || (nBits1 < 1)) std::cout << "WARNING: _mm_mi_epu8: nBits1=" << nBits1 << " has to be in range[1..8]" << std::endl;
+		if ((nBits2 > 8) || (nBits2 < 1)) std::cout << "WARNING: _mm_mi_epu8: nBits2=" << nBits2 << " has to be in range[1..8]" << std::endl;
+#endif
+
 		switch (nBits1) {
 		case 1:
 			switch (nBits2) 

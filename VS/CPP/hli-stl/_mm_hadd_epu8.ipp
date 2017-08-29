@@ -29,7 +29,7 @@ namespace hli {
 			const size_t nElements)
 		{
 			const size_t nBytes = std::get<1>(data);
-			const U8 * const ptr = reinterpret_cast<const U8 * const>(std::get<0>(data));
+			auto ptr = reinterpret_cast<const U8 * const>(std::get<0>(data));
 			unsigned __int32 sum = 0;
 
 			if (HAS_MV) {
@@ -348,7 +348,7 @@ namespace hli {
 		}
 	}
 
-	// Horizontally add all 8-bit integers in mem_addr (with nBytes).
+	// Horizontally add all 8-bit integers in data (with nBytes). return sum and nTrueElements
 	// Operation:
 	// tmp := sum(mem_addr)
 	// dst[31:0] := tmp
@@ -360,7 +360,13 @@ namespace hli {
 		const std::tuple<const __m128i * const, const size_t>& data,
 		const size_t nElements)
 	{
-		return priv::_mm_hadd_epu8_method1<N_BITS, HAS_MV, MV>(data, nElements);
+#if _DEBUG
+		const size_t nBytes = std::get<1>(data);
+		if (nBytes < nElements) std::cout << "ERROR: _mm_hadd_epu8: nElements (" << nElements << ") is too large for the number of bytes (" << nBytes << ")" << std::endl;
+#endif
+
+		return priv::_mm_hadd_epu8_method0<HAS_MV, MV>(data, nElements);
+		//return priv::_mm_hadd_epu8_method1<N_BITS, HAS_MV, MV>(data, nElements);
 		//return priv::_mm_hadd_epu8_method2<N_BITS, HAS_MV, MV>(data);
 	}
 }

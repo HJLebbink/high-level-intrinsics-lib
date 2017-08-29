@@ -13,6 +13,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hli-stl-main", "CPP\hli-stl
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hli-lib", "CPP\hli-lib\hli-lib.vcxproj", "{47507498-5B7E-4B3C-A9B1-7A9C5185223E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hli-cli-main", "CSHARP\hli-cli-main\hli-cli-main.csproj", "{3C1705AA-D793-4702-94DE-D103A782D9FF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E98F8B85-5FB1-41B3-B528-6A2162CDE738} = {E98F8B85-5FB1-41B3-B528-6A2162CDE738}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,6 +130,30 @@ Global
 		{47507498-5B7E-4B3C-A9B1-7A9C5185223E}.Release|x64.Build.0 = Release|x64
 		{47507498-5B7E-4B3C-A9B1-7A9C5185223E}.Release|x86.ActiveCfg = Release|Win32
 		{47507498-5B7E-4B3C-A9B1-7A9C5185223E}.Release|x86.Build.0 = Release|Win32
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.Debug|x64.Build.0 = Debug|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.Debug|x86.Build.0 = Debug|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.R_Avx|Any CPU.ActiveCfg = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.R_Avx|Any CPU.Build.0 = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.R_Avx|x64.ActiveCfg = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.R_Avx|x64.Build.0 = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.R_Avx|x86.ActiveCfg = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.R_Avx|x86.Build.0 = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.R_Sse2|Any CPU.ActiveCfg = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.R_Sse2|Any CPU.Build.0 = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.R_Sse2|x64.ActiveCfg = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.R_Sse2|x64.Build.0 = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.R_Sse2|x86.ActiveCfg = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.R_Sse2|x86.Build.0 = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.Release|x64.ActiveCfg = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.Release|x64.Build.0 = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.Release|x86.ActiveCfg = Release|Any CPU
+		{3C1705AA-D793-4702-94DE-D103A782D9FF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

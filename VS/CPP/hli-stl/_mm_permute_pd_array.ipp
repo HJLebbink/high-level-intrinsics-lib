@@ -36,7 +36,7 @@ namespace hli {
 			{	// perform the swapping, cannot be done in a vectorized manner
 				__m128d * const tmp = std::get<0>(data);
 				double * const data2 = reinterpret_cast<double * const>(tmp);
-				unsigned __int16 * const swap_array_int = reinterpret_cast<unsigned __int16 * const>(std::get<0>(swap));
+				U16 * const swap_array_int = reinterpret_cast<U16 * const>(std::get<0>(swap));
 				swapArray(data2, swap_array_int, nElements);
 			}
 		}
@@ -53,7 +53,7 @@ namespace hli {
 			{	// perform the swapping, cannot be done in a vectorized manner
 				__m128d * const tmp = std::get<0>(data);
 				double * const data2 = reinterpret_cast<double * const>(tmp);
-				unsigned __int16 * const swap_array_int = reinterpret_cast<unsigned __int16 * const>(std::get<0>(swap));
+				U16 * const swap_array_int = reinterpret_cast<U16 * const>(std::get<0>(swap));
 				swapArray(data2, swap_array_int, nElements);
 			}
 		}

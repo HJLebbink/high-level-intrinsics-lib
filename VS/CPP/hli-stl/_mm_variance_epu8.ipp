@@ -32,7 +32,7 @@ namespace hli {
 
 			const double average = static_cast<double>(std::get<0>(tup).m128i_u32[0]) / nTrueElements;
 			
-			const unsigned __int8 * const ptr = reinterpret_cast<const unsigned __int8 * const>(std::get<0>(data));
+			const U8 * const ptr = reinterpret_cast<const U8 * const>(std::get<0>(data));
 			double sum = 0;
 			for (size_t i = 0; i < nElements; ++i) {
 				double d = static_cast<double>(ptr[i]) - average;
@@ -102,6 +102,81 @@ namespace hli {
 			const __m128d nElements = _mm_set1_pd(static_cast<double>(nBytes));
 			return _mm_div_pd(_mm_hadd_pd(result_a, result_a), nElements);
 		}
+
+		template <int N_BITS, bool HAS_MV, U8 MV>
+		inline __m128d _mm_variance_epu8_method1(
+			const std::tuple<const __m128i * const, const size_t>& data1,
+			const size_t nElements,
+			const std::tuple<__m128d * const, const size_t>& data_double_out)
+		{
+			if constexpr (HAS_MV) { //TODO
+				std::cout << "WARNING: _mm_variance_epu8_method1: Not implemented yet" << std::endl;
+				return _mm_setzero_pd();
+			}
+
+			const auto tup1 = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data1, nElements);
+			const __m128d nTrueElements = _mm_cvtepi32_pd(std::get<1>(tup1));
+			const __m128d average = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup1)), nTrueElements);
+
+			const size_t nBytes = std::get<1>(data1);
+			const size_t nBlocksData = nBytes >> 4;
+
+			__m128d * const data_double = std::get<0>(data_double_out);
+			__m128d var = _mm_setzero_pd();
+
+			for (size_t block = 0; block < nBlocksData; ++block) {
+				const __m128i data = std::get<0>(data1)[block];
+				{
+					const __m128i d = _mm_cvtepu8_epi32(data);
+					const __m128d da = _mm_sub_pd(_mm_cvtepi32_pd(d), average);
+					const __m128d db = _mm_sub_pd(_mm_cvtepi32_pd(_mm_shuffle_epi32(d, 0b01011110)), average);
+					var = _mm_add_pd(var, _mm_mul_pd(da, da));
+					var = _mm_add_pd(var, _mm_mul_pd(db, db));
+					data_double[(8 * block) + 0] = da;
+					data_double[(8 * block) + 1] = db;
+					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 0) << "; d=" << toString_f64(da) << std::endl;
+					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 1) << "; d=" << toString_f64(db) << std::endl;
+				}
+				{
+					const __m128i d = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data, 0b01010101));
+					const __m128d da = _mm_sub_pd(_mm_cvtepi32_pd(d), average);
+					const __m128d db = _mm_sub_pd(_mm_cvtepi32_pd(_mm_shuffle_epi32(d, 0b01011110)), average);
+					var = _mm_add_pd(var, _mm_mul_pd(da, da));
+					var = _mm_add_pd(var, _mm_mul_pd(db, db));
+					data_double[(8 * block) + 2] = da;
+					data_double[(8 * block) + 3] = db;
+					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 2) << "; d=" << toString_f64(da) << std::endl;
+					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 3) << "; d=" << toString_f64(db) << std::endl;
+				}
+				{
+					const __m128i d = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data, 0b10101010));
+					const __m128d da = _mm_sub_pd(_mm_cvtepi32_pd(d), average);
+					const __m128d db = _mm_sub_pd(_mm_cvtepi32_pd(_mm_shuffle_epi32(d, 0b01011110)), average);
+					var = _mm_add_pd(var, _mm_mul_pd(da, da));
+					var = _mm_add_pd(var, _mm_mul_pd(db, db));
+					data_double[(8 * block) + 4] = da;
+					data_double[(8 * block) + 5] = db;
+					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 4) << "; d=" << toString_f64(da) << std::endl;
+					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 5) << "; d=" << toString_f64(db) << std::endl;
+				}
+				{
+					const __m128i d = _mm_cvtepu8_epi32(_mm_shuffle_epi32(data, 0b11111111));
+					const __m128d da = _mm_sub_pd(_mm_cvtepi32_pd(d), average);
+					const __m128d db = _mm_sub_pd(_mm_cvtepi32_pd(_mm_shuffle_epi32(d, 0b01011110)), average);
+					var = _mm_add_pd(var, _mm_mul_pd(da, da));
+					var = _mm_add_pd(var, _mm_mul_pd(db, db));
+					data_double[(8 * block) + 6] = da;
+					data_double[(8 * block) + 7] = db;
+					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 6) << "; d=" << toString_f64(da) << std::endl;
+					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 7) << "; d=" << toString_f64(db) << std::endl;
+				}
+			}
+			//for (size_t block = 0; block < (nBlocksData * 8); ++block) {
+			//	std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << block << "; d=" << toString_f64(data_double[block]) << std::endl;
+			//}
+			return _mm_div_pd(_mm_hadd_pd(var, var), nTrueElements);
+		}
+
 	}
 
 	namespace test {
