@@ -14,9 +14,11 @@
 //#include "immintrin.h"  // avx, avx2, avx512, FP16C, KNCNI, FMA
 //#include "ammintrin.h"  // AMD-specific intrinsics
 
-namespace hli {
-	
-	namespace priv {
+namespace hli
+{
+
+	namespace priv
+	{
 
 		inline __m128i _mm_freq_epu8_nBits2_method1(
 			const std::tuple<const __m128i * const, const size_t>& data)
@@ -32,7 +34,8 @@ namespace hli {
 			const size_t nBlocks = std::get<1>(data) >> 4;
 			size_t block;
 
-			for (block = 0; block < nBlocks - 4; block += 4) {
+			for (block = 0; block < nBlocks - 4; block += 4)
+			{
 
 				const __m128i d0 = ptr[block + 0];
 				const __m128i d1 = ptr[block + 1];
@@ -60,7 +63,8 @@ namespace hli {
 				freq = _mm_add_epi32(freq, _mm_set_epi32(nBits0, nBits1, nBits2, 0));
 			}
 
-			for (; block < nBlocks; ++block) {
+			for (; block < nBlocks; ++block)
+			{
 				const __m128i d0 = ptr[block];
 				const int nBits0 = static_cast<int>(_mm_popcnt_u64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask0))));
 				const int nBits1 = static_cast<int>(_mm_popcnt_u64(_mm_movemask_epi8(_mm_cmpeq_epi8(d0, mask1))));
@@ -88,13 +92,15 @@ namespace hli {
 			const size_t nBlocks = std::get<1>(data) >> 4;
 			const size_t nLoops = nBlocks >> 6; //divide by 2^6=64
 
-			for (size_t block = 0; block < nBlocks; ++block) {
+			for (size_t block = 0; block < nBlocks; ++block)
+			{
 				const __m128i d0 = ptr[block + 0];
 				freq0 = _mm_add_epi8(freq0, _mm_and_si128(_mm_cmpeq_epi8(d0, mask_0_epu8), mask_1_epu8));
 				freq1 = _mm_add_epi8(freq1, _mm_and_si128(_mm_cmpeq_epi8(d0, mask_1_epu8), mask_1_epu8));
 				freq2 = _mm_add_epi8(freq2, _mm_and_si128(_mm_cmpeq_epi8(d0, mask_2_epu8), mask_1_epu8));
 
-				if ((block & 0x80) == 0) {
+				if ((block & 0x80) == 0)
+				{
 					freq0 = _mm_sad_epu8(freq0, mask_0_epu8);
 					freq = _mm_add_epi32(freq, _mm_shuffle_epi32(freq0, _MM_SHUFFLE_EPI32_INT(2, 3, 3, 3)));
 					freq = _mm_add_epi32(freq, _mm_shuffle_epi32(freq0, _MM_SHUFFLE_EPI32_INT(0, 3, 3, 3)));
@@ -150,7 +156,8 @@ namespace hli {
 
 	}
 
-	namespace test {
+	namespace test
+	{
 
 	}
 
@@ -158,9 +165,10 @@ namespace hli {
 	inline __m128i _mm_freq_epu8(
 		const std::tuple<const __m128i * const, const size_t>& data)
 	{
-		switch (N_BITS) {
-		case 2: return _mm_freq_epu8_nBits2(data)
-		default: return _mm_setzero_si128();
+		switch (N_BITS)
+		{
+			case 2: return _mm_freq_epu8_nBits2(data)
+			default: return _mm_setzero_si128();
 		}
 	}
 }

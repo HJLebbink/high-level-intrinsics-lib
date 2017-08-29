@@ -17,9 +17,11 @@
 
 
 
-namespace hli {
+namespace hli
+{
 
-	namespace priv {
+	namespace priv
+	{
 
 		inline void _mm_rescale_epu16_method0(
 			const std::tuple<__m128i * const, const size_t>& data)
@@ -31,7 +33,8 @@ namespace hli {
 			if (showInfo) std::cout << "_mm_rescale_epu16_method0: nElements=" << nElements << std::endl;
 			U16 * const ptr2 = reinterpret_cast<U16 * const>(std::get<0>(data));
 
-			for (size_t i = 0; i < nElements; ++i) {
+			for (size_t i = 0; i < nElements; ++i)
+			{
 				//const size_t block = nElements >> 3;
 				//if (block == 178-1) std::cout << "_mm_rescale_epu16_method0: input: i=" << i << ":" << ptr2[i] << std::endl;
 
@@ -58,7 +61,8 @@ namespace hli {
 
 			if (showInfo) std::cout << "_mm_rescale_epu16_method1: increment=" << toString_i32(increment) << std::endl;
 
-			for (size_t i = 0; i < nBlocks; ++i) {
+			for (size_t i = 0; i < nBlocks; ++i)
+			{
 				const __m128i block = ptr[i];
 				if (showInfo) std::cout << "_mm_rescale_epu16_method1: input data=" << toString_u16(block) << std::endl;
 
@@ -81,7 +85,7 @@ namespace hli {
 				if (showInfo) std::cout << "_mm_rescale_epu16_method1: output int1 " << toString_i32(f3_int1) << std::endl;
 				const __m128i f3_int2 = _mm_srli_epi32(product2, 16); //Shifts the 4 signed or unsigned 32 - bit integers in a right by count bits while shifting in zeros.
 				if (showInfo) std::cout << "_mm_rescale_epu16_method1: output int2 " << toString_i32(f3_int2) << std::endl;
-	
+
 				const __m128i saturated = _mm_packs_epi32(f3_int1, f3_int2);
 				if (showInfo) std::cout << "_mm_rescale_epu16_method1: output short " << toString_u16(saturated) << std::endl;
 
@@ -114,14 +118,16 @@ namespace hli {
 		}
 	}
 
-	namespace test {
+	namespace test
+	{
 
 		void _mm_rescale_epu16_speed_test_1(
 			const size_t nBlocks,
 			const size_t nExperiments,
 			const bool doTests)
 		{
-			if ((nBlocks * 8) > 0xFFFF) {
+			if ((nBlocks * 8) > 0xFFFF)
+			{
 				std::cout << "WARNING: test_mm_rescale_epu16: too many blocks=" << nBlocks << std::endl;
 				return;
 			}
@@ -154,10 +160,14 @@ namespace hli {
 					hli::priv::_mm_rescale_epu16_method1(data1);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
-					if (doTests) {
-						for (size_t block = 0; block < nBlocks; ++block) {
-							for (size_t j = 0; j < 8; ++j) {
-								if (std::abs(std::get<0>(data0)[block].m128i_u16[j] != std::get<0>(data1)[block].m128i_u16[j])) {
+					if (doTests)
+					{
+						for (size_t block = 0; block < nBlocks; ++block)
+						{
+							for (size_t j = 0; j < 8; ++j)
+							{
+								if (std::abs(std::get<0>(data0)[block].m128i_u16[j] != std::get<0>(data1)[block].m128i_u16[j]))
+								{
 									std::cout << "WARNING: test mm_rescale_epu16: result0=" << hli::toString_u16(std::get<0>(data0)[block]) << "; result1=" << hli::toString_u16(std::get<0>(data1)[block]) << std::endl;
 									return;
 								}
@@ -171,10 +181,14 @@ namespace hli {
 					hli::priv::_mm_rescale_epu16_method2(data2);
 					min2 = std::min(min2, timer::get_elapsed_kcycles());
 
-					if (doTests) {
-						for (size_t block = 0; block < nBlocks; ++block) {
-							for (size_t j = 0; j < 8; ++j) {
-								if (std::abs(std::get<0>(data0)[block].m128i_u16[j] != std::get<0>(data2)[block].m128i_u16[j])) {
+					if (doTests)
+					{
+						for (size_t block = 0; block < nBlocks; ++block)
+						{
+							for (size_t j = 0; j < 8; ++j)
+							{
+								if (std::abs(std::get<0>(data0)[block].m128i_u16[j] != std::get<0>(data2)[block].m128i_u16[j]))
+								{
 									std::cout << "WARNING: test mm_rescale_epu16: result0=" << hli::toString_u16(std::get<0>(data0)[block]) << "; result2=" << hli::toString_u16(std::get<0>(data2)[block]) << std::endl;
 									return;
 								}
@@ -183,11 +197,15 @@ namespace hli {
 					}
 				}
 			}
-			if (doTests) {
+			if (doTests)
+			{
 				U16 k = 0;
-				for (size_t block = 0; block < nBlocks; ++block) {
-					for (size_t j = 0; j < 8; ++j) {
-						if (std::get<0>(data0)[block].m128i_u16[j] > k) {
+				for (size_t block = 0; block < nBlocks; ++block)
+				{
+					for (size_t j = 0; j < 8; ++j)
+					{
+						if (std::get<0>(data0)[block].m128i_u16[j] > k)
+						{
 							std::cout << "WARNING: test mm_rescale_epu16: position " << k << " has value " << std::get<0>(data0)[block].m128i_u16[j] << " which is too large" << std::endl;
 							return;
 						}

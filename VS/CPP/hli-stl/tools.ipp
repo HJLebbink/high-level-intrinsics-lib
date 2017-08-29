@@ -3,7 +3,8 @@
 #include <tuple>
 #include "emmintrin.h"
 
-namespace hli {
+namespace hli
+{
 
 	using U8 = unsigned __int8;
 	using U16 = unsigned __int16;
@@ -15,10 +16,10 @@ namespace hli {
 	//{
 	//	return ((d & 0b11) << 6) | ((c & 0b11) << 4) | ((b & 0b11) << 2) | ((a & 0b11) << 0);
 	//}
-#	define _MM_SHUFFLE_EPI32_INT(d, c, b, a) ((((d) & 0b11) << 6) | (((c) & 0b11) << 4) | (((b) & 0b11) << 2) | (((a) & 0b11) << 0))
+	#	define _MM_SHUFFLE_EPI32_INT(d, c, b, a) ((((d) & 0b11) << 6) | (((c) & 0b11) << 4) | (((b) & 0b11) << 2) | (((a) & 0b11) << 0))
 
 
-	// NO shuffle = 3, 2, 1, 0
+		// NO shuffle = 3, 2, 1, 0
 	static const int _MM_SHUFFLE_EPI32_3210 = _MM_SHUFFLE_EPI32_INT(3, 2, 1, 0);
 
 
@@ -26,56 +27,61 @@ namespace hli {
 	/*
 	Swap high 64-bits with low 64-bits
 	*/
-	inline __m128i _mm_swap_64(const __m128i d) {
+	inline __m128i _mm_swap_64(const __m128i d)
+	{
 		return _mm_shuffle_epi32(d, _MM_SHUFFLE_EPI32_INT(1, 0, 3, 2));
 	}
 
 	/*
 	Swap high 64-bits with low 64-bits
 	*/
-	inline __m128d _mm_swap_64(const __m128d d) {
+	inline __m128d _mm_swap_64(const __m128d d)
+	{
 		return _mm_castsi128_pd(_mm_swap_64(_mm_castpd_si128(d)));
 	}
 
 	/*
 	Swap high 64-bits with low 64-bits
 	*/
-	inline __m128 _mm_swap_64(const __m128 d) {
+	inline __m128 _mm_swap_64(const __m128 d)
+	{
 		return _mm_castsi128_ps(_mm_swap_64(_mm_castps_si128(d)));
 	}
 
 	template <size_t ALIGN>
 	inline size_t resizeNBytes(size_t nBytes)
 	{
-		switch (nBytes) {
-		case 16: return nBytes + (((nBytes & 0b1111) == 0) ? 0 : (16 - (nBytes & 0b1111)));
-		case 32: return nBytes + (((nBytes & 0b11111) == 0) ? 0 : (32 - (nBytes & 0b11111)));
-		case 64: return nBytes + (((nBytes & 0b111111) == 0) ? 0 : (64 - (nBytes & 0b111111)));
-		default: return nBytes;
+		switch (nBytes)
+		{
+			case 16: return nBytes + (((nBytes & 0b1111) == 0) ? 0 : (16 - (nBytes & 0b1111)));
+			case 32: return nBytes + (((nBytes & 0b11111) == 0) ? 0 : (32 - (nBytes & 0b11111)));
+			case 64: return nBytes + (((nBytes & 0b111111) == 0) ? 0 : (64 - (nBytes & 0b111111)));
+			default: return nBytes;
 		}
 	}
 
 	inline size_t resizeNBytes(size_t nBytes, size_t align)
 	{
-		switch (align) {
-		case 16: return resizeNBytes<16>(nBytes);
-		case 32: return resizeNBytes<32>(nBytes);
-		case 64: return resizeNBytes<64>(nBytes);
-		default: return nBytes;
+		switch (align)
+		{
+			case 16: return resizeNBytes<16>(nBytes);
+			case 32: return resizeNBytes<32>(nBytes);
+			case 64: return resizeNBytes<64>(nBytes);
+			default: return nBytes;
 		}
 	}
 
 	template <class T>
 	inline void copy(
 		const std::tuple<const T * const, const size_t>& src,
-		const std::tuple<T * const, const size_t>& dst) 
+		const std::tuple<T * const, const size_t>& dst)
 	{
 		memcpy(std::get<0>(dst), std::get<0>(src), std::get<1>(dst));
 	}
 
 
 	inline std::tuple<__m128d * const, const size_t> deepCopy(
-		const std::tuple<const __m128d * const, const size_t>& in) 
+		const std::tuple<const __m128d * const, const size_t>& in)
 	{
 		const size_t nBytes = std::get<1>(in);
 		__m128d * const copy = static_cast<__m128d * const>(_mm_malloc(nBytes, 16));
@@ -84,7 +90,7 @@ namespace hli {
 	}
 
 	inline std::tuple<__m128i * const, const size_t> deepCopy(
-		const std::tuple<const __m128i * const, const size_t>& in) 
+		const std::tuple<const __m128i * const, const size_t>& in)
 	{
 		const size_t nBytes = std::get<1>(in);
 		__m128i * const copy = static_cast<__m128i * const>(_mm_malloc(nBytes, 16));
@@ -93,12 +99,14 @@ namespace hli {
 	}
 
 	template <class T>
-	inline void _mm_free2(const std::tuple<T * const, const size_t>& t) {
+	inline void _mm_free2(const std::tuple<T * const, const size_t>& t)
+	{
 		const void * const ptr = reinterpret_cast<const void *>(std::get<0>(t));
 		_mm_free(const_cast<void *>(ptr));
 	}
 
-	inline std::tuple<U8 * const, const size_t> _mm_malloc_xmm(size_t nBytes) {
+	inline std::tuple<U8 * const, const size_t> _mm_malloc_xmm(size_t nBytes)
+	{
 		const size_t nBytes2 = resizeNBytes<16>(nBytes);
 		return std::make_tuple(static_cast<U8 * const>(_mm_malloc(nBytes2, 16)), nBytes2);
 	}
@@ -170,7 +178,7 @@ namespace hli {
 
 	inline double getDouble(
 		const std::tuple<const __m128d * const, const size_t>& data,
-		const size_t i) 
+		const size_t i)
 	{
 		const double * const ptr = reinterpret_cast<const double * const>(std::get<0>(data));
 		return ptr[i];

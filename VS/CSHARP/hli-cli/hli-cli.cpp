@@ -226,7 +226,7 @@ namespace hli_cli {
 	}
 
 #	pragma managed
-	void HliCli::_mm_corr_perm_epu8(
+	void HliCli::_mm_corr_epu8_perm(
 		List<Byte>^ data1,
 		int nBits1,
 		List<Byte>^ data2,
@@ -404,7 +404,7 @@ namespace hli_cli {
 	}
 
 #	pragma managed
-	void HliCli::_mm_mi_perm_epu8(
+	void HliCli::_mm_mi_epu8_perm(
 		List<Byte>^ data1,
 		int nBits1,
 		List<Byte>^ data2,
@@ -486,7 +486,7 @@ namespace hli_cli {
 	}
 
 #	pragma managed
-	void HliCli::_mm_mi_corr_perm_epu8(
+	void HliCli::_mm_mi_corr_epu8_perm(
 		List<Byte>^ data1,
 		int nBits1,
 		List<Byte>^ data2,

@@ -16,9 +16,11 @@
 
 #include "toString.ipp"
 
-namespace hli {
+namespace hli
+{
 
-	namespace priv {
+	namespace priv
+	{
 		inline __m128i lfsr32_galois(const __m128i i)
 		{
 			const __m128i i1 = _mm_and_si128(i, _mm_set1_epi32(1u));
@@ -70,7 +72,8 @@ namespace hli {
 			unsigned int r3 = randInts.m128i_u32[3];
 
 			const size_t nBlocks = nBytes >> 4;
-			for (size_t block = 0; block < nBlocks; ++block) {
+			for (size_t block = 0; block < nBlocks; ++block)
+			{
 				r0 = nextRandInt(r0);
 				r1 = nextRandInt(r1);
 				r2 = nextRandInt(r2);
@@ -96,14 +99,16 @@ namespace hli {
 			const size_t nBytes = std::get<1>(data);
 
 			const size_t nBlocks = nBytes >> 4;
-			for (size_t block = 0; block < nBlocks; ++block) {
+			for (size_t block = 0; block < nBlocks; ++block)
+			{
 				randInts = priv::lfsr32_galois(randInts);
 				ptr[block] = randInts;
 			}
 		}
 	}
 
-	namespace test {
+	namespace test
+	{
 
 		void _mm_rand_si128_speed_test_1(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 		{
@@ -116,7 +121,8 @@ namespace hli {
 			double min_ref = std::numeric_limits<double>::max();
 			double min1 = std::numeric_limits<double>::max();
 
-			for (size_t i = 0; i < nExperiments; ++i) {
+			for (size_t i = 0; i < nExperiments; ++i)
+			{
 
 				timer::reset_and_start_timer();
 				hli::priv::_mm_rand_si128_ref(data1, randInts1);
@@ -127,16 +133,22 @@ namespace hli {
 					hli::priv::_mm_lfsr32_epu32_method1(data2, randInts2);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
-					if (doTests) {
-						for (size_t j = 0; j < 4; ++j) {
-							if (randInts1.m128i_u32[j] != randInts2.m128i_u32[j]) {
+					if (doTests)
+					{
+						for (size_t j = 0; j < 4; ++j)
+						{
+							if (randInts1.m128i_u32[j] != randInts2.m128i_u32[j])
+							{
 								std::cout << "WARNING: test _mm_rand_si128: randInts1=" << hli::toString_u32(randInts1) << "; randInts2=" << hli::toString_u32(randInts2) << std::endl;
 								return;
 							}
 						}
-						for (size_t block = 0; block < nBlocks; ++block) {
-							for (size_t j = 0; j < 4; ++j) {
-								if (std::abs(std::get<0>(data1)[block].m128i_u32[j] != std::get<0>(data2)[block].m128i_u32[j])) {
+						for (size_t block = 0; block < nBlocks; ++block)
+						{
+							for (size_t j = 0; j < 4; ++j)
+							{
+								if (std::abs(std::get<0>(data1)[block].m128i_u32[j] != std::get<0>(data2)[block].m128i_u32[j]))
+								{
 									std::cout << "WARNING: test _mm_rand_si128: result-ref=" << hli::toString_u32(std::get<0>(data1)[block]) << "; result=" << hli::toString_u32(std::get<0>(data2)[block]) << std::endl;
 									return;
 								}
@@ -164,7 +176,8 @@ namespace hli {
 	void fillRand_epu8(U8 * const mem_addr, const size_t nBytes)
 	{
 		const int mask = (1 << N_BITS) - 1;
-		for (size_t i = 0; i < nBytes; ++i) {
+		for (size_t i = 0; i < nBytes; ++i)
+		{
 			mem_addr[i] = static_cast<U8>(mask & rand());
 		}
 	}
@@ -192,7 +205,8 @@ namespace hli {
 	{
 		double * const ptr = reinterpret_cast<double * const>(mem_addr);
 		const size_t nElements = nBytes >> 3;
-		for (size_t i = 0; i < nElements; ++i) {
+		for (size_t i = 0; i < nElements; ++i)
+		{
 			ptr[i] = static_cast<double>(rand()) / rand();
 		}
 	}
@@ -201,7 +215,8 @@ namespace hli {
 		const size_t nBytes = std::get<1>(data);
 		double * const ptr = reinterpret_cast<double * const>(std::get<0>(data));
 		const size_t nElements = nBytes >> 3;
-		for (size_t i = 0; i < nElements; ++i) {
+		for (size_t i = 0; i < nElements; ++i)
+		{
 			ptr[i] = static_cast<double>(rand()) / rand();
 		}
 	}

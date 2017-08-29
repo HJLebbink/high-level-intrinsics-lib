@@ -1,7 +1,8 @@
 #pragma once
 #include "emmintrin.h"  // sse
 
-namespace hli {
+namespace hli
+{
 
 	inline bool equal(const __m128i a, const __m128i b)
 	{

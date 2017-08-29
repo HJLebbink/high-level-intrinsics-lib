@@ -20,9 +20,11 @@
 #include "_mm_rand_si128.ipp"
 #include "_mm_rescale_epu16.ipp"
 
-namespace hli {
+namespace hli
+{
 
-	namespace priv {
+	namespace priv
+	{
 
 		inline void _mm_permute_pd_array_method0(
 			const std::tuple<__m128d * const, const size_t>& data,
@@ -59,14 +61,16 @@ namespace hli {
 		}
 	}
 
-	namespace test {
+	namespace test
+	{
 
 		void _mm_permute_pd_array_speed_test_1(
 			const size_t nBlocks,
 			const size_t nExperiments,
 			const bool doTests)
 		{
-			if ((nBlocks * 8) > 0xFFFF) {
+			if ((nBlocks * 8) > 0xFFFF)
+			{
 				std::cout << "WARNING: t test_mm_permute_epu8: too many blocks=" << nBlocks << std::endl;
 				return;
 			}
@@ -102,14 +106,18 @@ namespace hli {
 					hli::priv::_mm_permute_pd_array_method2(data_2, nElements, swap, randInt1);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
-					if (doTests) {
-						for (size_t block = 0; block < nBlocks; ++block) {
-							if (!equal(std::get<0>(data_1)[block], std::get<0>(data_2)[block])) {
+					if (doTests)
+					{
+						for (size_t block = 0; block < nBlocks; ++block)
+						{
+							if (!equal(std::get<0>(data_1)[block], std::get<0>(data_2)[block]))
+							{
 								std::cout << "WARNING: test_mm_permute_epu8: result-ref=" << hli::toString_f64(std::get<0>(data_1)[block]) << "; result1=" << hli::toString_f64(std::get<0>(data_2)[block]) << std::endl;
 								return;
 							}
 						}
-						if (!equal(randInt, randInt1)) {
+						if (!equal(randInt, randInt1))
+						{
 							std::cout << "WARNING: test_mm_permute_epu8: randInt=" << hli::toString_u32(randInt) << "; randInt1=" << hli::toString_u32(randInt1) << std::endl;
 							return;
 						}
@@ -145,6 +153,4 @@ namespace hli {
 		//std::cout << "INFO: _mm_permute_array::_mm_permute_dp_array: nBytes=" << nBytes << std::endl;
 		priv::_mm_permute_pd_array_method2(data, nElements, swap, randInts);
 	}
-
 }
-

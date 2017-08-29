@@ -7,17 +7,21 @@
 #endif
 #define rdtsc __rdtsc
 
-namespace hli {
-	namespace timer {
+namespace hli
+{
+	namespace timer
+	{
 
 		static unsigned long long timing_start, timing_end;
 
-		static inline void reset_and_start_timer() {
+		static inline void reset_and_start_timer()
+		{
 			timing_start = rdtsc();
 		}
 
 		// Returns the number of millions of elapsed processor cycles since the last reset_and_start_timer() call.
-		static inline double get_elapsed_mcycles() {
+		static inline double get_elapsed_mcycles()
+		{
 			timing_end = rdtsc();
 			return (timing_end - timing_start) / (1024. * 1024.);
 		}

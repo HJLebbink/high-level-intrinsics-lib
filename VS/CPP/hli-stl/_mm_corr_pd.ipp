@@ -19,9 +19,11 @@
 #include "_mm_permute_pd_array.ipp"
 
 
-namespace hli {
+namespace hli
+{
 
-	namespace priv {
+	namespace priv
+	{
 
 		template <bool HAS_MV, int MV>
 		inline __m128d _mm_corr_pd_method0(
@@ -72,7 +74,7 @@ namespace hli {
 			{
 				const __m128d d1 = std::get<0>(data1)[i];
 				const __m128d d2 = std::get<0>(data2)[i];
-				
+
 				s12 = _mm_add_pd(s12, _mm_mul_pd(d1, d2));
 				s11 = _mm_add_pd(s11, _mm_mul_pd(d1, d1));
 				s22 = _mm_add_pd(s22, _mm_mul_pd(d2, d2));
@@ -104,10 +106,12 @@ namespace hli {
 
 			__m128d covar = _mm_setzero_pd();
 
-			if (false) { // unrolling is NOT faster
+			if (false)
+			{ // unrolling is NOT faster
 				const size_t nLoops = nBlocks >> 2;
 				const size_t tail = nBlocks & 0b11;
-				for (size_t block = 0; block < nBlocks; block += 4) {
+				for (size_t block = 0; block < nBlocks; block += 4)
+				{
 					const __m128d d1a = std::get<0>(data1)[block + 0];
 					const __m128d d1b = std::get<0>(data1)[block + 1];
 					const __m128d d1c = std::get<0>(data1)[block + 2];
@@ -122,14 +126,18 @@ namespace hli {
 					covar = _mm_add_pd(covar, _mm_mul_pd(d1d, d2d));
 				}
 
-				for (size_t block = nBlocks - tail; block < nBlocks; ++block) {
+				for (size_t block = nBlocks - tail; block < nBlocks; ++block)
+				{
 					const __m128d d1a = std::get<0>(data1)[block + 0];
 					const __m128d d2a = std::get<0>(data2)[block + 0];
 					covar = _mm_add_pd(covar, _mm_mul_pd(d1a, d2a));
 					std::cout << "INFO: _mm_corr_epu8::_mm_corr_dp_method3: tail block=" << block << std::endl;
 				}
-			} else {
-				for (size_t block = 0; block < nBlocks; ++block) {
+			}
+			else
+			{
+				for (size_t block = 0; block < nBlocks; ++block)
+				{
 					const __m128d d1a = std::get<0>(data1)[block + 0];
 					const __m128d d2a = std::get<0>(data2)[block + 0];
 					covar = _mm_add_pd(covar, _mm_mul_pd(d1a, d2a));
@@ -144,11 +152,12 @@ namespace hli {
 		}
 	}
 
-	namespace test {
+	namespace test
+	{
 
 		void _mm_corr_pd_speed_test_1(
-			const size_t nBlocks, 
-			const size_t nExperiments, 
+			const size_t nBlocks,
+			const size_t nExperiments,
 			const bool doTests)
 		{
 			const double delta = 0.0000001;
@@ -171,7 +180,8 @@ namespace hli {
 
 			__m128d result0, result1;
 
-			for (size_t i = 0; i < nExperiments; ++i) {
+			for (size_t i = 0; i < nExperiments; ++i)
+			{
 
 				timer::reset_and_start_timer();
 				result0 = hli::priv::_mm_corr_pd_method0<HAS_MV, MV>(data1, data2, nElements);
@@ -182,8 +192,10 @@ namespace hli {
 					result1 = hli::priv::_mm_corr_pd_method1<HAS_MV, MV>(data1, data2, nElements);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
-					if (doTests) {
-						if (std::abs(result0.m128d_f64[0] - result1.m128d_f64[0]) > delta) {
+					if (doTests)
+					{
+						if (std::abs(result0.m128d_f64[0] - result1.m128d_f64[0]) > delta)
+						{
 							std::cout << "WARNING: test _mm_corr_pd_method0: result0=" << hli::toString_f64(result0) << "; result1=" << hli::toString_f64(result1) << std::endl;
 							return;
 						}

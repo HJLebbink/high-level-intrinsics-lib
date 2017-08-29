@@ -8,9 +8,11 @@
 #include "_mm_rand_si128.ipp"
 #include "_mm_mi_epu8.ipp"
 
-namespace hli {
+namespace hli
+{
 
-	namespace priv {
+	namespace priv
+	{
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline void _mm_mi_epu8_perm_method0(
@@ -23,7 +25,8 @@ namespace hli {
 		{
 			//std::cout << "INFO: _mm_mi_perm_epu8_method0: N_BITS1=" << N_BITS1 << "; N_BITS2=" << N_BITS2 << "; nElements="<< nElements << std::endl;
 
-			if constexpr (HAS_MV) {
+			if constexpr (HAS_MV)
+			{
 
 				auto data1b = deepCopy(data1);
 				auto data2b = deepCopy(data2);
@@ -37,14 +40,17 @@ namespace hli {
 
 				for (size_t permutation = 0; permutation < nPermutations; ++permutation)
 				{
-					for (int i = 0; i < nElements; ++i) {
+					for (int i = 0; i < nElements; ++i)
+					{
 						data1b_ptr[i] = data1_ptr[i];
 						data2b_ptr[i] = data2_ptr[i];
 					}
 					_mm_permute_epu8_array(data2b, nElements, swap, randInts);
 					// copy the missing value to both data columns, this to make the separate entropy calculation correct.
-					for (int i = 0; i < nElements; ++i) {
-						if ((data1b_ptr[i] == MV) || (data2b_ptr[i] == MV)) {
+					for (int i = 0; i < nElements; ++i)
+					{
+						if ((data1b_ptr[i] == MV) || (data2b_ptr[i] == MV))
+						{
 							data1b_ptr[i] = MV;
 							data2b_ptr[i] = MV;
 						}
@@ -56,10 +62,10 @@ namespace hli {
 					const __m128d h1_And_h2 = _mm_entropy_epu8<N_BITS1, N_BITS2, HAS_MV, MV>(data1b, data2b, nElements);
 					const __m128d mi = _mm_sub_pd(h1_Plus_h2, h1_And_h2);
 
-#				if	_DEBUG
+					#				if	_DEBUG
 					if (isnan(mi.m128d_f64[0])) std::cout << "WARNING: _mm_mi_perm_epu8_method0<" << N_BITS1 << "," << N_BITS2 << "," << HAS_MV << "," << (int)MV << ">: mi is NAN" << std::endl;
 					if (mi.m128d_f64[0] < 0)   std::cout << "WARNING: _mm_mi_perm_epu8_method0<" << N_BITS1 << "," << N_BITS2 << "," << HAS_MV << "," << (int)MV << ">: permutation=" << permutation << ": mi=" << mi.m128d_f64[0] << " is smaller than 0. h1=" << h1.m128d_f64[0] << "; h2 = " << h2.m128d_f64[0] << "; h1Plush2std = " << h1_Plus_h2.m128d_f64[0] << "; h1Andh2 = " << h1_And_h2.m128d_f64[0] << std::endl;
-#				endif
+					#				endif
 					results_double[permutation] = mi.m128d_f64[0];
 				}
 				_mm_free2(data1b);
@@ -82,10 +88,10 @@ namespace hli {
 					const __m128d h1_And_h2 = _mm_entropy_epu8<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2b, nElements);
 					const __m128d mi = _mm_sub_pd(h1_Plus_h2, h1_And_h2);
 
-#				if	_DEBUG
+					#				if	_DEBUG
 					if (isnan(mi.m128d_f64[0])) std::cout << "WARNING: _mm_mi_perm_epu8_method0<" << N_BITS1 << "," << N_BITS2 << "," << HAS_MV << "," << MV << ">: mi is NAN" << std::endl;
 					if (mi.m128d_f64[0] <= 0)   std::cout << "WARNING: _mm_mi_perm_epu8_method0<" << N_BITS1 << "," << N_BITS2 << "," << HAS_MV << "," << MV << ">: permutation=" << permutation << ": mi=" << mi.m128d_f64[0] << " is smaller than 0. h1=" << h1.m128d_f64[0] << "; h2 = " << h2.m128d_f64[0] << "; h1Plush2std = " << h1_Plus_h2.m128d_f64[0] << "; h1Andh2 = " << h1_And_h2.m128d_f64[0] << std::endl;
-#				endif
+					#				endif
 					results_double[permutation] = mi.m128d_f64[0];
 				}
 				_mm_free2(data2b);
@@ -107,7 +113,8 @@ namespace hli {
 		}
 	}
 
-	namespace test {
+	namespace test
+	{
 
 		void _mm_mi_epu8_perm_speed_test_1(
 			const size_t nBlocks,
@@ -154,8 +161,10 @@ namespace hli {
 					result1 = hli::priv::_mm_mi_epu8_method1<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
-					if (doTests) {
-						if (std::abs(result0.m128d_f64[0] - result1.m128d_f64[0]) > delta) {
+					if (doTests)
+					{
+						if (std::abs(result0.m128d_f64[0] - result1.m128d_f64[0]) > delta)
+						{
 							std::cout << "WARNING: test _mm_mi_perm_epu8_method0: result0=" << hli::toString_f64(result0) << "; result1=" << hli::toString_f64(result1) << std::endl;
 							return;
 						}
@@ -194,71 +203,72 @@ namespace hli {
 		const size_t nPermutations,
 		__m128i& randInts)
 	{
-		switch (nBits1) {
-		case 1:
-			switch (nBits2)
-			{
-			case 1: _mm_mi_epu8_perm<1, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 2: _mm_mi_epu8_perm<1, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 3: _mm_mi_epu8_perm<1, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 4: _mm_mi_epu8_perm<1, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 5: _mm_mi_epu8_perm<1, 5, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 6: _mm_mi_epu8_perm<1, 6, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 7: _mm_mi_epu8_perm<1, 7, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+		switch (nBits1)
+		{
+			case 1:
+				switch (nBits2)
+				{
+					case 1: _mm_mi_epu8_perm<1, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 2: _mm_mi_epu8_perm<1, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 3: _mm_mi_epu8_perm<1, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 4: _mm_mi_epu8_perm<1, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 5: _mm_mi_epu8_perm<1, 5, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 6: _mm_mi_epu8_perm<1, 6, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 7: _mm_mi_epu8_perm<1, 7, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					default: return;
+				}
+			case 2:
+				switch (nBits2)
+				{
+					case 1: _mm_mi_epu8_perm<2, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 2: _mm_mi_epu8_perm<2, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 3: _mm_mi_epu8_perm<2, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 4: _mm_mi_epu8_perm<2, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 5: _mm_mi_epu8_perm<2, 5, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 6: _mm_mi_epu8_perm<2, 6, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					default: return;
+				}
+			case 3:
+				switch (nBits2)
+				{
+					case 1: _mm_mi_epu8_perm<3, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 2: _mm_mi_epu8_perm<3, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 3: _mm_mi_epu8_perm<3, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 4: _mm_mi_epu8_perm<3, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 5: _mm_mi_epu8_perm<3, 5, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					default: return;
+				}
+			case 4:
+				switch (nBits2)
+				{
+					case 1: _mm_mi_epu8_perm<4, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 2: _mm_mi_epu8_perm<4, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 3: _mm_mi_epu8_perm<4, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 4: _mm_mi_epu8_perm<4, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					default: return;
+				}
+			case 5:
+				switch (nBits2)
+				{
+					case 1: _mm_mi_epu8_perm<5, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 2: _mm_mi_epu8_perm<5, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 3: _mm_mi_epu8_perm<5, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					default: return;
+				}
+			case 6:
+				switch (nBits2)
+				{
+					case 1: _mm_mi_epu8_perm<6, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					case 2: _mm_mi_epu8_perm<6, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					default: return;
+				}
+			case 7:
+				switch (nBits2)
+				{
+					case 1: _mm_mi_epu8_perm<7, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
+					default: return;
+				}
 			default: return;
-			}
-		case 2:
-			switch (nBits2)
-			{
-			case 1: _mm_mi_epu8_perm<2, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 2: _mm_mi_epu8_perm<2, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 3: _mm_mi_epu8_perm<2, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 4: _mm_mi_epu8_perm<2, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 5: _mm_mi_epu8_perm<2, 5, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 6: _mm_mi_epu8_perm<2, 6, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			default: return;
-			}
-		case 3:
-			switch (nBits2)
-			{
-			case 1: _mm_mi_epu8_perm<3, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 2: _mm_mi_epu8_perm<3, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 3: _mm_mi_epu8_perm<3, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 4: _mm_mi_epu8_perm<3, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 5: _mm_mi_epu8_perm<3, 5, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			default: return;
-			}
-		case 4:
-			switch (nBits2)
-			{
-			case 1: _mm_mi_epu8_perm<4, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 2: _mm_mi_epu8_perm<4, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 3: _mm_mi_epu8_perm<4, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 4: _mm_mi_epu8_perm<4, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			default: return;
-			}
-		case 5:
-			switch (nBits2)
-			{
-			case 1: _mm_mi_epu8_perm<5, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 2: _mm_mi_epu8_perm<5, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 3: _mm_mi_epu8_perm<5, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			default: return;
-			}
-		case 6:
-			switch (nBits2)
-			{
-			case 1: _mm_mi_epu8_perm<6, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			case 2: _mm_mi_epu8_perm<6, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			default: return;
-			}
-		case 7:
-			switch (nBits2)
-			{
-			case 1: _mm_mi_epu8_perm<7, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts); return;
-			default: return;
-			}
-		default: return;
 		}
 	}
 }

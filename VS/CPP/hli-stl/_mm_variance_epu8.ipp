@@ -15,30 +15,45 @@
 
 #include "_mm_hadd_epu8.ipp"
 
-namespace hli {
-
-	namespace priv {
-
+namespace hli
+{
+	namespace priv
+	{
 		// Variance population reference
 		template <bool HAS_MV, U8 MV>
 		inline __m128d _mm_variance_epu8_method0(
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const size_t nElements)
 		{
-			static_assert(!HAS_MV, "");
-
 			const auto tup = _mm_hadd_epu8_method0<HAS_MV, MV>(data, nElements);
-			unsigned int nTrueElements = static_cast<unsigned int>(_mm_cvtsi128_si32(std::get<1>(tup)));
+			unsigned int nElements_No_MV = static_cast<unsigned int>(_mm_cvtsi128_si32(std::get<1>(tup)));
 
-			const double average = static_cast<double>(std::get<0>(tup).m128i_u32[0]) / nTrueElements;
-			
-			const U8 * const ptr = reinterpret_cast<const U8 * const>(std::get<0>(data));
+			const double average = static_cast<double>(std::get<0>(tup).m128i_u32[0]) / nElements_No_MV;
+
+			auto ptr = reinterpret_cast<const U8 * const>(std::get<0>(data));
 			double sum = 0;
-			for (size_t i = 0; i < nElements; ++i) {
-				double d = static_cast<double>(ptr[i]) - average;
-				sum += (d * d);
+
+			if constexpr (HAS_MV)
+			{
+				for (size_t i = 0; i < nElements; ++i)
+				{
+					const U8 d = ptr[i];
+					if (d != MV)
+					{
+						double tmp = static_cast<double>(d) - average;
+						sum += (tmp * tmp);
+					}
+				}
 			}
-			return _mm_set1_pd(sum / nTrueElements);
+			else
+			{
+				for (size_t i = 0; i < nElements; ++i)
+				{
+					double tmp = static_cast<double>(ptr[i]) - average;
+					sum += (tmp * tmp);
+				}
+			}
+			return _mm_set1_pd(sum / nElements_No_MV);
 		}
 
 		// Variance population SSE: return 2x double var
@@ -47,6 +62,12 @@ namespace hli {
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const size_t nElements)
 		{
+			if constexpr (HAS_MV) //TODO
+			{ 
+				std::cout << "WARNING: _mm_variance_epu8_method1: Not implemented yet" << std::endl;
+				return _mm_setzero_pd();
+			}
+
 			const auto tup = _mm_hadd_epu8<N_BITS, HAS_MV, MV>(data, nElements);
 			const __m128d sum = _mm_cvtepi32_pd(std::get<0>(tup));
 			const __m128d nTrueElements = _mm_cvtepi32_pd(std::get<1>(tup));
@@ -60,13 +81,20 @@ namespace hli {
 			const std::tuple<const __m128i * const, const size_t>& data,
 			const __m128d average)
 		{
+			if constexpr (HAS_MV)
+			{ //TODO
+				std::cout << "WARNING: _mm_variance_epu8_method1: Not implemented yet" << std::endl;
+				return _mm_setzero_pd();
+			}
+
 			const size_t nBytes = std::get<1>(data);
 
 			__m128d result_a = _mm_setzero_pd();
 			__m128d result_b = _mm_setzero_pd();
 
 			const size_t nBlocks = nBytes >> 4;
-			for (size_t block = 0; block < nBlocks; ++block) {
+			for (size_t block = 0; block < nBlocks; ++block)
+			{
 				const __m128i data_Block = std::get<0>(data)[block];
 				{
 					const __m128i d1 = _mm_cvtepi8_epi32(data_Block);
@@ -109,7 +137,8 @@ namespace hli {
 			const size_t nElements,
 			const std::tuple<__m128d * const, const size_t>& data_double_out)
 		{
-			if constexpr (HAS_MV) { //TODO
+			if constexpr (HAS_MV)
+			{ //TODO
 				std::cout << "WARNING: _mm_variance_epu8_method1: Not implemented yet" << std::endl;
 				return _mm_setzero_pd();
 			}
@@ -124,7 +153,8 @@ namespace hli {
 			__m128d * const data_double = std::get<0>(data_double_out);
 			__m128d var = _mm_setzero_pd();
 
-			for (size_t block = 0; block < nBlocksData; ++block) {
+			for (size_t block = 0; block < nBlocksData; ++block)
+			{
 				const __m128i data = std::get<0>(data1)[block];
 				{
 					const __m128i d = _mm_cvtepu8_epi32(data);
@@ -179,8 +209,8 @@ namespace hli {
 
 	}
 
-	namespace test {
-
+	namespace test
+	{
 		void _mm_variance_epu8_speed_test_1(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 		{
 			const double delta = 0.0000001;
@@ -198,7 +228,8 @@ namespace hli {
 				double min3 = std::numeric_limits<double>::max();
 				double min4 = std::numeric_limits<double>::max();
 
-				for (size_t i = 0; i < nExperiments; ++i) {
+				for (size_t i = 0; i < nExperiments; ++i)
+				{
 
 					timer::reset_and_start_timer();
 					const __m128d result_ref = hli::priv::_mm_variance_epu8_method0<HAS_MV, MV>(data, nElements);
@@ -209,8 +240,10 @@ namespace hli {
 						const __m128d result = hli::priv::_mm_variance_epu8_method1<8, HAS_MV, MV>(data, nElements);
 						min1 = std::min(min1, timer::get_elapsed_kcycles());
 
-						if (doTests) {
-							if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
+						if (doTests)
+						{
+							if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta)
+							{
 								std::cout << "WARNING: test _mm_variance_epu8<8>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
 								return;
 							}
@@ -221,8 +254,10 @@ namespace hli {
 						const __m128d result = hli::priv::_mm_variance_epu8_method1<7, HAS_MV, MV>(data, nElements);
 						min2 = std::min(min2, timer::get_elapsed_kcycles());
 
-						if (doTests) {
-							if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
+						if (doTests)
+						{
+							if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta)
+							{
 								std::cout << "WARNING: test _mm_variance_epu8<7>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
 								return;
 							}
@@ -233,8 +268,10 @@ namespace hli {
 						const __m128d result = hli::priv::_mm_variance_epu8_method1<6, HAS_MV, MV>(data, nElements);
 						min3 = std::min(min3, timer::get_elapsed_kcycles());
 
-						if (doTests) {
-							if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
+						if (doTests)
+						{
+							if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta)
+							{
 								std::cout << "WARNING: test _mm_variance_epu8<6>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
 								return;
 							}
@@ -245,8 +282,10 @@ namespace hli {
 						const __m128d result = hli::priv::_mm_variance_epu8_method1<5, HAS_MV, MV>(data, nElements);
 						min4 = std::min(min4, timer::get_elapsed_kcycles());
 
-						if (doTests) {
-							if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta) {
+						if (doTests)
+						{
+							if (std::abs(result_ref.m128d_f64[0] - result.m128d_f64[0]) > delta)
+							{
 								std::cout << "WARNING: test _mm_variance_epu8<5>: result-ref=" << hli::toString_f64(result_ref) << "; result=" << hli::toString_f64(result) << std::endl;
 								return;
 							}

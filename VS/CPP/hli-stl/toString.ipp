@@ -7,7 +7,8 @@
 
 #include "get_set.ipp"
 
-namespace hli {
+namespace hli
+{
 
 
 
@@ -137,44 +138,48 @@ namespace hli {
 
 
 	template <size_t NBITS>
-	inline std::string toBinary(const unsigned long long i) {
+	inline std::string toBinary(const unsigned long long i)
+	{
 		std::ostringstream stringStream;
 		std::bitset<NBITS> x(i);
 		stringStream << x;
 		return stringStream.str();
 	}
 
-	inline std::string toBinary(const __m128i i) {
+	inline std::string toBinary(const __m128i i)
+	{
 		return toBinary_u8(i);
 	}
 	inline std::string toBinary(const float floatVar)
 	{
-#ifdef _MSC_VER
+		#ifdef _MSC_VER
 		int fl = *(int*)&floatVar;
 		std::ostringstream stringStream;
-		for (int i = 31; i >= 0; --i) {
+		for (int i = 31; i >= 0; --i)
+		{
 			if (i == 22) stringStream << ":";
 			stringStream << ((((1 << i) & fl) != 0) ? "1" : "0");
 		}
 		return stringStream.str();
-#else
+		#else
 		DEBUG_BREAK();
 		return "";
-#endif
+		#endif
 	}
 	inline std::string toBinary(const double doubleVar)
 	{
-#ifdef _MSC_VER
+		#ifdef _MSC_VER
 		long long fl = *(long long*)&doubleVar;
 		std::ostringstream stringStream;
-		for (int i = 63; i >= 0; --i) {
+		for (int i = 63; i >= 0; --i)
+		{
 			if (i == 51) stringStream << ":";
 			stringStream << ((((1ull << i) & fl) != 0) ? "1" : "0");
 		}
 		return stringStream.str();
-#else
+		#else
 		DEBUG_BREAK();
 		return "";
-#endif
+		#endif
 	}
 }

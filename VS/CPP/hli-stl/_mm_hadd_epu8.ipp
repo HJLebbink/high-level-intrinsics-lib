@@ -19,9 +19,11 @@
 #include "_mm_hadd_epi64.ipp"
 #include "_mm_rand_si128.ipp"
 
-namespace hli {
+namespace hli
+{
 
-	namespace priv {
+	namespace priv
+	{
 
 		template <bool HAS_MV, U8 MV>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method0(
@@ -32,18 +34,24 @@ namespace hli {
 			auto ptr = reinterpret_cast<const U8 * const>(std::get<0>(data));
 			unsigned __int32 sum = 0;
 
-			if (HAS_MV) {
+			if (HAS_MV)
+			{
 				unsigned __int32 nElements_No_MV = 0;
-				for (size_t i = 0; i < nElements; ++i) {
+				for (size_t i = 0; i < nElements; ++i)
+				{
 					U8 d = ptr[i];
-					if (d != 0xFF) {
+					if (d != 0xFF)
+					{
 						nElements_No_MV++;
 						sum += d;
 					}
 				}
 				return std::make_tuple(_mm_set1_epi32(sum), _mm_set1_epi32(nElements_No_MV));
-			} else {
-				for (size_t i = 0; i < nElements; ++i) {
+			}
+			else
+			{
+				for (size_t i = 0; i < nElements; ++i)
+				{
 					sum += ptr[i];
 				}
 				return std::make_tuple(_mm_set1_epi32(sum), _mm_set1_epi32((int)nElements));
@@ -56,18 +64,19 @@ namespace hli {
 			const size_t nElements)
 		{
 			static_assert((N_BITS > 0) && (N_BITS <= 8), "Number of bits must be in range 1 to 8.");
-#			pragma warning( disable: 280) 
-			switch (N_BITS) {
-			case 8: return _mm_hadd_epu8_method1_nBits8<HAS_MV, MV>(data, nElements);
-			case 7: return _mm_hadd_epu8_method1_nBits7<HAS_MV, MV>(data, nElements);
-			case 6: return _mm_hadd_epu8_method1_nBits6<HAS_MV, MV>(data, nElements);
-			case 5:
-			case 4:
-			case 3:
-			case 2:
-			case 1: return _mm_hadd_epu8_method1_nBits5<HAS_MV, MV>(data, nElements);
-			default:
-				return std::make_tuple(_mm_setzero_si128(), _mm_setzero_si128());
+			#			pragma warning( disable: 280) 
+			switch (N_BITS)
+			{
+				case 8: return _mm_hadd_epu8_method1_nBits8<HAS_MV, MV>(data, nElements);
+				case 7: return _mm_hadd_epu8_method1_nBits7<HAS_MV, MV>(data, nElements);
+				case 6: return _mm_hadd_epu8_method1_nBits6<HAS_MV, MV>(data, nElements);
+				case 5:
+				case 4:
+				case 3:
+				case 2:
+				case 1: return _mm_hadd_epu8_method1_nBits5<HAS_MV, MV>(data, nElements);
+				default:
+					return std::make_tuple(_mm_setzero_si128(), _mm_setzero_si128());
 			}
 		}
 
@@ -92,7 +101,8 @@ namespace hli {
 
 			__m128i sum = _mm_setzero_si128();
 
-			for (size_t block = 0; block < nBlocks; ++block) {
+			for (size_t block = 0; block < nBlocks; ++block)
+			{
 				const __m128i data_Block = std::get<0>(data)[block];
 				sum = _mm_add_epi32(sum, _mm_and_si128(data_Block, and_mask));
 				sum = _mm_add_epi32(sum, _mm_and_si128(_mm_shuffle_epi8(data_Block, shuffle_mask_1), and_mask));
@@ -114,7 +124,8 @@ namespace hli {
 			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method3: nElements is not equal to number of bytes" << std::endl;
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 			__m128i sum = _mm_setzero_si128();
-			for (size_t block = 0; block < nBlocks; ++block) {
+			for (size_t block = 0; block < nBlocks; ++block)
+			{
 				sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
 			}
 			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32((int)nElements));
@@ -131,7 +142,8 @@ namespace hli {
 			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 			__m128i sum = _mm_setzero_si128();
 
-			for (size_t block = 0; block < nBlocks; ++block) {
+			for (size_t block = 0; block < nBlocks; ++block)
+			{
 				sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
 			}
 			return std::make_tuple(_mm_hadd_epi64(sum), _mm_set1_epi32((int)nElements));
@@ -156,8 +168,10 @@ namespace hli {
 			}
 
 			const size_t tail = nBlocks & 0b1;
-			if (tail > 0) {
-				for (size_t block = (nBlocks - tail); block < nBlocks; ++block) {
+			if (tail > 0)
+			{
+				for (size_t block = (nBlocks - tail); block < nBlocks; ++block)
+				{
 					//std::cout << "INFO: hli::_mm_hadd_epu8_class<7>: tail=" << tail << "; block=" << block << std::endl;
 					sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
 				}
@@ -187,8 +201,10 @@ namespace hli {
 				sum = _mm_add_epi64(sum, _mm_sad_epu8(sum_p, _mm_setzero_si128()));
 			}
 			const int tail = nBlocks & 0b11;
-			if (tail > 0) {
-				for (int block = (nBlocks - tail); block < nBlocks; ++block) {
+			if (tail > 0)
+			{
+				for (int block = (nBlocks - tail); block < nBlocks; ++block)
+				{
 					//std::cout << "INFO: hli:::_mm_hadd_epu8_method3: tail: block=" << block << std::endl;
 					sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
 				}
@@ -223,10 +239,12 @@ namespace hli {
 			}
 
 			const int tail = nBlocks & 0b111;
-			if (tail > 0) {
+			if (tail > 0)
+			{
 				int startTail = nBlocks - tail;
 				sum_p = std::get<0>(data)[startTail];
-				for (int block = startTail + 1; block < nBlocks; ++block) {
+				for (int block = startTail + 1; block < nBlocks; ++block)
+				{
 					sum_p = _mm_add_epi8(sum_p, std::get<0>(data)[block]);
 				}
 				sum = _mm_add_epi64(sum, _mm_sad_epu8(sum_p, _mm_setzero_si128()));
@@ -235,7 +253,8 @@ namespace hli {
 		}
 	}
 
-	namespace test {
+	namespace test
+	{
 
 		void _mm_hadd_epu8_speed_test_1(const size_t nBlocks, const size_t nExperiments, const bool doTests)
 		{
@@ -267,8 +286,10 @@ namespace hli {
 						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<8, HAS_MV, MV>(data, nElements);
 						min1 = std::min(min1, timer::get_elapsed_kcycles());
 
-						if (doTests) {
-							if (sum0 != std::get<0>(result).m128i_u32[0]) {
+						if (doTests)
+						{
+							if (sum0 != std::get<0>(result).m128i_u32[0])
+							{
 								std::cout << "WARNING: test _mm_hadd_epu8_method1<8>: result0=" << sum0 << "; result=" << std::get<0>(result).m128i_u32[0] << std::endl;
 								return;
 							}
@@ -279,8 +300,10 @@ namespace hli {
 						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<7, HAS_MV, MV>(data, nElements);
 						min2 = std::min(min2, timer::get_elapsed_kcycles());
 
-						if (doTests) {
-							if (sum0 != std::get<0>(result).m128i_u32[0]) {
+						if (doTests)
+						{
+							if (sum0 != std::get<0>(result).m128i_u32[0])
+							{
 								std::cout << "WARNING: test _mm_hadd_epu8_method1<7>: result-ref=" << sum0 << "; result=" << std::get<0>(result).m128i_u32[0] << std::endl;
 								return;
 							}
@@ -291,8 +314,10 @@ namespace hli {
 						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<6, HAS_MV, MV>(data, nElements);
 						min3 = std::min(min3, timer::get_elapsed_kcycles());
 
-						if (doTests) {
-							if (sum0 != std::get<0>(result).m128i_u32[0]) {
+						if (doTests)
+						{
+							if (sum0 != std::get<0>(result).m128i_u32[0])
+							{
 								std::cout << "WARNING: test _mm_hadd_epu8_method1<6>: result-ref=" << sum0 << "; result=" << std::get<0>(result).m128i_u32[0] << std::endl;
 								return;
 							}
@@ -303,8 +328,10 @@ namespace hli {
 						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<5, HAS_MV, MV>(data, nElements);
 						min4 = std::min(min4, timer::get_elapsed_kcycles());
 
-						if (doTests) {
-							if (sum0 != std::get<0>(result).m128i_u32[0]) {
+						if (doTests)
+						{
+							if (sum0 != std::get<0>(result).m128i_u32[0])
+							{
 								std::cout << "WARNING: test _mm_hadd_epu8_method1<5>: result-ref=" << sum0 << "; result=" << std::get<0>(result).m128i_u32[0] << std::endl;
 								return;
 							}
@@ -315,8 +342,10 @@ namespace hli {
 						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method2<HAS_MV, MV>(data, nElements);
 						min5 = std::min(min5, timer::get_elapsed_kcycles());
 
-						if (doTests) {
-							if (sum0 != std::get<0>(result).m128i_u32[0]) {
+						if (doTests)
+						{
+							if (sum0 != std::get<0>(result).m128i_u32[0])
+							{
 								std::cout << "WARNING: test _mm_hadd_epu8_method2: result-ref=" << sum0 << "; result=" << std::get<0>(result).m128i_u32[0] << std::endl;
 								return;
 							}
@@ -327,8 +356,10 @@ namespace hli {
 						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method3<HAS_MV, MV>(data, nElements);
 						min6 = std::min(min6, timer::get_elapsed_kcycles());
 
-						if (doTests) {
-							if (sum0 != std::get<0>(result).m128i_u32[0]) {
+						if (doTests)
+						{
+							if (sum0 != std::get<0>(result).m128i_u32[0])
+							{
 								std::cout << "WARNING: test _mm_hadd_epu8_method3: result-ref=" << sum0 << "; result=" << std::get<0>(result).m128i_u32[0] << std::endl;
 								return;
 							}
@@ -360,10 +391,10 @@ namespace hli {
 		const std::tuple<const __m128i * const, const size_t>& data,
 		const size_t nElements)
 	{
-#if _DEBUG
+		#if _DEBUG
 		const size_t nBytes = std::get<1>(data);
 		if (nBytes < nElements) std::cout << "ERROR: _mm_hadd_epu8: nElements (" << nElements << ") is too large for the number of bytes (" << nBytes << ")" << std::endl;
-#endif
+		#endif
 
 		return priv::_mm_hadd_epu8_method0<HAS_MV, MV>(data, nElements);
 		//return priv::_mm_hadd_epu8_method1<N_BITS, HAS_MV, MV>(data, nElements);

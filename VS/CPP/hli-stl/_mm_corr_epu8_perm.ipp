@@ -22,10 +22,10 @@
 #include "_mm_rand_si128.ipp"
 
 
-namespace hli {
-
-	namespace priv {
-
+namespace hli
+{
+	namespace priv
+	{
 		// Uses Reference implementation
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline void _mm_corr_epu8_perm_method0(
@@ -70,7 +70,8 @@ namespace hli {
 			const __m128d average2 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup2)), _mm_cvtepi32_pd(std::get<1>(tup2)));
 
 			double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
-			for (size_t permutation = 0; permutation < nPermutations; ++permutation) {
+			for (size_t permutation = 0; permutation < nPermutations; ++permutation)
+			{
 				_mm_permute_epu8_array(data3, nElements, swap, randInts);
 				const __m128d corr = _mm_corr_epu8_method1<HAS_MV, MV>(data1, data3, nElements, average1, average2);
 				results_double[permutation] = corr.m128d_f64[0];
@@ -97,13 +98,14 @@ namespace hli {
 			const __m128d var2 = priv::_mm_variance_epu8_method1<N_BITS2, HAS_MV, MV>(data2, nElements, data2_Double);
 			const __m128d var1_2 = _mm_sqrt_pd(_mm_mul_pd(var1, var2));
 
-			//std::cout << "INFO: _mm_corr_epu8::_mm_corr_perm_epu8_method3: var1=" << var1.m128d_f64[0] << "; var2=" << var2.m128d_f64[0] << std::endl;
+			//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_perm_method2: var1=" << var1.m128d_f64[0] << "; var2=" << var2.m128d_f64[0] << std::endl;
 
 			double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
-			for (size_t permutation = 0; permutation < nPermutations; ++permutation) {
+			for (size_t permutation = 0; permutation < nPermutations; ++permutation)
+			{
 				_mm_permute_pd_array(data2_Double, nElements, swap, randInts);
 				const __m128d corr = _mm_corr_dp_method3<HAS_MV, MV>(data1_Double, data2_Double, nElements, var1_2);
-				//std::cout << "INFO: _mm_corr_epu8::_mm_corr_perm_epu8_method3: corr=" << corr.m128d_f64[0] << std::endl;
+				//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_perm_method2: corr=" << corr.m128d_f64[0] << std::endl;
 				results_double[permutation] = corr.m128d_f64[0];
 			}
 			_mm_free2(data1_Double);
@@ -123,7 +125,8 @@ namespace hli {
 			const size_t nBytes = std::get<1>(data1);
 			const size_t nBlocks = nBytes >> 4;
 
-			if (nElements > 0xFFFF) {
+			if (nElements > 0xFFFF)
+			{
 				std::cout << "WARNING: _mm_corr_epu8_perm: _mm_corr_epu8_perm_method3: nElements=" << nElements << " which is larger than 0xFFFF." << std::endl;
 			}
 
@@ -177,8 +180,8 @@ namespace hli {
 		}
 	}
 
-	namespace test {
-
+	namespace test
+	{
 		void _mm_corr_epu8_perm_speed_test_1(
 			const size_t nBlocks,
 			const size_t nPermutations,
@@ -203,7 +206,7 @@ namespace hli {
 			const std::tuple<const __m128i * const, const size_t> data2 = data2_r;
 
 			const size_t nBytesResults = resizeNBytes(8 * nPermutations, 16);
-			//std::cout << "INFO: test_mm_corr_perm_epu8: nPermutations=" << nPermutations << "; nBytesResults=" << nBytesResults << std::endl;
+			//std::cout << "INFO: _mm_corr_epu8_perm_speed_test_1: nPermutations=" << nPermutations << "; nBytesResults=" << nBytesResults << std::endl;
 			auto results0 = _mm_malloc_m128d(nBytesResults);
 			auto results1 = _mm_malloc_m128d(nBytesResults);
 			auto results2 = _mm_malloc_m128d(nBytesResults);
@@ -233,20 +236,25 @@ namespace hli {
 						min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 						//for (size_t block = 0; block < (nBytesResults >> 4); ++block) {
-						//	std::cout << "WARNING: test_mm_corr_perm_epu8_ref<6>: results[" << block << "] =" << hli::toString_f64(results[block]) << std::endl;
-						//	std::cout << "WARNING: test_mm_corr_perm_epu8_ref<6>: results1[" << block << "]=" << hli::toString_f64(results1[block]) << std::endl;
+						//	std::cout << "WARNING: _mm_corr_epu8_perm_method1<6>: results[" << block << "] =" << hli::toString_f64(results[block]) << std::endl;
+						//	std::cout << "WARNING: _mm_corr_epu8_perm_method1<6>: results1[" << block << "]=" << hli::toString_f64(results1[block]) << std::endl;
 						//}
 
-						if (doTests) {
-							if (!equal(randInt0, randInt1)) {
-								std::cout << "WARNING: test_mm_corr_perm_epu8_ref: randInt=" << hli::toString_u32(randInt0) << "; randInt1=" << hli::toString_u32(randInt1) << std::endl;
+						if (doTests)
+						{
+							if (!equal(randInt0, randInt1))
+							{
+								std::cout << "WARNING: _mm_corr_epu8_perm_method1: randInt=" << hli::toString_u32(randInt0) << "; randInt1=" << hli::toString_u32(randInt1) << std::endl;
 								return;
 							}
-							if (i == 0) {
-								for (size_t j = 0; j < (nBytesResults >> 3); ++j) {
+							if (i == 0)
+							{
+								for (size_t j = 0; j < (nBytesResults >> 3); ++j)
+								{
 									double diff = std::abs(getDouble(results0, j) - getDouble(results1, j));
-									if (diff > delta) {
-										std::cout << "WARNING: _mm_corr_perm_epu8_method1<6>: j=" << j << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, j) << "; result1=" << getDouble(results1, j) << std::endl;
+									if (diff > delta)
+									{
+										std::cout << "WARNING: _mm_corr_epu8_perm_method1<6>: j=" << j << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, j) << "; result1=" << getDouble(results1, j) << std::endl;
 										return;
 									}
 								}
@@ -258,16 +266,21 @@ namespace hli {
 						hli::priv::_mm_corr_epu8_perm_method2<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements, results2, nPermutations, randInt2);
 						min2 = std::min(min2, timer::get_elapsed_kcycles());
 
-						if (doTests) {
-							if (!equal(randInt0, randInt2)) {
-								std::cout << "WARNING: _mm_corr_perm_epu8_method2<6>: randInt=" << hli::toString_u32(randInt0) << "; randInt2=" << hli::toString_u32(randInt2) << std::endl;
+						if (doTests)
+						{
+							if (!equal(randInt0, randInt2))
+							{
+								std::cout << "WARNING: _mm_corr_epu8_perm_method2<6>: randInt=" << hli::toString_u32(randInt0) << "; randInt2=" << hli::toString_u32(randInt2) << std::endl;
 								return;
 							}
-							if (i == 0) {
-								for (size_t j = 0; j < (nBytesResults >> 3); ++j) {
+							if (i == 0)
+							{
+								for (size_t j = 0; j < (nBytesResults >> 3); ++j)
+								{
 									double diff = std::abs(getDouble(results0, j) - getDouble(results2, j));
-									if (diff > delta) {
-										std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: i=" << j << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, j) << "; result2=" << getDouble(results2, j) << std::endl;
+									if (diff > delta)
+									{
+										std::cout << "WARNING: _mm_corr_epu8_perm_method2<6>: i=" << j << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, j) << "; result2=" << getDouble(results2, j) << std::endl;
 										return;
 									}
 								}
@@ -279,16 +292,21 @@ namespace hli {
 						hli::priv::_mm_corr_epu8_perm_method3<HAS_MV, MV>(data1, data2, nElements, results3, nPermutations, randInt3);
 						min3 = std::min(min3, timer::get_elapsed_kcycles());
 
-						if (doTests) {
-							if (!equal(randInt0, randInt3)) {
-								std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: randInt=" << hli::toString_u32(randInt0) << "; randInt3=" << hli::toString_u32(randInt3) << std::endl;
+						if (doTests)
+						{
+							if (!equal(randInt0, randInt3))
+							{
+								std::cout << "WARNING: _mm_corr_epu8_perm_method3<6>: randInt=" << hli::toString_u32(randInt0) << "; randInt3=" << hli::toString_u32(randInt3) << std::endl;
 								return;
 							}
-							if (i == 0) {
-								for (size_t j = 0; j < (nBytesResults >> 3); ++j) {
+							if (i == 0)
+							{
+								for (size_t j = 0; j < (nBytesResults >> 3); ++j)
+								{
 									double diff = std::abs(getDouble(results0, j) - getDouble(results3, j));
-									if (diff > delta) {
-										std::cout << "WARNING: _mm_corr_perm_epu8_method3<6>: i=" << j << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, j) << "; result3=" << getDouble(results3, j) << std::endl;
+									if (diff > delta)
+									{
+										std::cout << "WARNING: _mm_corr_epu8_perm_method3<6>: i=" << j << "; diff=" << std::setprecision(30) << diff << "; result-ref=" << getDouble(results0, j) << "; result3=" << getDouble(results3, j) << std::endl;
 										return;
 									}
 								}
@@ -296,10 +314,10 @@ namespace hli {
 						}
 					}
 				}
-				printf("[_mm_corr_perm_epu8_method0]: %2.5f Kcycles\n", min0);
-				printf("[_mm_corr_perm_epu8_method1]: %2.5f Kcycles; %2.3f times faster than ref\n", min1, min0 / min1);
-				printf("[_mm_corr_perm_epu8_method2]: %2.5f Kcycles; %2.3f times faster than ref\n", min2, min0 / min2);
-				printf("[_mm_corr_perm_epu8_method3]: %2.5f Kcycles; %2.3f times faster than ref\n", min3, min0 / min3);
+				printf("[_mm_corr_epu8_perm_method0]: %2.5f Kcycles\n", min0);
+				printf("[_mm_corr_epu8_perm_method1]: %2.5f Kcycles; %2.3f times faster than ref\n", min1, min0 / min1);
+				printf("[_mm_corr_epu8_perm_method2]: %2.5f Kcycles; %2.3f times faster than ref\n", min2, min0 / min2);
+				printf("[_mm_corr_epu8_perm_method3]: %2.5f Kcycles; %2.3f times faster than ref\n", min3, min0 / min3);
 			}
 			_mm_free2(data1);
 			_mm_free2(data2);
@@ -326,18 +344,20 @@ namespace hli {
 		}
 		else
 		{
-			//priv::_mm_corr_epu8_perm_method3<HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			priv::_mm_corr_epu8_perm_method2<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+			priv::_mm_corr_epu8_perm_method3<HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+			//priv::_mm_corr_epu8_perm_method1<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
 		}
 
-#		if _DEBUG
+		#if _DEBUG
 		const double * const ptr = reinterpret_cast<double * const>(std::get<0>(results));
-		for (size_t i = 0; i < nPermutations; ++i) {
-			if ((ptr[i] < -1) || (ptr[i] > 1)) {
-				std::cout << "WARNING: _mm_corr_epu8: _mm_corr_perm_epu8: permutation " << i << " has an invalid correlation value " << ptr[i] << std::endl;
+		for (size_t i = 0; i < nPermutations; ++i)
+		{
+			if ((ptr[i] < -1) || (ptr[i] > 1))
+			{
+				std::cout << "WARNING: _mm_corr_epu8: _mm_corr_epu8_perm: permutation " << i << " has an invalid correlation value " << ptr[i] << std::endl;
 			}
 		}
-#		endif
+		#endif
 	}
 
 	template <bool HAS_MV, U8 MV>
@@ -351,76 +371,77 @@ namespace hli {
 		const size_t nPermutations,
 		__m128i& randInts)
 	{
-#if _DEBUG
+		#if _DEBUG
 		if ((nBits1 > 8) || (nBits1 < 1)) std::cout << "WARNING: _mm_corr_epu8_perm: nBits1=" << nBits1 << " has to be in range[1..8]" << std::endl;
 		if ((nBits2 > 8) || (nBits2 < 1)) std::cout << "WARNING: _mm_corr_epu8_perm: nBits2=" << nBits2 << " has to be in range[1..8]" << std::endl;
-#endif
+		#endif
 
-		switch (nBits1) {
-		case 1:
-			switch (nBits2)
-			{
-			case 1: return _mm_corr_epu8_perm<1, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 2: return _mm_corr_epu8_perm<1, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 3: return _mm_corr_epu8_perm<1, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 4: return _mm_corr_epu8_perm<1, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 5: return _mm_corr_epu8_perm<1, 5, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 6: return _mm_corr_epu8_perm<1, 6, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 7: return _mm_corr_epu8_perm<1, 7, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+		switch (nBits1)
+		{
+			case 1:
+				switch (nBits2)
+				{
+					case 1: return _mm_corr_epu8_perm<1, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 2: return _mm_corr_epu8_perm<1, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 3: return _mm_corr_epu8_perm<1, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 4: return _mm_corr_epu8_perm<1, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 5: return _mm_corr_epu8_perm<1, 5, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 6: return _mm_corr_epu8_perm<1, 6, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 7: return _mm_corr_epu8_perm<1, 7, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					default: break;
+				}
+			case 2:
+				switch (nBits2)
+				{
+					case 1: return _mm_corr_epu8_perm<2, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 2: return _mm_corr_epu8_perm<2, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 3: return _mm_corr_epu8_perm<2, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 4: return _mm_corr_epu8_perm<2, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 5: return _mm_corr_epu8_perm<2, 5, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 6: return _mm_corr_epu8_perm<2, 6, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					default: break;
+				}
+			case 3:
+				switch (nBits2)
+				{
+					case 1: return _mm_corr_epu8_perm<3, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 2: return _mm_corr_epu8_perm<3, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 3: return _mm_corr_epu8_perm<3, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 4: return _mm_corr_epu8_perm<3, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 5: return _mm_corr_epu8_perm<3, 5, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					default: break;
+				}
+			case 4:
+				switch (nBits2)
+				{
+					case 1: return _mm_corr_epu8_perm<4, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 2: return _mm_corr_epu8_perm<4, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 3: return _mm_corr_epu8_perm<4, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 4: return _mm_corr_epu8_perm<4, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					default: break;
+				}
+			case 5:
+				switch (nBits2)
+				{
+					case 1: return _mm_corr_epu8_perm<5, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 2: return _mm_corr_epu8_perm<5, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 3: return _mm_corr_epu8_perm<5, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					default: break;
+				}
+			case 6:
+				switch (nBits2)
+				{
+					case 1: return _mm_corr_epu8_perm<6, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					case 2: return _mm_corr_epu8_perm<6, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					default: break;
+				}
+			case 7:
+				switch (nBits2)
+				{
+					case 1: return _mm_corr_epu8_perm<7, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
+					default: break;
+				}
 			default: break;
-			}
-		case 2:
-			switch (nBits2)
-			{
-			case 1: return _mm_corr_epu8_perm<2, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 2: return _mm_corr_epu8_perm<2, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 3: return _mm_corr_epu8_perm<2, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 4: return _mm_corr_epu8_perm<2, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 5: return _mm_corr_epu8_perm<2, 5, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 6: return _mm_corr_epu8_perm<2, 6, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			default: break;
-			}
-		case 3:
-			switch (nBits2)
-			{
-			case 1: return _mm_corr_epu8_perm<3, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 2: return _mm_corr_epu8_perm<3, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 3: return _mm_corr_epu8_perm<3, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 4: return _mm_corr_epu8_perm<3, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 5: return _mm_corr_epu8_perm<3, 5, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			default: break;
-			}
-		case 4:
-			switch (nBits2)
-			{
-			case 1: return _mm_corr_epu8_perm<4, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 2: return _mm_corr_epu8_perm<4, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 3: return _mm_corr_epu8_perm<4, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 4: return _mm_corr_epu8_perm<4, 4, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			default: break;
-			}
-		case 5:
-			switch (nBits2)
-			{
-			case 1: return _mm_corr_epu8_perm<5, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 2: return _mm_corr_epu8_perm<5, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 3: return _mm_corr_epu8_perm<5, 3, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			default: break;
-			}
-		case 6:
-			switch (nBits2)
-			{
-			case 1: return _mm_corr_epu8_perm<6, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			case 2: return _mm_corr_epu8_perm<6, 2, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			default: break;
-			}
-		case 7:
-			switch (nBits2)
-			{
-			case 1: return _mm_corr_epu8_perm<7, 1, HAS_MV, MV>(data1, data2, nElements, results, nPermutations, randInts);
-			default: break;
-			}
-		default: break;
 		}
 	}
 }

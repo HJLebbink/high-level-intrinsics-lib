@@ -2,7 +2,8 @@
 
 #include <iostream>		// std::cout
 
-namespace hli {
+namespace hli
+{
 
 	// swap the elements of data given pos1 and pos2
 	template <class T>
@@ -23,19 +24,21 @@ namespace hli {
 		const U16 * const swap_array,
 		const size_t nElements)
 	{
-		for (int i = static_cast<int>(nElements) - 1; i > 0; --i) {
-#		if	_DEBUG 
-			if (i >= static_cast<int>(nElements)) {
+		for (int i = static_cast<int>(nElements) - 1; i > 0; --i)
+		{
+			#		if	_DEBUG 
+			if (i >= static_cast<int>(nElements))
+			{
 				std::cout << "ERROR: hli::swapArray i=" << i << "; nElements=" << nElements << std::endl;
 				return;
 			}
-			if (swap_array[i] >= nElements) {
+			if (swap_array[i] >= nElements)
+			{
 				std::cout << "ERROR: hli::swapArray i=" << i << "; swap_array[i]=" << swap_array[i] << "; nElements = " << nElements << std::endl;
 				return;
 			}
-#		endif
+			#		endif
 			swapElement(data, i, swap_array[i]);
 		}
 	}
 }
-

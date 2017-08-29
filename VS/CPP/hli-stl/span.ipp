@@ -2,10 +2,11 @@
 
 #include <tuple>
 
-namespace hli {
+namespace hli
+{
 
 	template <class T>
 	using span = std::tuple<typename T * const, const size_t>;
-	
+
 
 }

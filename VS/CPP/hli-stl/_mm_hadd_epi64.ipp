@@ -18,7 +18,8 @@
 #include "toString.ipp"
 
 
-namespace hli {
+namespace hli
+{
 
 	// Horizontally add adjacent pairs of 64-bit integers in a, store the result in dst.
 	// Operation:

@@ -33,7 +33,7 @@ namespace hli_cli {
 			List<Double>^ data2,
 			bool has_missing_values);
 
-		static void _mm_corr_perm_epu8(
+		static void _mm_corr_epu8_perm(
 			List<Byte>^ data1,
 			int nBits1,
 			List<Byte>^ data2,
@@ -61,7 +61,7 @@ namespace hli_cli {
 			int nBits2,
 			bool has_missing_values);
 
-		static void _mm_mi_perm_epu8(
+		static void _mm_mi_epu8_perm(
 			List<Byte>^ data1,
 			int nBits1,
 			List<Byte>^ data2,
@@ -70,7 +70,7 @@ namespace hli_cli {
 			List<Double>^ results,
 			array<UInt32>^ randInts);
 
-		static void _mm_mi_corr_perm_epu8(
+		static void _mm_mi_corr_epu8_perm(
 			List<Byte>^ data1,
 			int nBits1,
 			List<Byte>^ data2,
