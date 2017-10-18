@@ -21,7 +21,7 @@
 
 #include "_mm_rand_si128.ipp"
 #include "tools.ipp"
-#include "timer.ipp"
+#include "timing.ipp"
 
 namespace hli
 {
@@ -337,14 +337,14 @@ namespace hli
 			for (int i = 0; i < nExperiments; ++i)
 			{
 
-				timer::reset_and_start_timer();
+				reset_and_start_timer();
 				result0 = hli::priv::_mm_entropy_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
-				min0 = std::min(min0, timer::get_elapsed_kcycles());
+				min0 = std::min(min0, get_elapsed_kcycles());
 
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					result1 = hli::priv::_mm_entropy_epu8_method1<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
-					min1 = std::min(min1, timer::get_elapsed_kcycles());
+					min1 = std::min(min1, get_elapsed_kcycles());
 
 					if (doTests)
 					{
@@ -356,9 +356,9 @@ namespace hli
 					}
 				}
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					result2 = hli::priv::_mm_entropy_epu8_method2<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
-					min2 = std::min(min2, timer::get_elapsed_kcycles());
+					min2 = std::min(min2, get_elapsed_kcycles());
 
 					if (doTests)
 					{
@@ -370,9 +370,9 @@ namespace hli
 					}
 				}
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					result3 = hli::priv::_mm_entropy_epu8_method3<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
-					min3 = std::min(min3, timer::get_elapsed_kcycles());
+					min3 = std::min(min3, get_elapsed_kcycles());
 
 					if (doTests)
 					{

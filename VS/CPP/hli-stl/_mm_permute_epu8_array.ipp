@@ -16,7 +16,7 @@
 //#include "ammintrin.h"  // AMD-specific intrinsics
 
 #include "toString.ipp"
-#include "timer.ipp"
+#include "timing.ipp"
 #include "equal.ipp"
 #include "tools.ipp"
 #include "swap.ipp"
@@ -109,6 +109,7 @@ namespace hli
 
 	namespace test
 	{
+		using namespace tools::timing;
 
 		void _mm_permute_epu8_array_speed_test_1(
 			const int nBlocks,
@@ -155,15 +156,15 @@ namespace hli
 			for (int i = 0; i < nExperiments; ++i)
 			{
 				copy(data_source, data0);
-				timer::reset_and_start_timer();
+				reset_and_start_timer();
 				hli::priv::_mm_permute_epu8_array_method0(data0, nElements, swap, randInt0);
-				min0 = std::min(min0, timer::get_elapsed_kcycles());
+				min0 = std::min(min0, get_elapsed_kcycles());
 
 				{
 					copy(data_source, data1);
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					hli::priv::_mm_permute_epu8_array_method1(data1, nElements, swap, randInt1);
-					min1 = std::min(min1, timer::get_elapsed_kcycles());
+					min1 = std::min(min1, get_elapsed_kcycles());
 
 					if (doTests)
 					{
@@ -184,9 +185,9 @@ namespace hli
 				}
 				{
 					copy(data_source, data2);
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					hli::priv::_mm_permute_epu8_array_method2(data2, nElements, swap, randInt2);
-					min2 = std::min(min2, timer::get_elapsed_kcycles());
+					min2 = std::min(min2, get_elapsed_kcycles());
 
 					if (doTests)
 					{
@@ -207,9 +208,9 @@ namespace hli
 				}
 				{
 					copy(data_source, data3);
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					hli::priv::_mm_permute_epu8_array_method3(data3, nElements, swap, randInt3);
-					min3 = std::min(min3, timer::get_elapsed_kcycles());
+					min3 = std::min(min3, get_elapsed_kcycles());
 
 					if (doTests)
 					{

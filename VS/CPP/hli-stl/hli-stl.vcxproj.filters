@@ -13,10 +13,10 @@
     <ClInclude Include="_mm_variance_epu8.ipp" />
     <ClInclude Include="equal.ipp" />
     <ClInclude Include="get_set.ipp" />
-    <ClInclude Include="timer.ipp" />
     <ClInclude Include="tools.ipp" />
     <ClInclude Include="toString.ipp" />
     <ClInclude Include="_mm_permute_epu8_array.ipp" />
+    <ClInclude Include="timing.ipp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="span.ipp" />

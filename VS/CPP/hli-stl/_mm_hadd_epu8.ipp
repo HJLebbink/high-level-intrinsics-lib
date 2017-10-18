@@ -14,7 +14,7 @@
 //#include "ammintrin.h"  // AMD-specific intrinsics
 
 #include "tools.ipp"
-#include "timer.ipp"
+#include "timing.ipp"
 #include "toString.ipp"
 #include "_mm_hadd_epi64.ipp"
 #include "_mm_rand_si128.ipp"
@@ -255,6 +255,7 @@ namespace hli
 
 	namespace test
 	{
+		using namespace tools::timing;
 
 		void _mm_hadd_epu8_speed_test_1(const int nBlocks, const int nExperiments, const bool doTests)
 		{
@@ -276,15 +277,15 @@ namespace hli
 
 				for (int i = 0; i < nExperiments; ++i)
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					const std::tuple<__m128i, __m128i> result_ref = hli::priv::_mm_hadd_epu8_method0<HAS_MV, MV>(data, nElements);
 					const unsigned int sum0 = std::get<0>(result_ref).m128i_u32[0];
-					min0 = std::min(min0, timer::get_elapsed_kcycles());
+					min0 = std::min(min0, get_elapsed_kcycles());
 
 					{
-						timer::reset_and_start_timer();
+						reset_and_start_timer();
 						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<8, HAS_MV, MV>(data, nElements);
-						min1 = std::min(min1, timer::get_elapsed_kcycles());
+						min1 = std::min(min1, get_elapsed_kcycles());
 
 						if (doTests)
 						{
@@ -296,9 +297,9 @@ namespace hli
 						}
 					}
 					{
-						timer::reset_and_start_timer();
+						reset_and_start_timer();
 						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<7, HAS_MV, MV>(data, nElements);
-						min2 = std::min(min2, timer::get_elapsed_kcycles());
+						min2 = std::min(min2, get_elapsed_kcycles());
 
 						if (doTests)
 						{
@@ -310,9 +311,9 @@ namespace hli
 						}
 					}
 					{
-						timer::reset_and_start_timer();
+						reset_and_start_timer();
 						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<6, HAS_MV, MV>(data, nElements);
-						min3 = std::min(min3, timer::get_elapsed_kcycles());
+						min3 = std::min(min3, get_elapsed_kcycles());
 
 						if (doTests)
 						{
@@ -324,9 +325,9 @@ namespace hli
 						}
 					}
 					{
-						timer::reset_and_start_timer();
+						reset_and_start_timer();
 						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method1<5, HAS_MV, MV>(data, nElements);
-						min4 = std::min(min4, timer::get_elapsed_kcycles());
+						min4 = std::min(min4, get_elapsed_kcycles());
 
 						if (doTests)
 						{
@@ -338,9 +339,9 @@ namespace hli
 						}
 					}
 					{
-						timer::reset_and_start_timer();
+						reset_and_start_timer();
 						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method2<HAS_MV, MV>(data, nElements);
-						min5 = std::min(min5, timer::get_elapsed_kcycles());
+						min5 = std::min(min5, get_elapsed_kcycles());
 
 						if (doTests)
 						{
@@ -352,9 +353,9 @@ namespace hli
 						}
 					}
 					{
-						timer::reset_and_start_timer();
+						reset_and_start_timer();
 						const std::tuple<__m128i, __m128i> result = hli::priv::_mm_hadd_epu8_method3<HAS_MV, MV>(data, nElements);
-						min6 = std::min(min6, timer::get_elapsed_kcycles());
+						min6 = std::min(min6, get_elapsed_kcycles());
 
 						if (doTests)
 						{

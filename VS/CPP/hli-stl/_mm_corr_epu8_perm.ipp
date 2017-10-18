@@ -15,7 +15,7 @@
 //#include "ammintrin.h"  // AMD-specific intrinsics
 
 #include "tools.ipp"
-#include "timer.ipp"
+#include "timing.ipp"
 #include "span.ipp"
 
 
@@ -182,6 +182,8 @@ namespace hli
 
 	namespace test
 	{
+		using namespace tools::timing;
+
 		void _mm_corr_epu8_perm_speed_test_1(
 			const int nBlocks,
 			const int nPermutations,
@@ -226,14 +228,14 @@ namespace hli
 
 				for (int i = 0; i < nExperiments; ++i)
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					hli::priv::_mm_corr_epu8_perm_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements, results0, nPermutations, randInt0);
-					min0 = std::min(min0, timer::get_elapsed_kcycles());
+					min0 = std::min(min0, get_elapsed_kcycles());
 
 					{
-						timer::reset_and_start_timer();
+						reset_and_start_timer();
 						hli::priv::_mm_corr_epu8_perm_method1<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements, results1, nPermutations, randInt1);
-						min1 = std::min(min1, timer::get_elapsed_kcycles());
+						min1 = std::min(min1, get_elapsed_kcycles());
 
 						//for (int block = 0; block < (nBytesResults >> 4); ++block) {
 						//	std::cout << "WARNING: _mm_corr_epu8_perm_method1<6>: results[" << block << "] =" << hli::toString_f64(results[block]) << std::endl;
@@ -262,9 +264,9 @@ namespace hli
 						}
 					}
 					{
-						timer::reset_and_start_timer();
+						reset_and_start_timer();
 						hli::priv::_mm_corr_epu8_perm_method2<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements, results2, nPermutations, randInt2);
-						min2 = std::min(min2, timer::get_elapsed_kcycles());
+						min2 = std::min(min2, get_elapsed_kcycles());
 
 						if (doTests)
 						{
@@ -288,9 +290,9 @@ namespace hli
 						}
 					}
 					{
-						timer::reset_and_start_timer();
+						reset_and_start_timer();
 						hli::priv::_mm_corr_epu8_perm_method3<HAS_MV, MV>(data1, data2, nElements, results3, nPermutations, randInt3);
-						min3 = std::min(min3, timer::get_elapsed_kcycles());
+						min3 = std::min(min3, get_elapsed_kcycles());
 
 						if (doTests)
 						{

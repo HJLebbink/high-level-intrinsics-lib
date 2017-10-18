@@ -109,6 +109,7 @@ namespace hli
 
 	namespace test
 	{
+		using namespace tools::timing;
 
 		void _mm_rand_si128_speed_test_1(const int nBlocks, const int nExperiments, const bool doTests)
 		{
@@ -124,14 +125,14 @@ namespace hli
 			for (int i = 0; i < nExperiments; ++i)
 			{
 
-				timer::reset_and_start_timer();
+				reset_and_start_timer();
 				hli::priv::_mm_rand_si128_ref(data1, randInts1);
-				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
+				min_ref = std::min(min_ref, get_elapsed_kcycles());
 
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					hli::priv::_mm_lfsr32_epu32_method1(data2, randInts2);
-					min1 = std::min(min1, timer::get_elapsed_kcycles());
+					min1 = std::min(min1, get_elapsed_kcycles());
 
 					if (doTests)
 					{

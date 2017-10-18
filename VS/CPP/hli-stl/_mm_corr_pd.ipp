@@ -154,6 +154,7 @@ namespace hli
 
 	namespace test
 	{
+		using namespace tools::timing;
 
 		void _mm_corr_pd_speed_test_1(
 			const int nBlocks,
@@ -183,14 +184,14 @@ namespace hli
 			for (int i = 0; i < nExperiments; ++i)
 			{
 
-				timer::reset_and_start_timer();
+				reset_and_start_timer();
 				result0 = hli::priv::_mm_corr_pd_method0<HAS_MV, MV>(data1, data2, nElements);
-				min0 = std::min(min0, timer::get_elapsed_kcycles());
+				min0 = std::min(min0, get_elapsed_kcycles());
 
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					result1 = hli::priv::_mm_corr_pd_method1<HAS_MV, MV>(data1, data2, nElements);
-					min1 = std::min(min1, timer::get_elapsed_kcycles());
+					min1 = std::min(min1, get_elapsed_kcycles());
 
 					if (doTests)
 					{

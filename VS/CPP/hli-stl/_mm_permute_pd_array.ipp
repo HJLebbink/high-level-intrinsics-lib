@@ -63,6 +63,7 @@ namespace hli
 
 	namespace test
 	{
+		using namespace tools::timing;
 
 		void _mm_permute_pd_array_speed_test_1(
 			const int nBlocks,
@@ -96,15 +97,15 @@ namespace hli
 			for (int i = 0; i < nExperiments; ++i)
 			{
 				memcpy(std::get<0>(data_1), std::get<0>(data), nBytes);
-				timer::reset_and_start_timer();
+				reset_and_start_timer();
 				hli::priv::_mm_permute_pd_array_method0(data_1, nElements, swap, randInt);
-				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
+				min_ref = std::min(min_ref, get_elapsed_kcycles());
 
 				{
 					memcpy(std::get<0>(data_2), std::get<0>(data), nBytes);
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					hli::priv::_mm_permute_pd_array_method2(data_2, nElements, swap, randInt1);
-					min1 = std::min(min1, timer::get_elapsed_kcycles());
+					min1 = std::min(min1, get_elapsed_kcycles());
 
 					if (doTests)
 					{

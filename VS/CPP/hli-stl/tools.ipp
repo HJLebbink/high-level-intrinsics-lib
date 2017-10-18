@@ -3,6 +3,8 @@
 #include <tuple>
 #include "emmintrin.h"
 
+#include "intrin.h"
+
 namespace hli
 {
 

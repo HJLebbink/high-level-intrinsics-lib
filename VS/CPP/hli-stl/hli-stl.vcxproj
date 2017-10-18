@@ -256,7 +256,7 @@
     <ClInclude Include="_mm_entropy_epu8.ipp" />
     <ClInclude Include="_mm_hadd_epi64.ipp" />
     <ClInclude Include="_mm_hadd_epu8.ipp" />
-    <ClInclude Include="timer.ipp" />
+    <ClInclude Include="timing.ipp" />
     <ClInclude Include="toString.ipp" />
     <ClInclude Include="_mm_mi_epu8.ipp" />
     <ClInclude Include="_mm_permute_epu8_array.ipp" />

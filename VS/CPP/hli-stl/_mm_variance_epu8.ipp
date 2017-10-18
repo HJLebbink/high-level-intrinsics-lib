@@ -211,6 +211,8 @@ namespace hli
 
 	namespace test
 	{
+		using namespace tools::timing;
+
 		void _mm_variance_epu8_speed_test_1(const int nBlocks, const int nExperiments, const bool doTests)
 		{
 			const double delta = 0.0000001;
@@ -231,14 +233,14 @@ namespace hli
 				for (int i = 0; i < nExperiments; ++i)
 				{
 
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					const __m128d result_ref = hli::priv::_mm_variance_epu8_method0<HAS_MV, MV>(data, nElements);
-					min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
+					min_ref = std::min(min_ref, get_elapsed_kcycles());
 
 					{
-						timer::reset_and_start_timer();
+						reset_and_start_timer();
 						const __m128d result = hli::priv::_mm_variance_epu8_method1<8, HAS_MV, MV>(data, nElements);
-						min1 = std::min(min1, timer::get_elapsed_kcycles());
+						min1 = std::min(min1, get_elapsed_kcycles());
 
 						if (doTests)
 						{
@@ -250,9 +252,9 @@ namespace hli
 						}
 					}
 					{
-						timer::reset_and_start_timer();
+						reset_and_start_timer();
 						const __m128d result = hli::priv::_mm_variance_epu8_method1<7, HAS_MV, MV>(data, nElements);
-						min2 = std::min(min2, timer::get_elapsed_kcycles());
+						min2 = std::min(min2, get_elapsed_kcycles());
 
 						if (doTests)
 						{
@@ -264,9 +266,9 @@ namespace hli
 						}
 					}
 					{
-						timer::reset_and_start_timer();
+						reset_and_start_timer();
 						const __m128d result = hli::priv::_mm_variance_epu8_method1<6, HAS_MV, MV>(data, nElements);
-						min3 = std::min(min3, timer::get_elapsed_kcycles());
+						min3 = std::min(min3, get_elapsed_kcycles());
 
 						if (doTests)
 						{
@@ -278,9 +280,9 @@ namespace hli
 						}
 					}
 					{
-						timer::reset_and_start_timer();
+						reset_and_start_timer();
 						const __m128d result = hli::priv::_mm_variance_epu8_method1<5, HAS_MV, MV>(data, nElements);
-						min4 = std::min(min4, timer::get_elapsed_kcycles());
+						min4 = std::min(min4, get_elapsed_kcycles());
 
 						if (doTests)
 						{

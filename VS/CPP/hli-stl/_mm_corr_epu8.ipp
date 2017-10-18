@@ -339,6 +339,7 @@ namespace hli
 
 	namespace test
 	{
+		using namespace tools::timing;
 
 		void _mm_corr_epu8_speed_test_1(
 			const int nBlocks,
@@ -391,14 +392,14 @@ namespace hli
 
 			for (int i = 0; i < nExperiments; ++i)
 			{
-				timer::reset_and_start_timer();
+				reset_and_start_timer();
 				result_ref = hli::priv::_mm_corr_epu8_ref<8, 8, HAS_MV, MV>(data1, data2, nElements);
-				min_ref = std::min(min_ref, timer::get_elapsed_kcycles());
+				min_ref = std::min(min_ref, get_elapsed_kcycles());
 
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					result1 = hli::priv::_mm_corr_epu8_method0<8, 8, HAS_MV, MV>(data1, data2, nElements);
-					min1 = std::min(min1, timer::get_elapsed_kcycles());
+					min1 = std::min(min1, get_elapsed_kcycles());
 
 					if (doTests)
 					{
@@ -410,9 +411,9 @@ namespace hli
 					}
 				}
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					result2 = hli::priv::_mm_corr_epu8_method0<6, 6, HAS_MV, MV>(data1, data2, nElements);
-					min2 = std::min(min2, timer::get_elapsed_kcycles());
+					min2 = std::min(min2, get_elapsed_kcycles());
 
 					if (doTests)
 					{
@@ -425,9 +426,9 @@ namespace hli
 				}
 
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					result3 = hli::priv::_mm_corr_epu8_method1<8, 8, HAS_MV, MV>(data1, data2, nElements);
-					min3 = std::min(min3, timer::get_elapsed_kcycles());
+					min3 = std::min(min3, get_elapsed_kcycles());
 
 					if (doTests)
 					{
@@ -439,9 +440,9 @@ namespace hli
 					}
 				}
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					result4 = hli::priv::_mm_corr_epu8_method1<6, 6, HAS_MV, MV>(data1, data2, nElements);
-					min4 = std::min(min4, timer::get_elapsed_kcycles());
+					min4 = std::min(min4, get_elapsed_kcycles());
 
 					if (doTests)
 					{
@@ -454,9 +455,9 @@ namespace hli
 				}
 
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					result5 = hli::priv::_mm_corr_epu8_method2<8, 8, HAS_MV, MV>(data1, data2, nElements);
-					min5 = std::min(min5, timer::get_elapsed_kcycles());
+					min5 = std::min(min5, get_elapsed_kcycles());
 
 					if (doTests)
 					{
@@ -468,9 +469,9 @@ namespace hli
 					}
 				}
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					result6 = hli::priv::_mm_corr_epu8_method0<6, 6, HAS_MV, MV>(data1, data2, nElements);
-					min6 = std::min(min6, timer::get_elapsed_kcycles());
+					min6 = std::min(min6, get_elapsed_kcycles());
 
 					if (doTests)
 					{
@@ -482,9 +483,9 @@ namespace hli
 					}
 				}
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					result7 = hli::priv::_mm_corr_epu8_method3<HAS_MV, MV>(data1, data2, nElements);
-					min7 = std::min(min7, timer::get_elapsed_kcycles());
+					min7 = std::min(min7, get_elapsed_kcycles());
 
 					if (doTests)
 					{
@@ -496,9 +497,9 @@ namespace hli
 					}
 				}
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					result8 = hli::priv::_mm_corr_epu8_method4<8, 8, HAS_MV, MV>(data1, data2, nElements);
-					min8 = std::min(min8, timer::get_elapsed_kcycles());
+					min8 = std::min(min8, get_elapsed_kcycles());
 
 					if (doTests)
 					{
@@ -510,9 +511,9 @@ namespace hli
 					}
 				}
 				{
-					timer::reset_and_start_timer();
+					reset_and_start_timer();
 					result9 = hli::priv::_mm_corr_pd_method0<HAS_MV, MV>(data1_D, data2_D, nElements);
-					min9 = std::min(min9, timer::get_elapsed_kcycles());
+					min9 = std::min(min9, get_elapsed_kcycles());
 
 					if (doTests)
 					{
