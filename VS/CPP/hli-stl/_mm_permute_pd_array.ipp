@@ -27,9 +27,9 @@ namespace hli
 	{
 
 		inline void _mm_permute_pd_array_method0(
-			const std::tuple<__m128d * const, const size_t>& data,
-			const size_t nElements,
-			const std::tuple<__m128i * const, const size_t>& swap,
+			const std::tuple<__m128d * const, const int>& data,
+			const int nElements,
+			const std::tuple<__m128i * const, const int>& swap,
 			__m128i& randInts)
 		{
 			_mm_lfsr32_epu32(swap, randInts);
@@ -44,9 +44,9 @@ namespace hli
 		}
 
 		inline void _mm_permute_pd_array_method2(
-			const std::tuple<__m128d * const, const size_t>& data,
-			const size_t nElements,
-			const std::tuple<__m128i * const, const size_t>& swap,
+			const std::tuple<__m128d * const, const int>& data,
+			const int nElements,
+			const std::tuple<__m128i * const, const int>& swap,
 			__m128i& randInts)
 		{
 			_mm_lfsr32_epu32(swap, randInts);
@@ -65,8 +65,8 @@ namespace hli
 	{
 
 		void _mm_permute_pd_array_speed_test_1(
-			const size_t nBlocks,
-			const size_t nExperiments,
+			const int nBlocks,
+			const int nExperiments,
 			const bool doTests)
 		{
 			if ((nBlocks * 8) > 0xFFFF)
@@ -75,12 +75,12 @@ namespace hli
 				return;
 			}
 
-			const size_t nBytes = 16 * nBlocks;
+			const int nBytes = 16 * nBlocks;
 			auto data = _mm_malloc_m128d(nBytes);
 			auto data_1 = _mm_malloc_m128d(nBytes);
 			auto data_2 = _mm_malloc_m128d(nBytes);
 
-			const size_t nElements = nBytes >> 3;
+			const int nElements = nBytes >> 3;
 			auto swap = _mm_malloc_m128i(nElements << 1);
 
 			const __m128i seed = _mm_set_epi32(rand() || rand() << 16, rand() || rand() << 16, rand() || rand() << 16, rand() || rand() << 16);
@@ -93,7 +93,7 @@ namespace hli
 			double min_ref = std::numeric_limits<double>::max();
 			double min1 = std::numeric_limits<double>::max();
 
-			for (size_t i = 0; i < nExperiments; ++i)
+			for (int i = 0; i < nExperiments; ++i)
 			{
 				memcpy(std::get<0>(data_1), std::get<0>(data), nBytes);
 				timer::reset_and_start_timer();
@@ -108,7 +108,7 @@ namespace hli
 
 					if (doTests)
 					{
-						for (size_t block = 0; block < nBlocks; ++block)
+						for (int block = 0; block < nBlocks; ++block)
 						{
 							if (!equal(std::get<0>(data_1)[block], std::get<0>(data_2)[block]))
 							{
@@ -145,9 +145,9 @@ namespace hli
 	}
 
 	inline void _mm_permute_pd_array(
-		const std::tuple<__m128d * const, const size_t> data,
-		const size_t nElements,
-		const std::tuple<__m128i * const, const size_t> swap,
+		const std::tuple<__m128d * const, const int> data,
+		const int nElements,
+		const std::tuple<__m128i * const, const int> swap,
 		__m128i& randInts)
 	{
 		//std::cout << "INFO: _mm_permute_array::_mm_permute_dp_array: nBytes=" << nBytes << std::endl;

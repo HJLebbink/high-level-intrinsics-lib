@@ -48,8 +48,8 @@ namespace hli
 		return _mm_castsi128_ps(_mm_swap_64(_mm_castps_si128(d)));
 	}
 
-	template <size_t ALIGN>
-	inline size_t resizeNBytes(size_t nBytes)
+	template <int ALIGN>
+	inline int resizeNBytes(int nBytes)
 	{
 		switch (nBytes)
 		{
@@ -60,7 +60,7 @@ namespace hli
 		}
 	}
 
-	inline size_t resizeNBytes(size_t nBytes, size_t align)
+	inline int resizeNBytes(int nBytes, int align)
 	{
 		switch (align)
 		{
@@ -73,70 +73,116 @@ namespace hli
 
 	template <class T>
 	inline void copy(
-		const std::tuple<const T * const, const size_t>& src,
-		const std::tuple<T * const, const size_t>& dst)
+		const std::tuple<const T * const, const int>& src,
+		const std::tuple<T * const, const int>& dst)
 	{
 		memcpy(std::get<0>(dst), std::get<0>(src), std::get<1>(dst));
 	}
 
 
-	inline std::tuple<__m128d * const, const size_t> deepCopy(
-		const std::tuple<const __m128d * const, const size_t>& in)
+	inline std::tuple<__m128d * const, const int> deepCopy(
+		const std::tuple<const __m128d * const, const int>& in)
 	{
-		const size_t nBytes = std::get<1>(in);
+		const int nBytes = std::get<1>(in);
 		__m128d * const copy = static_cast<__m128d * const>(_mm_malloc(nBytes, 16));
 		memcpy(copy, std::get<0>(in), nBytes);
 		return std::make_tuple(copy, nBytes);
 	}
 
-	inline std::tuple<__m128i * const, const size_t> deepCopy(
-		const std::tuple<const __m128i * const, const size_t>& in)
+	inline std::tuple<__m128i * const, const int> deepCopy(
+		const std::tuple<const __m128i * const, const int>& in)
 	{
-		const size_t nBytes = std::get<1>(in);
+		const int nBytes = std::get<1>(in);
 		__m128i * const copy = static_cast<__m128i * const>(_mm_malloc(nBytes, 16));
 		memcpy(copy, std::get<0>(in), nBytes);
 		return std::make_tuple(copy, nBytes);
 	}
 
-	template <class T>
-	inline void _mm_free2(const std::tuple<T * const, const size_t>& t)
+	template <class T, class S>
+	inline void _mm_free2(const std::tuple<T * const, const S>& t)
 	{
 		const void * const ptr = reinterpret_cast<const void *>(std::get<0>(t));
 		_mm_free(const_cast<void *>(ptr));
 	}
 
-	inline std::tuple<U8 * const, const size_t> _mm_malloc_xmm(size_t nBytes)
+	inline std::tuple<U8 * const, const int> _mm_malloc_xmm(int nBytes)
 	{
-		const size_t nBytes2 = resizeNBytes<16>(nBytes);
+		const int nBytes2 = resizeNBytes<16>(nBytes);
 		return std::make_tuple(static_cast<U8 * const>(_mm_malloc(nBytes2, 16)), nBytes2);
 	}
-	inline std::tuple<__m128d * const, const size_t> _mm_cast_m128d(
-		const std::tuple<U8 * const, const size_t>& data)
+	inline std::tuple<U8 * const, const int> _mm_malloc_ymm(int nBytes)
+	{
+		const int nBytes2 = resizeNBytes<32>(nBytes);
+		return std::make_tuple(static_cast<U8 * const>(_mm_malloc(nBytes2, 32)), nBytes2);
+	}
+	inline std::tuple<U8 * const, const int> _mm_malloc_zmm(int nBytes)
+	{
+		const int nBytes2 = resizeNBytes<64>(nBytes);
+		return std::make_tuple(static_cast<U8 * const>(_mm_malloc(nBytes2, 64)), nBytes2);
+	}
+
+
+	inline std::tuple<__m128d * const, const int> _mm_cast_m128d(
+		const std::tuple<U8 * const, const int>& data)
 	{
 		return std::make_tuple(reinterpret_cast<__m128d * const>(std::get<0>(data)), std::get<1>(data));
 	}
-	inline std::tuple<const __m128d * const, const size_t> _mm_cast_m128d(
-		const std::tuple<const U8 * const, const size_t>& data)
+	inline std::tuple<const __m128d * const, const int> _mm_cast_m128d(
+		const std::tuple<const U8 * const, const int>& data)
 	{
 		return std::make_tuple(reinterpret_cast<const __m128d * const>(std::get<0>(data)), std::get<1>(data));
 	}
-	inline std::tuple<__m128i * const, const size_t> _mm_cast_m128i(
-		const std::tuple<U8 * const, const size_t>& data)
+	inline std::tuple<__m128i * const, const int> _mm_cast_m128i(
+		const std::tuple<U8 * const, const int>& data)
 	{
 		return std::make_tuple(reinterpret_cast<__m128i * const>(std::get<0>(data)), std::get<1>(data));
 	}
-	inline std::tuple<const __m128i * const, const size_t> _mm_cast_m128i(
-		const std::tuple<const U8 * const, const size_t>& data)
+	inline std::tuple<const __m128i * const, const int> _mm_cast_m128i(
+		const std::tuple<const U8 * const, const int>& data)
 	{
 		return std::make_tuple(reinterpret_cast<const __m128i * const>(std::get<0>(data)), std::get<1>(data));
 	}
-	inline std::tuple<__m128d * const, const size_t> _mm_malloc_m128d(size_t nBytes)
+
+
+	inline std::tuple<__m512d * const, const int> _mm_cast_m512d(
+		const std::tuple<U8 * const, const int>& data)
+	{
+		return std::make_tuple(reinterpret_cast<__m512d * const>(std::get<0>(data)), std::get<1>(data));
+	}
+	inline std::tuple<const __m512d * const, const int> _mm_cast_m512d(
+		const std::tuple<const U8 * const, const int>& data)
+	{
+		return std::make_tuple(reinterpret_cast<const __m512d * const>(std::get<0>(data)), std::get<1>(data));
+	}
+	inline std::tuple<__m512i * const, const int> _mm_cast_m512i(
+		const std::tuple<U8 * const, const int>& data)
+	{
+		return std::make_tuple(reinterpret_cast<__m512i * const>(std::get<0>(data)), std::get<1>(data));
+	}
+	inline std::tuple<const __m512i * const, const int> _mm_cast_m512i(
+		const std::tuple<const U8 * const, const int>& data)
+	{
+		return std::make_tuple(reinterpret_cast<const __m512i * const>(std::get<0>(data)), std::get<1>(data));
+	}
+
+
+
+	inline std::tuple<__m128d * const, const int> _mm_malloc_m128d(int nBytes)
 	{
 		return _mm_cast_m128d(_mm_malloc_xmm(nBytes));
 	}
-	inline std::tuple<__m128i * const, const size_t> _mm_malloc_m128i(size_t nBytes)
+	inline std::tuple<__m128i * const, const int> _mm_malloc_m128i(int nBytes)
 	{
 		return _mm_cast_m128i(_mm_malloc_xmm(nBytes));
+	}
+
+	inline std::tuple<__m512d * const, const int> _mm_malloc_m512d(int nBytes)
+	{
+		return _mm_cast_m512d(_mm_malloc_zmm(nBytes));
+	}
+	inline std::tuple<__m512i * const, const int> _mm_malloc_m512i(int nBytes)
+	{
+		return _mm_cast_m512i(_mm_malloc_zmm(nBytes));
 	}
 
 
@@ -177,8 +223,8 @@ namespace hli
 	}
 
 	inline double getDouble(
-		const std::tuple<const __m128d * const, const size_t>& data,
-		const size_t i)
+		const std::tuple<const __m128d * const, const int>& data,
+		const int i)
 	{
 		const double * const ptr = reinterpret_cast<const double * const>(std::get<0>(data));
 		return ptr[i];

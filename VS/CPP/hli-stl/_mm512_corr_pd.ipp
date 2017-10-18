@@ -18,17 +18,15 @@
 #include "_mm_covar_epu8.ipp"
 #include "_mm_permute_pd_array.ipp"
 
-
 namespace hli
 {
-
 	namespace priv
 	{
 
 		template <bool HAS_MV, int MV>
-		inline __m128d _mm_corr_pd_method0(
-			const std::tuple<const __m128d * const, const int>& data1,
-			const std::tuple<const __m128d * const, const int>& data2,
+		inline __m512d _mm512_corr_pd_method0(
+			const std::tuple<const __m512d * const, const int>& data1,
+			const std::tuple<const __m512d * const, const int>& data2,
 			const int nElements)
 		{
 			const double * const ptr1 = reinterpret_cast<const double * const>(std::get<0>(data1));
@@ -51,24 +49,24 @@ namespace hli
 				s2 += d2;
 			}
 
-			double corr = ((nElements * s12) - (s1*s2)) / (sqrt((nElements*s11) - (s1*s1)) * sqrt((nElements * s22) - (s2*s2)));
-			return _mm_set1_pd(corr);
+			const double corr = ((nElements * s12) - (s1*s2)) / (sqrt((nElements*s11) - (s1*s1)) * sqrt((nElements * s22) - (s2*s2)));
+			return _mm512_set1_pd(corr);
 		}
 
 		template <bool HAS_MV, int MV>
-		inline __m128d _mm_corr_pd_method1(
-			const std::tuple<const __m128d * const, const int>& data1,
-			const std::tuple<const __m128d * const, const int>& data2,
+		inline __m512d _mm_corr_pd_method1(
+			const std::tuple<const __m512d * const, const int>& data1,
+			const std::tuple<const __m512d * const, const int>& data2,
 			const int nElements)
 		{
 			const int nBytes = std::get<1>(data1);
 			const int nBlocks = nBytes >> 4;
 
-			__m128d s12 = _mm_setzero_pd();
-			__m128d s11 = _mm_setzero_pd();
-			__m128d s22 = _mm_setzero_pd();
-			__m128d s1 = _mm_setzero_pd();
-			__m128d s2 = _mm_setzero_pd();
+			__m512d s12 = _mm_setzero_pd();
+			__m512d s11 = _mm_setzero_pd();
+			__m512d s22 = _mm_setzero_pd();
+			__m512d s1 = _mm_setzero_pd();
+			__m512d s2 = _mm_setzero_pd();
 
 			for (int i = 0; i < nBlocks; ++i)
 			{
@@ -154,8 +152,7 @@ namespace hli
 
 	namespace test
 	{
-
-		void _mm_corr_pd_speed_test_1(
+		void _mm512_corr_pd_speed_test_1(
 			const int nBlocks,
 			const int nExperiments,
 			const bool doTests)
@@ -165,36 +162,36 @@ namespace hli
 			const int MV = 99999;
 			const int nElements = nBlocks * 2;
 
-			auto data1_r = _mm_malloc_m128d(nElements * 8);
-			auto data2_r = _mm_malloc_m128d(nElements * 8);
+			auto data1_r = _mm_malloc_m512d(nElements * 8);
+			auto data2_r = _mm_malloc_m512d(nElements * 8);
 
 			fillRand_pd(data1_r);
 			fillRand_pd(data2_r);
 
-			const std::tuple<const __m128d * const, const int> data1 = data1_r;
-			const std::tuple<const __m128d * const, const int> data2 = data2_r;
+			const std::tuple<const __m512d * const, const int> data1 = data1_r;
+			const std::tuple<const __m512d * const, const int> data2 = data2_r;
 
 
 			double min0 = std::numeric_limits<double>::max();
 			double min1 = std::numeric_limits<double>::max();
 
-			__m128d result0, result1;
+			__m512d result0, result1;
 
 			for (int i = 0; i < nExperiments; ++i)
 			{
 
 				timer::reset_and_start_timer();
-				result0 = hli::priv::_mm_corr_pd_method0<HAS_MV, MV>(data1, data2, nElements);
+				result0 = hli::priv::_mm512_corr_pd_method0<HAS_MV, MV>(data1, data2, nElements);
 				min0 = std::min(min0, timer::get_elapsed_kcycles());
 
 				{
 					timer::reset_and_start_timer();
-					result1 = hli::priv::_mm_corr_pd_method1<HAS_MV, MV>(data1, data2, nElements);
+					result1 = hli::priv::_mm512_corr_pd_method1<HAS_MV, MV>(data1, data2, nElements);
 					min1 = std::min(min1, timer::get_elapsed_kcycles());
 
 					if (doTests)
 					{
-						if (std::abs(result0.m128d_f64[0] - result1.m128d_f64[0]) > delta)
+						if (std::abs(result0.m512d_f64[0] - result1.m512d_f64[0]) > delta)
 						{
 							std::cout << "WARNING: test _mm_corr_pd_method0: result0=" << hli::toString_f64(result0) << "; result1=" << hli::toString_f64(result1) << std::endl;
 							return;
@@ -211,12 +208,11 @@ namespace hli
 	}
 
 	template <bool HAS_MV, int MV>
-	inline __m128d _mm_corr_pd(
-		const std::tuple<const __m128d * const, const int>& data1,
-		const std::tuple<const __m128d * const, const int>& data2,
+	inline __m512d _mm512_corr_pd(
+		const std::tuple<const __m512d * const, const int>& data1,
+		const std::tuple<const __m512d * const, const int>& data2,
 		const int nElements)
 	{
-		return priv::_mm_corr_pd_method0<HAS_MV, MV>(data1, data2, nElements);
-		//return priv::_mm_corr_pd_method1<HAS_MV>(data1, data2);
+		return priv::_mm512_corr_pd_method0<HAS_MV, MV>(data1, data2, nElements);
 	}
 }

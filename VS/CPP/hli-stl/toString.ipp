@@ -10,24 +10,53 @@
 namespace hli
 {
 
+	inline std::string toString_f64(const __m512d i)
+	{
+		std::ostringstream stringStream;
+		for (int j = 0; j < 8; ++j) stringStream << std::setprecision(16) << get_f64(i, j) << " ";
+		return stringStream.str();
+	}
+	inline std::string toString_f64(const __m512 i)
+	{
+		std::ostringstream stringStream;
+		for (int j = 0; j < 8; ++j) stringStream << std::setprecision(16) << get_f64(i, j) << " ";
+		return stringStream.str();
+	}
+	inline std::string toString_u64(const __m512i i)
+	{
+		std::ostringstream stringStream;
+		for (int j = 0; j < 8; ++j) stringStream << get_u64(i, j) << " ";
+		return stringStream.str();
+	}
+	inline std::string toString_i64(const __m512i i)
+	{
+		std::ostringstream stringStream;
+		for (int j = 0; j < 8; ++j) stringStream << get_i64(i, j) << " ";
+		return stringStream.str();
+	}
 
-
+	inline std::string toString_f64(const __m256d i)
+	{
+		std::ostringstream stringStream;
+		for (int j = 0; j < 8; ++j) stringStream << std::setprecision(16) << get_f64(i, j) << " ";
+		return stringStream.str();
+	}
 	inline std::string toString_f64(const __m256 i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 4; ++j) stringStream << std::setprecision(16) << get_f64(i, j) << " ";
+		for (int j = 0; j < 4; ++j) stringStream << std::setprecision(16) << get_f64(i, j) << " ";
 		return stringStream.str();
 	}
 	inline std::string toString_u64(const __m256i i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 4; ++j) stringStream << get_u64(i, j) << " ";
+		for (int j = 0; j < 4; ++j) stringStream << get_u64(i, j) << " ";
 		return stringStream.str();
 	}
 	inline std::string toString_i64(const __m256i i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 4; ++j) stringStream << get_i64(i, j) << " ";
+		for (int j = 0; j < 4; ++j) stringStream << get_i64(i, j) << " ";
 		return stringStream.str();
 	}
 
@@ -35,19 +64,19 @@ namespace hli
 	inline std::string toString_f64(const __m128d i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 2; ++j) stringStream << std::setprecision(16) << get_f64(i, j) << " ";
+		for (int j = 0; j < 2; ++j) stringStream << std::setprecision(16) << get_f64(i, j) << " ";
 		return stringStream.str();
 	}
 	inline std::string toString_u64(const __m128i i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 2; ++j) stringStream << get_u64(i, j) << " ";
+		for (int j = 0; j < 2; ++j) stringStream << get_u64(i, j) << " ";
 		return stringStream.str();
 	}
 	inline std::string toString_i64(const __m128i i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 2; ++j) stringStream << get_i64(i, j) << " ";
+		for (int j = 0; j < 2; ++j) stringStream << get_i64(i, j) << " ";
 		return stringStream.str();
 	}
 
@@ -55,89 +84,89 @@ namespace hli
 	inline std::string toString_f32(const __m128 i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 4; ++j) stringStream << std::setprecision(16) << get_f32(i, j) << " ";
+		for (int j = 0; j < 4; ++j) stringStream << std::setprecision(16) << get_f32(i, j) << " ";
 		return stringStream.str();
 	}
 	inline std::string toString_u32(const __m128i i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 4; ++j) stringStream << get_u32(i, j) << " ";
+		for (int j = 0; j < 4; ++j) stringStream << get_u32(i, j) << " ";
 		return stringStream.str();
 	}
 	inline std::string toString_i32(const __m128i i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 4; ++j) stringStream << get_i32(i, j) << " ";
+		for (int j = 0; j < 4; ++j) stringStream << get_i32(i, j) << " ";
 		return stringStream.str();
 	}
 
 	inline std::string toString_i16(const __m64 i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 4; ++j) stringStream << get_i16(i, j) << " ";
+		for (int j = 0; j < 4; ++j) stringStream << get_i16(i, j) << " ";
 		return stringStream.str();
 	}
 	inline std::string toString_u16(const __m128i i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 8; ++j) stringStream << get_u16(i, j) << " ";
+		for (int j = 0; j < 8; ++j) stringStream << get_u16(i, j) << " ";
 		return stringStream.str();
 	}
 
 	inline std::string toString_u8(const __m128i i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 16; ++j) stringStream << static_cast<int>(get_u8(i, j)) << " ";
+		for (int j = 0; j < 16; ++j) stringStream << static_cast<int>(get_u8(i, j)) << " ";
 		return stringStream.str();
 	}
 	inline std::string toString_u8(const __m128 i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 16; ++j) stringStream << static_cast<int>(get_u8(i, j)) << " ";
+		for (int j = 0; j < 16; ++j) stringStream << static_cast<int>(get_u8(i, j)) << " ";
 		return stringStream.str();
 	}
 	/*	inline std::string toString_u8(const __m256i i)
 	{
 	std::ostringstream stringStream;
-	for (size_t j = 0; j < 32; ++j) stringStream << static_cast<int>(i.m256i_u8[j]) << " ";
+	for (int j = 0; j < 32; ++j) stringStream << static_cast<int>(i.m256i_u8[j]) << " ";
 	return stringStream.str();
 	}
 	*/
 	inline std::string toString_i8(const __m128i i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 16; ++j) stringStream << static_cast<int>(get_i8(i, j)) << " ";
+		for (int j = 0; j < 16; ++j) stringStream << static_cast<int>(get_i8(i, j)) << " ";
 		return stringStream.str();
 	}
 
 	inline std::string toBinary_u8(const __m128i i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 16; ++j) stringStream << std::bitset<8>(get_u8(i, j)) << " ";
+		for (int j = 0; j < 16; ++j) stringStream << std::bitset<8>(get_u8(i, j)) << " ";
 		return stringStream.str();
 	}
 	/*	inline std::string toBinary_u8(const __m256i i)
 	{
 	std::ostringstream stringStream;
-	for (size_t j = 0; j < 32; ++j) stringStream << std::bitset<8>(get_u8(i, j)) << " ";
+	for (int j = 0; j < 32; ++j) stringStream << std::bitset<8>(get_u8(i, j)) << " ";
 	return stringStream.str();
 	}
 	*/
 	inline std::string toBinary_u32(const __m128i i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 4; ++j) stringStream << std::bitset<32>(get_u32(i, j)) << " ";
+		for (int j = 0; j < 4; ++j) stringStream << std::bitset<32>(get_u32(i, j)) << " ";
 		return stringStream.str();
 	}
 	inline std::string toBinary_u8(const __m128 i)
 	{
 		std::ostringstream stringStream;
-		for (size_t j = 0; j < 16; ++j) stringStream << std::bitset<8>(get_u8(i, j)) << " ";
+		for (int j = 0; j < 16; ++j) stringStream << std::bitset<8>(get_u8(i, j)) << " ";
 		return stringStream.str();
 	}
 
 
-	template <size_t NBITS>
+	template <int NBITS>
 	inline std::string toBinary(const unsigned long long i)
 	{
 		std::ostringstream stringStream;

@@ -24,18 +24,18 @@ namespace hli
 	{
 
 		inline void _mm_rescale_epu16_method0(
-			const std::tuple<__m128i * const, const size_t>& data)
+			const std::tuple<__m128i * const, const int>& data)
 		{
-			const size_t nBytes = std::get<1>(data);
-			const size_t nElements = nBytes >> 1;
+			const int nBytes = std::get<1>(data);
+			const int nElements = nBytes >> 1;
 			const bool showInfo = false;
 
 			if (showInfo) std::cout << "_mm_rescale_epu16_method0: nElements=" << nElements << std::endl;
 			U16 * const ptr2 = reinterpret_cast<U16 * const>(std::get<0>(data));
 
-			for (size_t i = 0; i < nElements; ++i)
+			for (int i = 0; i < nElements; ++i)
 			{
-				//const size_t block = nElements >> 3;
+				//const int block = nElements >> 3;
 				//if (block == 178-1) std::cout << "_mm_rescale_epu16_method0: input: i=" << i << ":" << ptr2[i] << std::endl;
 
 				const U16 original = ptr2[i];
@@ -49,11 +49,11 @@ namespace hli
 		}
 
 		inline void _mm_rescale_epu16_method1(
-			const std::tuple<__m128i * const, const size_t>& data)
+			const std::tuple<__m128i * const, const int>& data)
 		{
 			__m128i * const ptr = std::get<0>(data);
-			const size_t nBytes = std::get<1>(data);
-			const size_t nBlocks = nBytes >> 4;
+			const int nBytes = std::get<1>(data);
+			const int nBlocks = nBytes >> 4;
 			const bool showInfo = false;
 
 			__m128i m = _mm_set_epi32(4, 3, 2, 1);
@@ -61,7 +61,7 @@ namespace hli
 
 			if (showInfo) std::cout << "_mm_rescale_epu16_method1: increment=" << toString_i32(increment) << std::endl;
 
-			for (size_t i = 0; i < nBlocks; ++i)
+			for (int i = 0; i < nBlocks; ++i)
 			{
 				const __m128i block = ptr[i];
 				if (showInfo) std::cout << "_mm_rescale_epu16_method1: input data=" << toString_u16(block) << std::endl;
@@ -95,15 +95,15 @@ namespace hli
 		}
 
 		inline void _mm_rescale_epu16_method2(
-			const std::tuple<__m128i * const, const size_t>& data)
+			const std::tuple<__m128i * const, const int>& data)
 		{
-			const size_t nBytes = std::get<1>(data);
-			const size_t nBlocks = nBytes >> 4;
+			const int nBytes = std::get<1>(data);
+			const int nBlocks = nBytes >> 4;
 
 			__m128i m = _mm_set_epi16(8, 7, 6, 5, 4, 3, 2, 1);
 			const __m128i increment = _mm_set1_epi16(8);
 
-			for (size_t block = 0; block < nBlocks; ++block)
+			for (int block = 0; block < nBlocks; ++block)
 			{
 				const __m128i input = std::get<0>(data)[block];
 				//if (block == 178) std::cout << "_mm_rescale_epu16_method2: input  =" << toString_u16(input) << std::endl;
@@ -122,8 +122,8 @@ namespace hli
 	{
 
 		void _mm_rescale_epu16_speed_test_1(
-			const size_t nBlocks,
-			const size_t nExperiments,
+			const int nBlocks,
+			const int nExperiments,
 			const bool doTests)
 		{
 			if ((nBlocks * 8) > 0xFFFF)
@@ -141,13 +141,13 @@ namespace hli
 			__m128i randInt = seed;
 
 			hli::_mm_lfsr32_epu32(data_source_r, randInt);
-			const std::tuple<const __m128i * const, const size_t> data_source = data_source_r;
+			const std::tuple<const __m128i * const, const int> data_source = data_source_r;
 
 			double min0 = std::numeric_limits<double>::max();
 			double min1 = std::numeric_limits<double>::max();
 			double min2 = std::numeric_limits<double>::max();
 
-			for (size_t i = 0; i < nExperiments; ++i)
+			for (int i = 0; i < nExperiments; ++i)
 			{
 				copy(data_source, data0);
 				timer::reset_and_start_timer();
@@ -162,9 +162,9 @@ namespace hli
 
 					if (doTests)
 					{
-						for (size_t block = 0; block < nBlocks; ++block)
+						for (int block = 0; block < nBlocks; ++block)
 						{
-							for (size_t j = 0; j < 8; ++j)
+							for (int j = 0; j < 8; ++j)
 							{
 								if (std::abs(std::get<0>(data0)[block].m128i_u16[j] != std::get<0>(data1)[block].m128i_u16[j]))
 								{
@@ -183,9 +183,9 @@ namespace hli
 
 					if (doTests)
 					{
-						for (size_t block = 0; block < nBlocks; ++block)
+						for (int block = 0; block < nBlocks; ++block)
 						{
-							for (size_t j = 0; j < 8; ++j)
+							for (int j = 0; j < 8; ++j)
 							{
 								if (std::abs(std::get<0>(data0)[block].m128i_u16[j] != std::get<0>(data2)[block].m128i_u16[j]))
 								{
@@ -200,9 +200,9 @@ namespace hli
 			if (doTests)
 			{
 				U16 k = 0;
-				for (size_t block = 0; block < nBlocks; ++block)
+				for (int block = 0; block < nBlocks; ++block)
 				{
-					for (size_t j = 0; j < 8; ++j)
+					for (int j = 0; j < 8; ++j)
 					{
 						if (std::get<0>(data0)[block].m128i_u16[j] > k)
 						{
@@ -226,11 +226,11 @@ namespace hli
 	}
 
 	inline void _mm_rescale_epu16(
-		const std::tuple<__m128i * const, const size_t>& data)
+		const std::tuple<__m128i * const, const int>& data)
 	{
 		priv::_mm_rescale_epu16_method2(data);
 
-		//for (size_t block = 0; block < (nBytes >> 4); ++block) {
+		//for (int block = 0; block < (nBytes >> 4); ++block) {
 		//	std::cout << "INFO: _mm_rescale_epu16::_mm_rescale_epu16: block="<<block << ": " << toString_u16(mem_addr[block]) << std::endl;
 		//}
 	}

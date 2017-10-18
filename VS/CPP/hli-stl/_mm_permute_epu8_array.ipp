@@ -31,9 +31,9 @@ namespace hli
 	{
 
 		inline void _mm_permute_epu8_array_method0(
-			const std::tuple<__m128i * const, const size_t>& data,
-			const size_t nElements,
-			const std::tuple<__m128i * const, const size_t>& swap,
+			const std::tuple<__m128i * const, const int>& data,
+			const int nElements,
+			const std::tuple<__m128i * const, const int>& swap,
 			__m128i& randInts)
 		{
 			_mm_rand_si128_ref(swap, randInts);
@@ -44,9 +44,9 @@ namespace hli
 		}
 
 		inline void _mm_permute_epu8_array_method1(
-			const std::tuple<__m128i * const, const size_t>& data,
-			const size_t nElements,
-			const std::tuple<__m128i * const, const size_t>& swap,
+			const std::tuple<__m128i * const, const int>& data,
+			const int nElements,
+			const std::tuple<__m128i * const, const int>& swap,
 			__m128i& randInts)
 		{
 			_mm_lfsr32_epu32(swap, randInts);
@@ -57,9 +57,9 @@ namespace hli
 		}
 
 		inline void _mm_permute_epu8_array_method2(
-			const std::tuple<__m128i * const, const size_t>& data,
-			const size_t nElements,
-			const std::tuple<__m128i * const, const size_t>& swap,
+			const std::tuple<__m128i * const, const int>& data,
+			const int nElements,
+			const std::tuple<__m128i * const, const int>& swap,
 			__m128i& randInts)
 		{
 			_mm_lfsr32_epu32(swap, randInts);
@@ -70,9 +70,9 @@ namespace hli
 		}
 
 		inline void _mm_permute_epu8_array_method3(
-			const std::tuple<__m128i * const, const size_t>& data,
-			const size_t nElements,
-			const std::tuple<__m128i * const, const size_t>& swap,
+			const std::tuple<__m128i * const, const int>& data,
+			const int nElements,
+			const std::tuple<__m128i * const, const int>& swap,
 			__m128i& randInts)
 		{
 			if (true)
@@ -86,13 +86,13 @@ namespace hli
 				//following code seems broken
 
 				__m128i * const ptr = std::get<0>(swap);
-				const size_t nBytes = std::get<1>(swap);
-				const size_t nBlocks = nBytes >> 4;
+				const int nBytes = std::get<1>(swap);
+				const int nBlocks = nBytes >> 4;
 
 				__m128i m = _mm_set_epi16(8, 7, 6, 5, 4, 3, 2, 1);
 				const __m128i increment = _mm_set1_epi16(8);
 
-				for (size_t block = 0; block < nBlocks; ++block)
+				for (int block = 0; block < nBlocks; ++block)
 				{
 					__m128i randInts2 = priv::lfsr32_galois(randInts);
 					randInts = priv::lfsr32_galois(randInts);
@@ -111,8 +111,8 @@ namespace hli
 	{
 
 		void _mm_permute_epu8_array_speed_test_1(
-			const size_t nBlocks,
-			const size_t nExperiments,
+			const int nBlocks,
+			const int nExperiments,
 			const bool doTests)
 		{
 			if ((nBlocks * 8) > 0xFFFF)
@@ -124,8 +124,8 @@ namespace hli
 			const bool HAS_MV = true;
 			const U8 MV = 0xFF;
 
-			const size_t nElements = 8 * nBlocks;
-			const size_t nBytes = nElements * 2;
+			const int nElements = 8 * nBlocks;
+			const int nBytes = nElements * 2;
 			const int N_BITS = 5;
 
 			auto data_source_r = _mm_malloc_m128i(nBytes);
@@ -136,7 +136,7 @@ namespace hli
 
 
 			fillRand_epu8<N_BITS>(data_source_r);
-			const std::tuple<const __m128i * const, const size_t> data_source = data_source_r;
+			const std::tuple<const __m128i * const, const int> data_source = data_source_r;
 
 			auto swap = _mm_malloc_m128i(nElements << 1);
 
@@ -152,7 +152,7 @@ namespace hli
 			double min2 = std::numeric_limits<double>::max();
 			double min3 = std::numeric_limits<double>::max();
 
-			for (size_t i = 0; i < nExperiments; ++i)
+			for (int i = 0; i < nExperiments; ++i)
 			{
 				copy(data_source, data0);
 				timer::reset_and_start_timer();
@@ -167,7 +167,7 @@ namespace hli
 
 					if (doTests)
 					{
-						for (size_t block = 0; block < nBlocks; ++block)
+						for (int block = 0; block < nBlocks; ++block)
 						{
 							if (!equal(std::get<0>(data0)[block], std::get<0>(data1)[block]))
 							{
@@ -190,7 +190,7 @@ namespace hli
 
 					if (doTests)
 					{
-						for (size_t block = 0; block < nBlocks; ++block)
+						for (int block = 0; block < nBlocks; ++block)
 						{
 							if (!equal(std::get<0>(data0)[block], std::get<0>(data2)[block]))
 							{
@@ -213,7 +213,7 @@ namespace hli
 
 					if (doTests)
 					{
-						for (size_t block = 0; block < nBlocks; ++block)
+						for (int block = 0; block < nBlocks; ++block)
 						{
 							if (!equal(std::get<0>(data0)[block], std::get<0>(data3)[block]))
 							{
@@ -264,15 +264,15 @@ namespace hli
 	}
 
 	inline void _mm_permute_epu8_array(
-		const std::tuple<__m128i * const, const size_t>& data,
-		const size_t nElements,
-		const std::tuple<__m128i * const, const size_t>& swap,
+		const std::tuple<__m128i * const, const int>& data,
+		const int nElements,
+		const std::tuple<__m128i * const, const int>& swap,
 		__m128i& randInts)
 	{
 		#if _DEBUG
-		size_t nBytes_Data = std::get<1>(data);
+		int nBytes_Data = std::get<1>(data);
 		if (nBytes_Data < nElements) std::cout << "ERROR: _mm_permute_epu8_array: nBytes_Data=" << nBytes_Data << " is smaller than nElements=" << nElements << ".";
-		size_t nBytes_Swap = std::get<1>(swap);
+		int nBytes_Swap = std::get<1>(swap);
 		if (nBytes_Swap < nElements * 2) std::cout << "ERROR: _mm_permute_epu8_array: nBytes_Swap=" << nBytes_Swap << " is smaller than nElements*2=" << nElements * 2 << ".";
 		//printf("INFO: _mm_permute_epu8_array: nElements=%d; data.nBytes=%d; swap.nBytes=%d\n", nElements, std::get<1>(data), std::get<1>(swap));
 		#endif

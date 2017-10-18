@@ -27,17 +27,17 @@ namespace hli
 
 		template <bool HAS_MV, U8 MV>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method0(
-			const std::tuple<const __m128i * const, const size_t>& data,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data,
+			const int nElements)
 		{
-			const size_t nBytes = std::get<1>(data);
+			const int nBytes = std::get<1>(data);
 			auto ptr = reinterpret_cast<const U8 * const>(std::get<0>(data));
 			unsigned __int32 sum = 0;
 
 			if (HAS_MV)
 			{
 				unsigned __int32 nElements_No_MV = 0;
-				for (size_t i = 0; i < nElements; ++i)
+				for (int i = 0; i < nElements; ++i)
 				{
 					U8 d = ptr[i];
 					if (d != 0xFF)
@@ -50,7 +50,7 @@ namespace hli
 			}
 			else
 			{
-				for (size_t i = 0; i < nElements; ++i)
+				for (int i = 0; i < nElements; ++i)
 				{
 					sum += ptr[i];
 				}
@@ -60,8 +60,8 @@ namespace hli
 
 		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method1(
-			const std::tuple<const __m128i * const, const size_t>& data,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data,
+			const int nElements)
 		{
 			static_assert((N_BITS > 0) && (N_BITS <= 8), "Number of bits must be in range 1 to 8.");
 			#			pragma warning( disable: 280) 
@@ -82,14 +82,14 @@ namespace hli
 
 		template <bool HAS_MV, U8 MV>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method2(
-			const std::tuple<const __m128i * const, const size_t>& data,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data,
+			const int nElements)
 		{
 			static_assert(HAS_MV == false, "not implemented for missing values");
 			//assume (nBytes < 2 ^ (32 - 8))
 
-			const size_t nBytes = std::get<1>(data);
-			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
+			const int nBytes = std::get<1>(data);
+			const int nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 
 			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method2: nElements is not equal to number of bytes" << std::endl;
 
@@ -101,7 +101,7 @@ namespace hli
 
 			__m128i sum = _mm_setzero_si128();
 
-			for (size_t block = 0; block < nBlocks; ++block)
+			for (int block = 0; block < nBlocks; ++block)
 			{
 				const __m128i data_Block = std::get<0>(data)[block];
 				sum = _mm_add_epi32(sum, _mm_and_si128(data_Block, and_mask));
@@ -116,15 +116,15 @@ namespace hli
 
 		template <bool HAS_MV, U8 MV>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method3(
-			const std::tuple<const __m128i * const, const size_t>& data,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data,
+			const int nElements)
 		{
 			static_assert(HAS_MV == false, "not implemented for missing values");
-			const size_t nBytes = std::get<1>(data);
+			const int nBytes = std::get<1>(data);
 			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method3: nElements is not equal to number of bytes" << std::endl;
-			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
+			const int nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 			__m128i sum = _mm_setzero_si128();
-			for (size_t block = 0; block < nBlocks; ++block)
+			for (int block = 0; block < nBlocks; ++block)
 			{
 				sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
 			}
@@ -133,16 +133,16 @@ namespace hli
 
 		template <bool HAS_MV, U8 MV>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method1_nBits8(
-			const std::tuple<const __m128i * const, const size_t>& data,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data,
+			const int nElements)
 		{
 			//static_assert(HAS_MV == false, "not implemented for missing values"); //TODO
-			const size_t nBytes = std::get<1>(data);
+			const int nBytes = std::get<1>(data);
 			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method1: nElements is not equal to number of bytes" << std::endl;
-			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
+			const int nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 			__m128i sum = _mm_setzero_si128();
 
-			for (size_t block = 0; block < nBlocks; ++block)
+			for (int block = 0; block < nBlocks; ++block)
 			{
 				sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
 			}
@@ -151,26 +151,26 @@ namespace hli
 
 		template <bool HAS_MV, U8 MV>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method1_nBits7(
-			const std::tuple<const __m128i * const, const size_t>& data,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data,
+			const int nElements)
 		{
 			//static_assert(HAS_MV == false, "not implemented for missing values");
-			const size_t nBytes = std::get<1>(data);
+			const int nBytes = std::get<1>(data);
 			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method1_nBits7: nElements is not equal to number of bytes" << std::endl;
-			const size_t nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
+			const int nBlocks = nBytes >> 4; // divide by 16 to get the number of __m128i regs (blocks)
 
 			__m128i sum = _mm_setzero_si128();
 
-			for (size_t block = 0; block < nBlocks - 1; block += 2)
+			for (int block = 0; block < nBlocks - 1; block += 2)
 			{
 				__m128i sum_p = _mm_add_epi8(std::get<0>(data)[block], std::get<0>(data)[block + 1]);
 				sum = _mm_add_epi64(sum, _mm_sad_epu8(sum_p, _mm_setzero_si128()));
 			}
 
-			const size_t tail = nBlocks & 0b1;
+			const int tail = nBlocks & 0b1;
 			if (tail > 0)
 			{
-				for (size_t block = (nBlocks - tail); block < nBlocks; ++block)
+				for (int block = (nBlocks - tail); block < nBlocks; ++block)
 				{
 					//std::cout << "INFO: hli::_mm_hadd_epu8_class<7>: tail=" << tail << "; block=" << block << std::endl;
 					sum = _mm_add_epi64(sum, _mm_sad_epu8(std::get<0>(data)[block], _mm_setzero_si128()));
@@ -181,11 +181,11 @@ namespace hli
 
 		template <bool HAS_MV, U8 MV>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method1_nBits6(
-			const std::tuple<const __m128i * const, const size_t>& data,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data,
+			const int nElements)
 		{
 			//static_assert(HAS_MV == false, "not implemented for missing values");
-			const size_t nBytes = std::get<1>(data);
+			const int nBytes = std::get<1>(data);
 			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method1_nBits6: nElements is not equal to number of bytes" << std::endl;
 			const int nBlocks = static_cast<int>(nBytes >> 4); // divide by 16 to get the number of __m128i regs (blocks)
 
@@ -214,11 +214,11 @@ namespace hli
 
 		template <bool HAS_MV, U8 MV>
 		inline std::tuple<__m128i, __m128i> _mm_hadd_epu8_method1_nBits5(
-			const std::tuple<const __m128i * const, const size_t>& data,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data,
+			const int nElements)
 		{
 			//static_assert(HAS_MV == false, "not implemented for missing values");
-			const size_t nBytes = std::get<1>(data);
+			const int nBytes = std::get<1>(data);
 			if (nBytes != nElements) std::cout << "WARNING: test _mm_hadd_epu8_method1_nBits5: nElements is not equal to number of bytes" << std::endl;
 			const int nBlocks = static_cast<int>(nBytes >> 4); // divide by 16 to get the number of __m128i regs (blocks)
 
@@ -256,14 +256,14 @@ namespace hli
 	namespace test
 	{
 
-		void _mm_hadd_epu8_speed_test_1(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		void _mm_hadd_epu8_speed_test_1(const int nBlocks, const int nExperiments, const bool doTests)
 		{
 			const bool HAS_MV = false;
 			const U8 MV = 0xFF;
-			const size_t nElements = nBlocks * 16;
+			const int nElements = nBlocks * 16;
 			auto data_r = _mm_malloc_m128i(nElements);
 			fillRand_epu8<5>(data_r);
-			const std::tuple<const __m128i * const, const size_t> data = data_r; // make a new variable that is const
+			const std::tuple<const __m128i * const, const int> data = data_r; // make a new variable that is const
 
 			{
 				double min0 = std::numeric_limits<double>::max();
@@ -274,7 +274,7 @@ namespace hli
 				double min5 = std::numeric_limits<double>::max();
 				double min6 = std::numeric_limits<double>::max();
 
-				for (size_t i = 0; i < nExperiments; ++i)
+				for (int i = 0; i < nExperiments; ++i)
 				{
 					timer::reset_and_start_timer();
 					const std::tuple<__m128i, __m128i> result_ref = hli::priv::_mm_hadd_epu8_method0<HAS_MV, MV>(data, nElements);
@@ -388,11 +388,11 @@ namespace hli
 	// dst[127:96] := tmp
 	template <int N_BITS, bool HAS_MV, U8 MV>
 	inline std::tuple<__m128i, __m128i> _mm_hadd_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data,
-		const size_t nElements)
+		const std::tuple<const __m128i * const, const int>& data,
+		const int nElements)
 	{
 		#if _DEBUG
-		const size_t nBytes = std::get<1>(data);
+		const int nBytes = std::get<1>(data);
 		if (nBytes < nElements) std::cout << "ERROR: _mm_hadd_epu8: nElements (" << nElements << ") is too large for the number of bytes (" << nBytes << ")" << std::endl;
 		#endif
 

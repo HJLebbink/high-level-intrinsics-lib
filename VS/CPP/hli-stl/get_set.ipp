@@ -12,9 +12,68 @@ namespace hli
 	* get
 	*******************************************/
 
-	inline double get_f64(const __m256& V, const size_t i)
+	inline double get_f64(const __m512d& V, const int i)
 	{
-		//BOOST_ASSERT_MSG_HJ(i < 2, "");
+		//BOOST_ASSERT_MSG_HJ(i < 8, "");
+		union
+		{
+			__m512d v;
+			double a[8];
+		} converter;
+		converter.v = V;
+		return converter.a[i];
+	}
+
+	inline double get_f64(const __m512& V, const int i)
+	{
+		//BOOST_ASSERT_MSG_HJ(i < 4, "");
+		union
+		{
+			__m512 v;
+			double a[8];
+		} converter;
+		converter.v = V;
+		return converter.a[i];
+	}
+
+	inline unsigned __int64 get_u64(const __m512i& V, const int i)
+	{
+		//BOOST_ASSERT_MSG_HJ(i < 4, "");
+		union
+		{
+			__m512i v;
+			unsigned __int64 a[8];
+		} converter;
+		converter.v = V;
+		return converter.a[i];
+	}
+	inline __int64 get_i64(const __m512i& V, const int i)
+	{
+		//BOOST_ASSERT_MSG_HJ(i < 4, "");
+		union
+		{
+			__m512i v;
+			__int64 a[8];
+		} converter;
+		converter.v = V;
+		return converter.a[i];
+	}
+
+	inline double get_f64(const __m256d& V, const int i)
+	{
+		//BOOST_ASSERT_MSG_HJ(i < 4, "");
+		union
+		{
+			__m256d v;
+			double a[4];
+		} converter;
+		converter.v = V;
+		return converter.a[i];
+	}
+
+	inline double get_f64(const __m256& V, const int i)
+	{
+		//BOOST_ASSERT_MSG_HJ(i < 4, "");
 		union
 		{
 			__m256 v;
@@ -24,9 +83,9 @@ namespace hli
 		return converter.a[i];
 	}
 
-	inline unsigned __int64 get_u64(const __m256i& V, const size_t i)
+	inline unsigned __int64 get_u64(const __m256i& V, const int i)
 	{
-		//BOOST_ASSERT_MSG_HJ(i < 2, "");
+		//BOOST_ASSERT_MSG_HJ(i < 4, "");
 		union
 		{
 			__m256i v;
@@ -35,9 +94,9 @@ namespace hli
 		converter.v = V;
 		return converter.a[i];
 	}
-	inline __int64 get_i64(const __m256i& V, const size_t i)
+	inline __int64 get_i64(const __m256i& V, const int i)
 	{
-		//BOOST_ASSERT_MSG_HJ(i < 2, "");
+		//BOOST_ASSERT_MSG_HJ(i < 4, "");
 		union
 		{
 			__m256i v;
@@ -48,7 +107,7 @@ namespace hli
 	}
 
 
-	inline double get_f64(const __m128d& V, const size_t i)
+	inline double get_f64(const __m128d& V, const int i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 2, "");
 		union
@@ -60,7 +119,7 @@ namespace hli
 		return converter.a[i];
 	}
 
-	inline unsigned __int64 get_u64(const __m128i& V, const size_t i)
+	inline unsigned __int64 get_u64(const __m128i& V, const int i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 2, "");
 		union
@@ -71,7 +130,7 @@ namespace hli
 		converter.v = V;
 		return converter.a[i];
 	}
-	inline __int64 get_i64(const __m128i& V, const size_t i)
+	inline __int64 get_i64(const __m128i& V, const int i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 2, "");
 		union
@@ -83,7 +142,7 @@ namespace hli
 		return converter.a[i];
 	}
 
-	inline float get_f32(const __m128& V, const size_t i)
+	inline float get_f32(const __m128& V, const int i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 4, "");
 		union
@@ -94,7 +153,7 @@ namespace hli
 		converter.v = V;
 		return converter.a[i];
 	}
-	inline __int32 get_i32(const __m128i& V, const size_t i)
+	inline __int32 get_i32(const __m128i& V, const int i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 4, "");
 		union
@@ -105,7 +164,7 @@ namespace hli
 		converter.v = V;
 		return converter.a[i];
 	}
-	inline unsigned __int32 get_u32(const __m128i& V, const size_t i)
+	inline unsigned __int32 get_u32(const __m128i& V, const int i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 4, "");
 		union
@@ -116,7 +175,7 @@ namespace hli
 		converter.v = V;
 		return converter.a[i];
 	}
-	inline signed __int16 get_i16(const __m128i& V, const size_t i)
+	inline signed __int16 get_i16(const __m128i& V, const int i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 8, "");
 		union
@@ -127,7 +186,7 @@ namespace hli
 		converter.v = V;
 		return converter.a[i];
 	}
-	inline signed __int16 get_i16(const __m64& V, const size_t i)
+	inline signed __int16 get_i16(const __m64& V, const int i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 4, "");
 		union
@@ -138,7 +197,7 @@ namespace hli
 		converter.v = V;
 		return converter.a[i];
 	}
-	inline U16 get_u16(const __m128i& V, const size_t i)
+	inline U16 get_u16(const __m128i& V, const int i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 8, "");
 		union
@@ -149,7 +208,7 @@ namespace hli
 		converter.v = V;
 		return converter.a[i];
 	}
-	inline U8 get_u8(const __m128i& V, const size_t i)
+	inline U8 get_u8(const __m128i& V, const int i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 16, "");
 		union
@@ -160,7 +219,7 @@ namespace hli
 		converter.v = V;
 		return converter.a[i];
 	}
-	inline U8 get_u8(const __m128& V, const size_t i)
+	inline U8 get_u8(const __m128& V, const int i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 16, "");
 		union
@@ -171,7 +230,7 @@ namespace hli
 		converter.v = V;
 		return converter.a[i];
 	}
-	/*	inline U8 get_u8(const __m256i V, const size_t i)
+	/*	inline U8 get_u8(const __m256i V, const int i)
 	{
 	BOOST_ASSERT_MSG_HJ(i < 32, "");
 	union
@@ -182,7 +241,7 @@ namespace hli
 	converter.v = V;
 	return converter.a[i];
 	}
-	*/	inline signed __int8 get_i8(const __m128i& V, const size_t i)
+	*/	inline signed __int8 get_i8(const __m128i& V, const int i)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 16, "");
 		union
@@ -198,7 +257,7 @@ namespace hli
 	/******************************************
 	* set
 	*******************************************/
-	inline void set_u8(__m128i& v, const size_t i, const U8 d)
+	inline void set_u8(__m128i& v, const int i, const U8 d)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 16, "");
 		union
@@ -210,7 +269,7 @@ namespace hli
 		converter.a[i] = d;
 		v = converter.v;
 	}
-	inline void set_u16(__m128i& v, const size_t i, const U16 d)
+	inline void set_u16(__m128i& v, const int i, const U16 d)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 8, "");
 		union
@@ -222,7 +281,7 @@ namespace hli
 		converter.a[i] = d;
 		v = converter.v;
 	}
-	inline void set_u32(__m128i& v, const size_t i, const unsigned __int32 d)
+	inline void set_u32(__m128i& v, const int i, const unsigned __int32 d)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 4, "");
 
@@ -235,7 +294,7 @@ namespace hli
 		converter.a[i] = d;
 		v = converter.v;
 	}
-	inline void set_u64(__m128i& v, const size_t i, const unsigned __int64 d)
+	inline void set_u64(__m128i& v, const int i, const unsigned __int64 d)
 	{
 		//BOOST_ASSERT_MSG_HJ(i < 2, "");
 

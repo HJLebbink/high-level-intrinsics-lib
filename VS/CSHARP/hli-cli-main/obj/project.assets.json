@@ -118,11 +118,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "H:\\Dropbox\\sc\\GitHub\\high-level-intrinsics-lib\\VS\\CSHARP\\hli-cli-main\\hli-cli-main.csproj",
+      "projectUniqueName": "C:\\Users\\henk\\OneDrive\\Documents\\GitHub\\high-level-intrinsics-lib\\VS\\CSHARP\\hli-cli-main\\hli-cli-main.csproj",
       "projectName": "hli-cli-main",
-      "projectPath": "H:\\Dropbox\\sc\\GitHub\\high-level-intrinsics-lib\\VS\\CSHARP\\hli-cli-main\\hli-cli-main.csproj",
+      "projectPath": "C:\\Users\\henk\\OneDrive\\Documents\\GitHub\\high-level-intrinsics-lib\\VS\\CSHARP\\hli-cli-main\\hli-cli-main.csproj",
       "packagesPath": "C:\\Users\\henk\\.nuget\\packages\\",
-      "outputPath": "H:\\Dropbox\\sc\\GitHub\\high-level-intrinsics-lib\\VS\\CSHARP\\hli-cli-main\\obj\\",
+      "outputPath": "C:\\Users\\henk\\OneDrive\\Documents\\GitHub\\high-level-intrinsics-lib\\VS\\CSHARP\\hli-cli-main\\obj\\",
       "projectStyle": "PackageReference",
       "skipContentFileWrite": true,
       "configFilePaths": [
@@ -140,12 +140,6 @@
         "net461": {
           "projectReferences": {}
         }
-      }
-    },
-    "dependencies": {
-      "System.ValueTuple": {
-        "target": "Package",
-        "version": "4.4.0"
       }
     },
     "frameworks": {

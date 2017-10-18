@@ -26,9 +26,9 @@ namespace hli
 	{
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_ref(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements)
 		{
 			if constexpr (HAS_MV)
 			{
@@ -71,9 +71,9 @@ namespace hli
 
 		template <bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method0(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements,
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements,
 			const __m128d average1,
 			const __m128d average2)
 		{
@@ -92,9 +92,9 @@ namespace hli
 			auto ptr1 = reinterpret_cast<const U8 * const>(std::get<0>(data1));
 			auto ptr2 = reinterpret_cast<const U8 * const>(std::get<0>(data2));
 
-			const size_t nBytes = std::get<1>(data1);
+			const int nBytes = std::get<1>(data1);
 
-			for (size_t element = 0; element < nElements; ++element)
+			for (int element = 0; element < nElements; ++element)
 			{
 				const double d1 = static_cast<double>(ptr1[element]) - a1;
 				const double d2 = static_cast<double>(ptr2[element]) - a2;
@@ -114,9 +114,9 @@ namespace hli
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method0(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements)
 		{
 			const auto tup1 = _mm_hadd_epu8<N_BITS1, HAS_MV, MV>(data1, nElements);
 			const auto tup2 = _mm_hadd_epu8<N_BITS2, HAS_MV, MV>(data2, nElements);
@@ -127,9 +127,9 @@ namespace hli
 
 		template <bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method1(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements,
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements,
 			const __m128d average1,
 			const __m128d average2)
 		{
@@ -143,9 +143,9 @@ namespace hli
 			__m128d var1 = _mm_setzero_pd();
 			__m128d var2 = _mm_setzero_pd();
 
-			const size_t nBytes = std::get<1>(data1);
-			const size_t nBlocks = nBytes >> 4;
-			for (size_t block = 0; block < nBlocks; ++block)
+			const int nBytes = std::get<1>(data1);
+			const int nBlocks = nBytes >> 4;
+			for (int block = 0; block < nBlocks; ++block)
 			{
 				const auto d1 = _mm_sub_pd(_mm_cvt_epu8_pd(std::get<0>(data1)[block]), average1);
 
@@ -189,9 +189,9 @@ namespace hli
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method1(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements)
 		{
 			const auto tup1 = _mm_hadd_epu8<N_BITS1, HAS_MV, MV>(data1, nElements);
 			const auto tup2 = _mm_hadd_epu8<N_BITS2, HAS_MV, MV>(data2, nElements);
@@ -202,9 +202,9 @@ namespace hli
 
 		template <bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method2(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements,
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements,
 			const __m128d average1,
 			const __m128d average2)
 		{
@@ -218,9 +218,9 @@ namespace hli
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method2(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements)
 		{
 			const auto tup1 = _mm_hadd_epu8<N_BITS1, HAS_MV, MV>(data1, nElements);
 			const auto tup2 = _mm_hadd_epu8<N_BITS2, HAS_MV, MV>(data2, nElements);
@@ -231,9 +231,9 @@ namespace hli
 
 		template <bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method3(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements)
 		{
 			if constexpr (HAS_MV)
 			{ //TODO
@@ -241,8 +241,8 @@ namespace hli
 				return _mm_setzero_pd();
 			}
 
-			const size_t nBytes = std::get<1>(data1);
-			const size_t nBlocks = nBytes >> 4;
+			const int nBytes = std::get<1>(data1);
+			const int nBlocks = nBytes >> 4;
 
 			if (nElements > 0xFFFF)
 			{
@@ -260,9 +260,9 @@ namespace hli
 
 			if (HAS_MV)
 			{
-				size_t nElements_No_MV = 0;
+				int nElements_No_MV = 0;
 
-				for (size_t i = 0; i < nElements; ++i)
+				for (int i = 0; i < nElements; ++i)
 				{
 					const U8 d1 = ptr1[i];
 					const U8 d2 = ptr2[i];
@@ -290,7 +290,7 @@ namespace hli
 			}
 			else
 			{
-				for (size_t i = 0; i < nElements; ++i)
+				for (int i = 0; i < nElements; ++i)
 				{
 					const U8 d1 = ptr1[i];
 					const U8 d2 = ptr2[i];
@@ -315,13 +315,13 @@ namespace hli
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_corr_epu8_method4(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements)
 		{
-			const size_t nBytes = std::get<1>(data1);
-			const size_t nBlocksInput = nBytes >> 4;
-			const size_t nBlocksDouble = nBlocksInput * 8;
+			const int nBytes = std::get<1>(data1);
+			const int nBlocksInput = nBytes >> 4;
+			const int nBlocksDouble = nBlocksInput * 8;
 
 			auto data1_d = _mm_malloc_m128d(nBlocksDouble * 16);
 			auto data2_d = _mm_malloc_m128d(nBlocksDouble * 16);
@@ -341,15 +341,15 @@ namespace hli
 	{
 
 		void _mm_corr_epu8_speed_test_1(
-			const size_t nBlocks,
-			const size_t nExperiments,
+			const int nBlocks,
+			const int nExperiments,
 			const bool doTests)
 		{
 			const double delta = 0.0000001;
 			const bool HAS_MV = false;
 			const U8 MV = 0xFF;
 
-			const size_t nElements = nBlocks * 16;
+			const int nElements = nBlocks * 16;
 			auto data1_r = _mm_malloc_m128i(nElements);
 			auto data2_r = _mm_malloc_m128i(nElements);
 			auto data1_D_r = _mm_malloc_m128d(nElements * 8);
@@ -364,17 +364,17 @@ namespace hli
 				auto ptr2i = reinterpret_cast<U8 * const>(std::get<0>(data2_r));
 				auto ptr2d = reinterpret_cast<double * const>(std::get<0>(data2_D_r));
 
-				for (size_t i = 0; i < std::get<1>(data1_r); ++i)
+				for (int i = 0; i < std::get<1>(data1_r); ++i)
 				{
 					ptr1d[i] = static_cast<double>(ptr1i[i]);
 					ptr2d[i] = static_cast<double>(ptr2i[i]);
 				}
 			}
 
-			const std::tuple<const __m128i * const, const size_t> data1 = data1_r;
-			const std::tuple<const __m128i * const, const size_t> data2 = data2_r;
-			const std::tuple<const __m128d * const, const size_t> data1_D = data1_D_r;
-			const std::tuple<const __m128d * const, const size_t> data2_D = data2_D_r;
+			const std::tuple<const __m128i * const, const int> data1 = data1_r;
+			const std::tuple<const __m128i * const, const int> data2 = data2_r;
+			const std::tuple<const __m128d * const, const int> data1_D = data1_D_r;
+			const std::tuple<const __m128d * const, const int> data2_D = data2_D_r;
 
 			double min_ref = std::numeric_limits<double>::max();
 			double min1 = std::numeric_limits<double>::max();
@@ -389,7 +389,7 @@ namespace hli
 
 			__m128d result_ref, result1, result2, result3, result4, result5, result6, result7, result8, result9;
 
-			for (size_t i = 0; i < nExperiments; ++i)
+			for (int i = 0; i < nExperiments; ++i)
 			{
 				timer::reset_and_start_timer();
 				result_ref = hli::priv::_mm_corr_epu8_ref<8, 8, HAS_MV, MV>(data1, data2, nElements);
@@ -542,9 +542,9 @@ namespace hli
 
 	template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 	inline __m128d _mm_corr_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data1,
-		const std::tuple<const __m128i * const, const size_t>& data2,
-		const size_t nElements)
+		const std::tuple<const __m128i * const, const int>& data1,
+		const std::tuple<const __m128i * const, const int>& data2,
+		const int nElements)
 	{
 		if constexpr (HAS_MV)
 		{
@@ -558,11 +558,11 @@ namespace hli
 
 	template <bool HAS_MV, U8 MV>
 	inline __m128d _mm_corr_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data1,
+		const std::tuple<const __m128i * const, const int>& data1,
 		const int nBits1,
-		const std::tuple<const __m128i * const, const size_t>& data2,
+		const std::tuple<const __m128i * const, const int>& data2,
 		const int nBits2,
-		const size_t nElements)
+		const int nElements)
 	{
 		#if _DEBUG
 		if ((nBits1 > 8) || (nBits1 < 1)) std::cout << "WARNING: _mm_corr_epu8: nBits1=" << nBits1 << " has to be in range[1..8]" << std::endl;

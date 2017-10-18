@@ -25,9 +25,9 @@ namespace hli
 		// Variance population SSE: return 2x double var
 		template <bool HAS_MV, U8 MV>
 		inline __m128d _mm_covar_epu8_method0(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements,
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements,
 			const __m128d average1,
 			const __m128d average2)
 		{
@@ -41,8 +41,8 @@ namespace hli
 
 			if constexpr (HAS_MV)
 			{
-				size_t nElements_No_MV = 0;
-				for (size_t i = 0; i < nElements; ++i)
+				int nElements_No_MV = 0;
+				for (int i = 0; i < nElements; ++i)
 				{
 					const U8 d1 = ptr1[i];
 					const U8 d2 = ptr2[i];
@@ -57,7 +57,7 @@ namespace hli
 			}
 			else
 			{
-				for (size_t i = 0; i < nElements; ++i)
+				for (int i = 0; i < nElements; ++i)
 				{
 					const double d1 = ptr1[i];
 					const double d2 = ptr2[i];
@@ -70,9 +70,9 @@ namespace hli
 		// Variance population reference
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_covar_epu8_method0(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements)
 		{
 			if constexpr (HAS_MV)
 			{
@@ -127,9 +127,9 @@ namespace hli
 		// Variance population SSE: return 2x double var
 		template <bool HAS_MV, U8 MV>
 		inline __m128d _mm_covar_epu8_method1(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements,
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements,
 			const __m128d average1,
 			const __m128d average2)
 		{
@@ -143,9 +143,9 @@ namespace hli
 				__m128d result_a = _mm_setzero_pd();
 				__m128d result_b = _mm_setzero_pd();
 
-				const size_t nBytes = std::get<1>(data1);
-				const size_t nBlocks = nBytes >> 4;
-				for (size_t block = 0; block < nBlocks; ++block)
+				const int nBytes = std::get<1>(data1);
+				const int nBlocks = nBytes >> 4;
+				for (int block = 0; block < nBlocks; ++block)
 				{
 					const __m128i data1_Block = std::get<0>(data1)[block];
 					const __m128i data2_Block = std::get<0>(data2)[block];
@@ -199,9 +199,9 @@ namespace hli
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_covar_epu8_method1(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements)
 		{
 			if constexpr (HAS_MV)
 			{
@@ -229,9 +229,9 @@ namespace hli
 	// Variance population SSE: return 2x double var
 	template <bool HAS_MV, U8 MV>
 	inline __m128d _mm_covar_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data1,
-		const std::tuple<const __m128i * const, const size_t>& data2,
-		const size_t nElements,
+		const std::tuple<const __m128i * const, const int>& data1,
+		const std::tuple<const __m128i * const, const int>& data2,
+		const int nElements,
 		const __m128d average1,
 		const __m128d average2)
 	{
@@ -241,9 +241,9 @@ namespace hli
 
 	template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 	inline __m128d _mm_covar_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data1,
-		const std::tuple<const __m128i * const, const size_t>& data2,
-		const size_t nElements)
+		const std::tuple<const __m128i * const, const int>& data1,
+		const std::tuple<const __m128i * const, const int>& data2,
+		const int nElements)
 	{
 		//return priv::_mm_covar_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
 		return priv::_mm_covar_epu8_method1<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);

@@ -60,19 +60,19 @@ namespace hli
 		}
 
 		inline void _mm_rand_si128_ref(
-			const std::tuple<__m128i * const, const size_t>& data,
+			const std::tuple<__m128i * const, const int>& data,
 			__m128i& randInts)
 		{
 			__m128i * const ptr = std::get<0>(data);
-			const size_t nBytes = std::get<1>(data);
+			const int nBytes = std::get<1>(data);
 
 			unsigned int r0 = randInts.m128i_u32[0];
 			unsigned int r1 = randInts.m128i_u32[1];
 			unsigned int r2 = randInts.m128i_u32[2];
 			unsigned int r3 = randInts.m128i_u32[3];
 
-			const size_t nBlocks = nBytes >> 4;
-			for (size_t block = 0; block < nBlocks; ++block)
+			const int nBlocks = nBytes >> 4;
+			for (int block = 0; block < nBlocks; ++block)
 			{
 				r0 = nextRandInt(r0);
 				r1 = nextRandInt(r1);
@@ -92,14 +92,14 @@ namespace hli
 		}
 
 		inline void _mm_lfsr32_epu32_method1(
-			const std::tuple<__m128i * const, const size_t>& data,
+			const std::tuple<__m128i * const, const int>& data,
 			__m128i& randInts)
 		{
 			__m128i * const ptr = std::get<0>(data);
-			const size_t nBytes = std::get<1>(data);
+			const int nBytes = std::get<1>(data);
 
-			const size_t nBlocks = nBytes >> 4;
-			for (size_t block = 0; block < nBlocks; ++block)
+			const int nBlocks = nBytes >> 4;
+			for (int block = 0; block < nBlocks; ++block)
 			{
 				randInts = priv::lfsr32_galois(randInts);
 				ptr[block] = randInts;
@@ -110,7 +110,7 @@ namespace hli
 	namespace test
 	{
 
-		void _mm_rand_si128_speed_test_1(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		void _mm_rand_si128_speed_test_1(const int nBlocks, const int nExperiments, const bool doTests)
 		{
 			auto data1 = _mm_malloc_m128i(16 * nBlocks);
 			auto data2 = _mm_malloc_m128i(16 * nBlocks);
@@ -121,7 +121,7 @@ namespace hli
 			double min_ref = std::numeric_limits<double>::max();
 			double min1 = std::numeric_limits<double>::max();
 
-			for (size_t i = 0; i < nExperiments; ++i)
+			for (int i = 0; i < nExperiments; ++i)
 			{
 
 				timer::reset_and_start_timer();
@@ -135,7 +135,7 @@ namespace hli
 
 					if (doTests)
 					{
-						for (size_t j = 0; j < 4; ++j)
+						for (int j = 0; j < 4; ++j)
 						{
 							if (randInts1.m128i_u32[j] != randInts2.m128i_u32[j])
 							{
@@ -143,9 +143,9 @@ namespace hli
 								return;
 							}
 						}
-						for (size_t block = 0; block < nBlocks; ++block)
+						for (int block = 0; block < nBlocks; ++block)
 						{
-							for (size_t j = 0; j < 4; ++j)
+							for (int j = 0; j < 4; ++j)
 							{
 								if (std::abs(std::get<0>(data1)[block].m128i_u32[j] != std::get<0>(data2)[block].m128i_u32[j]))
 								{
@@ -166,56 +166,66 @@ namespace hli
 	}
 
 	inline void _mm_lfsr32_epu32(
-		const std::tuple<__m128i * const, const size_t>& data,
+		const std::tuple<__m128i * const, const int>& data,
 		__m128i& randInts)
 	{
 		priv::_mm_lfsr32_epu32_method1(data, randInts);
 	}
 
 	template <int N_BITS>
-	void fillRand_epu8(U8 * const mem_addr, const size_t nBytes)
+	void fillRand_epu8(U8 * const mem_addr, const int nBytes)
 	{
 		const int mask = (1 << N_BITS) - 1;
-		for (size_t i = 0; i < nBytes; ++i)
+		for (int i = 0; i < nBytes; ++i)
 		{
 			mem_addr[i] = static_cast<U8>(mask & rand());
 		}
 	}
 
 	template <int N_BITS>
-	void fillRand_epu8(__m128i * const mem_addr, const size_t nBytes)
+	void fillRand_epu8(__m128i * const mem_addr, const int nBytes)
 	{
 		fillRand_epu8<N_BITS>(reinterpret_cast<U8 * const>(mem_addr), nBytes);
 	}
 
 	template <int N_BITS>
-	void fillRand_epu8(__m256i * const mem_addr, const size_t nBytes)
+	void fillRand_epu8(__m256i * const mem_addr, const int nBytes)
 	{
 		fillRand_epu8<N_BITS>(reinterpret_cast<U8 * const>(mem_addr), nBytes);
 	}
 
 	template <int N_BITS>
-	void fillRand_epu8(const std::tuple<__m128i * const, const size_t>& data)
+	void fillRand_epu8(const std::tuple<__m128i * const, const int>& data)
 	{
 		fillRand_epu8<N_BITS>(std::get<0>(data), std::get<1>(data));
 	}
 
 
-	void fillRand_pd(__m128d * const mem_addr, const size_t nBytes)
+	void fillRand_pd(__m128d * const mem_addr, const int nBytes)
 	{
 		double * const ptr = reinterpret_cast<double * const>(mem_addr);
-		const size_t nElements = nBytes >> 3;
-		for (size_t i = 0; i < nElements; ++i)
+		const int nElements = nBytes >> 3;
+		for (int i = 0; i < nElements; ++i)
 		{
 			ptr[i] = static_cast<double>(rand()) / rand();
 		}
 	}
-	void fillRand_pd(std::tuple<__m128d * const, const size_t> data)
+	void fillRand_pd(std::tuple<__m128d * const, const int> data)
 	{
-		const size_t nBytes = std::get<1>(data);
+		const int nBytes = std::get<1>(data);
 		double * const ptr = reinterpret_cast<double * const>(std::get<0>(data));
-		const size_t nElements = nBytes >> 3;
-		for (size_t i = 0; i < nElements; ++i)
+		const int nElements = nBytes >> 3;
+		for (int i = 0; i < nElements; ++i)
+		{
+			ptr[i] = static_cast<double>(rand()) / rand();
+		}
+	}
+	void fillRand_pd(std::tuple<__m512d * const, const int> data)
+	{
+		const int nBytes = std::get<1>(data);
+		double * const ptr = reinterpret_cast<double * const>(std::get<0>(data));
+		const int nElements = nBytes >> 3;
+		for (int i = 0; i < nElements; ++i)
 		{
 			ptr[i] = static_cast<double>(rand()) / rand();
 		}

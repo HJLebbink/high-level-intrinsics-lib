@@ -29,19 +29,19 @@ namespace hli
 	namespace priv
 	{
 
-		#		ifdef _MSC_VER
+		#ifdef _MSC_VER
 		inline __m128d _mm_log2_pd(__m128d a)
 		{
 			return _mm_set_pd(log2(a.m128d_f64[1]), log2(a.m128d_f64[0]));
 		}
-		#		endif
+		#endif
 
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline void merge_U8xU8_to_U8(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const std::tuple<__m128i * const, const size_t>& data3)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const std::tuple<__m128i * const, const int>& data3)
 		{
 			#pragma region Tests
 			static_assert(N_BITS1 > 0, "NBITS_1 has to be larger than zero");
@@ -54,7 +54,7 @@ namespace hli
 			#endif
 			#pragma endregion
 
-			const size_t nBlocks = std::get<1>(data1) >> 4;
+			const int nBlocks = std::get<1>(data1) >> 4;
 			if constexpr (HAS_MV)
 			{
 				if constexpr (MV == 0xFF)
@@ -63,7 +63,7 @@ namespace hli
 				}
 				else
 				{
-					for (size_t block = 0; block < nBlocks; ++block)
+					for (int block = 0; block < nBlocks; ++block)
 					{
 						const __m128i d1 = std::get<0>(data1)[block];
 						const __m128i d2 = std::get<0>(data2)[block];
@@ -75,7 +75,7 @@ namespace hli
 			}
 			else
 			{
-				for (size_t block = 0; block < nBlocks; ++block)
+				for (int block = 0; block < nBlocks; ++block)
 				{
 					std::get<0>(data3)[block] = _mm_or_si128(std::get<0>(data1)[block], _mm_slli_epi16(std::get<0>(data2)[block], N_BITS1));
 				}
@@ -103,7 +103,7 @@ namespace hli
 			/*
 			const unsigned int nRowsNoMissingValues = nRows - nMissingValues;
 			double sum = 0;
-			for (size_t i = 0; i < 2; ++i) {
+			for (int i = 0; i < 2; ++i) {
 				const auto f = freq.get(i);
 				if (f > 0) {
 					const double probability = static_cast<double>(f) / nRowsNoMissingValues;
@@ -116,8 +116,8 @@ namespace hli
 
 		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline __m128d _mm_entropy_epu8_method0(
-			const std::tuple<const __m128i * const, const size_t>& data,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data,
+			const int nElements)
 		{
 			static_assert(N_BITS > 0, "_mm_entropy_epu8_method0: N_BITS should be larger than 0");
 			static_assert(N_BITS <= 8, "_mm_entropy_epu8_method0: N_BITS should be smaller or equal than 8");
@@ -125,14 +125,14 @@ namespace hli
 			const U8 * const ptr1 = reinterpret_cast<const U8 * const>(std::get<0>(data));
 
 			const int N_DISTINCT_VALUES = (1 << N_BITS);
-			std::array<size_t, N_DISTINCT_VALUES> freq;
+			std::array<int, N_DISTINCT_VALUES> freq;
 			freq.fill(0);
 
 			double h = 0;
 			if (HAS_MV)
 			{
-				size_t nElements_No_MV = 0;
-				for (size_t element = 0; element < nElements; ++element)
+				int nElements_No_MV = 0;
+				for (int element = 0; element < nElements; ++element)
 				{
 					const U8 mergedData = ptr1[element];
 					if (mergedData != MV)
@@ -156,7 +156,7 @@ namespace hli
 			}
 			else
 			{
-				for (size_t element = 0; element < nElements; ++element)
+				for (int element = 0; element < nElements; ++element)
 				{
 					const U8 mergedData = ptr1[element];
 					freq[mergedData]++;
@@ -176,19 +176,19 @@ namespace hli
 
 		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline __m128d _mm_entropy_epu8_method1(
-			const std::tuple<const __m128i * const, const size_t>& data,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data,
+			const int nElements)
 		{
 			static_assert(N_BITS > 0, "");
 			static_assert(N_BITS <= 8, "");
 
 			const int N_DISTINCT_VALUES = (1 << N_BITS);
-			std::array<size_t, N_DISTINCT_VALUES> freq;
+			std::array<int, N_DISTINCT_VALUES> freq;
 			freq.fill(0);
 
-			const size_t nBlocks = std::get<1>(data) >> 4;
+			const int nBlocks = std::get<1>(data) >> 4;
 
-			for (size_t block = 0; block < nBlocks; ++block)
+			for (int block = 0; block < nBlocks; ++block)
 			{
 				const __m128i d = std::get<0>(data)[block];
 				for (int i = 0; i < N_DISTINCT_VALUES; ++i)
@@ -215,9 +215,9 @@ namespace hli
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_entropy_epu8_method0(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements)
 		{
 			static_assert(N_BITS1 > 0, "NBITS_1 has to be larger than zero");
 			static_assert(N_BITS2 > 0, "NBITS_2 has to be larger than zero");
@@ -228,15 +228,15 @@ namespace hli
 			const U8 * const ptr2 = reinterpret_cast<const U8 * const>(std::get<0>(data2));
 
 			const int N_DISTINCT_VALUES = (1 << N_BITS);
-			std::array<size_t, N_DISTINCT_VALUES> freq;
+			std::array<int, N_DISTINCT_VALUES> freq;
 			freq.fill(0);
 
-			size_t nEffectiveElements;
+			int nEffectiveElements;
 
 			if (HAS_MV)
 			{
 				nEffectiveElements = 0;
-				for (size_t element = 0; element < nElements; ++element)
+				for (int element = 0; element < nElements; ++element)
 				{
 					const U8 d1 = ptr1[element];
 					const U8 d2 = ptr2[element];
@@ -251,7 +251,7 @@ namespace hli
 			else
 			{
 				nEffectiveElements = nElements;
-				for (size_t element = 0; element < nElements; ++element)
+				for (int element = 0; element < nElements; ++element)
 				{
 					const U8 d1 = ptr1[element];
 					const U8 d2 = ptr2[element];
@@ -275,11 +275,11 @@ namespace hli
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_entropy_epu8_method1(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements)
 		{
-			const std::tuple<__m128i * const, const size_t> data3 = _mm_malloc_m128i(std::get<1>(data1));
+			const std::tuple<__m128i * const, const int> data3 = _mm_malloc_m128i(std::get<1>(data1));
 			merge_U8xU8_to_U8<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, data3);
 			const int N_BITS3 = N_BITS1 + N_BITS2;
 			const __m128d result = _mm_entropy_epu8<N_BITS3, HAS_MV, MV>(data3, nElements);
@@ -289,9 +289,9 @@ namespace hli
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_entropy_epu8_method2(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements)
 		{
 			//TODO
 			return _mm_entropy_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
@@ -299,9 +299,9 @@ namespace hli
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_entropy_epu8_method3(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements)
 		{
 			//TODO
 			return _mm_entropy_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
@@ -310,14 +310,14 @@ namespace hli
 
 	namespace test
 	{
-		void _mm_entropy_epu8_speed_test_1(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		void _mm_entropy_epu8_speed_test_1(const int nBlocks, const int nExperiments, const bool doTests)
 		{
 			const double delta = 0.0000001;
 			const bool HAS_MV = false;
 			const U8 MV = 0xFF;
 
 
-			const size_t nElements = 16 * nBlocks;
+			const int nElements = 16 * nBlocks;
 			const int N_BITS1 = 3;
 			const int N_BITS2 = 2;
 
@@ -334,7 +334,7 @@ namespace hli
 
 			__m128d result0, result1, result2, result3;
 
-			for (size_t i = 0; i < nExperiments; ++i)
+			for (int i = 0; i < nExperiments; ++i)
 			{
 
 				timer::reset_and_start_timer();
@@ -397,8 +397,8 @@ namespace hli
 
 	template <int N_BITS, bool HAS_MV, U8 MV>
 	inline __m128d _mm_entropy_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data,
-		const size_t nElements)
+		const std::tuple<const __m128i * const, const int>& data,
+		const int nElements)
 	{
 		const __m128d result = priv::_mm_entropy_epu8_method0<N_BITS, HAS_MV, MV>(data, nElements);
 
@@ -412,9 +412,9 @@ namespace hli
 
 	template <bool HAS_MV, U8 MV>
 	inline __m128d _mm_entropy_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data,
+		const std::tuple<const __m128i * const, const int>& data,
 		const int nBits,
-		const size_t nElements)
+		const int nElements)
 	{
 		#if _DEBUG
 		if ((nBits > 8) || (nBits < 1)) std::cout << "WARNING: _mm_entropy_epu8: nBits=" << nBits << " has to be in range[1..8]" << std::endl;
@@ -436,9 +436,9 @@ namespace hli
 
 	template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 	inline __m128d _mm_entropy_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data1,
-		const std::tuple<const __m128i * const, const size_t>& data2,
-		const size_t nElements)
+		const std::tuple<const __m128i * const, const int>& data1,
+		const std::tuple<const __m128i * const, const int>& data2,
+		const int nElements)
 	{
 		const __m128d result = priv::_mm_entropy_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
 		//const __m128d result = priv::_mm_entropy_epu8_method1<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
@@ -452,11 +452,11 @@ namespace hli
 
 	template <bool HAS_MV, U8 MV>
 	inline __m128d _mm_entropy_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data1,
+		const std::tuple<const __m128i * const, const int>& data1,
 		const int nBits1,
-		const std::tuple<const __m128i * const, const size_t>& data2,
+		const std::tuple<const __m128i * const, const int>& data2,
 		const int nBits2,
-		const size_t nElements)
+		const int nElements)
 	{
 		#if _DEBUG
 		if ((nBits1 > 8) || (nBits1 < 1)) std::cout << "WARNING: _mm_entropy_epu8: nBits1=" << nBits1 << " has to be in range[1..8]" << std::endl;

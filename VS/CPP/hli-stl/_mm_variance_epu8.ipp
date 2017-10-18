@@ -22,8 +22,8 @@ namespace hli
 		// Variance population reference
 		template <bool HAS_MV, U8 MV>
 		inline __m128d _mm_variance_epu8_method0(
-			const std::tuple<const __m128i * const, const size_t>& data,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data,
+			const int nElements)
 		{
 			const auto tup = _mm_hadd_epu8_method0<HAS_MV, MV>(data, nElements);
 			unsigned int nElements_No_MV = static_cast<unsigned int>(_mm_cvtsi128_si32(std::get<1>(tup)));
@@ -35,7 +35,7 @@ namespace hli
 
 			if constexpr (HAS_MV)
 			{
-				for (size_t i = 0; i < nElements; ++i)
+				for (int i = 0; i < nElements; ++i)
 				{
 					const U8 d = ptr[i];
 					if (d != MV)
@@ -47,7 +47,7 @@ namespace hli
 			}
 			else
 			{
-				for (size_t i = 0; i < nElements; ++i)
+				for (int i = 0; i < nElements; ++i)
 				{
 					double tmp = static_cast<double>(ptr[i]) - average;
 					sum += (tmp * tmp);
@@ -59,8 +59,8 @@ namespace hli
 		// Variance population SSE: return 2x double var
 		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline __m128d _mm_variance_epu8_method1(
-			const std::tuple<const __m128i * const, const size_t>& data,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data,
+			const int nElements)
 		{
 			if constexpr (HAS_MV) //TODO
 			{ 
@@ -78,7 +78,7 @@ namespace hli
 		// Variance population SSE: return 2x double var
 		template <bool HAS_MV, U8 MV>
 		inline __m128d _mm_variance_epu8_method1(
-			const std::tuple<const __m128i * const, const size_t>& data,
+			const std::tuple<const __m128i * const, const int>& data,
 			const __m128d average)
 		{
 			if constexpr (HAS_MV)
@@ -87,13 +87,13 @@ namespace hli
 				return _mm_setzero_pd();
 			}
 
-			const size_t nBytes = std::get<1>(data);
+			const int nBytes = std::get<1>(data);
 
 			__m128d result_a = _mm_setzero_pd();
 			__m128d result_b = _mm_setzero_pd();
 
-			const size_t nBlocks = nBytes >> 4;
-			for (size_t block = 0; block < nBlocks; ++block)
+			const int nBlocks = nBytes >> 4;
+			for (int block = 0; block < nBlocks; ++block)
 			{
 				const __m128i data_Block = std::get<0>(data)[block];
 				{
@@ -133,9 +133,9 @@ namespace hli
 
 		template <int N_BITS, bool HAS_MV, U8 MV>
 		inline __m128d _mm_variance_epu8_method1(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const size_t nElements,
-			const std::tuple<__m128d * const, const size_t>& data_double_out)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const int nElements,
+			const std::tuple<__m128d * const, const int>& data_double_out)
 		{
 			if constexpr (HAS_MV)
 			{ //TODO
@@ -147,13 +147,13 @@ namespace hli
 			const __m128d nTrueElements = _mm_cvtepi32_pd(std::get<1>(tup1));
 			const __m128d average = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup1)), nTrueElements);
 
-			const size_t nBytes = std::get<1>(data1);
-			const size_t nBlocksData = nBytes >> 4;
+			const int nBytes = std::get<1>(data1);
+			const int nBlocksData = nBytes >> 4;
 
 			__m128d * const data_double = std::get<0>(data_double_out);
 			__m128d var = _mm_setzero_pd();
 
-			for (size_t block = 0; block < nBlocksData; ++block)
+			for (int block = 0; block < nBlocksData; ++block)
 			{
 				const __m128i data = std::get<0>(data1)[block];
 				{
@@ -201,7 +201,7 @@ namespace hli
 					//std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << ((8 * block) + 7) << "; d=" << toString_f64(db) << std::endl;
 				}
 			}
-			//for (size_t block = 0; block < (nBlocksData * 8); ++block) {
+			//for (int block = 0; block < (nBlocksData * 8); ++block) {
 			//	std::cout << "INFO: _mm_corr_epu8::calc_variance: block=" << block << "; d=" << toString_f64(data_double[block]) << std::endl;
 			//}
 			return _mm_div_pd(_mm_hadd_pd(var, var), nTrueElements);
@@ -211,13 +211,13 @@ namespace hli
 
 	namespace test
 	{
-		void _mm_variance_epu8_speed_test_1(const size_t nBlocks, const size_t nExperiments, const bool doTests)
+		void _mm_variance_epu8_speed_test_1(const int nBlocks, const int nExperiments, const bool doTests)
 		{
 			const double delta = 0.0000001;
 			const bool HAS_MV = false;
 			const U8 MV = 0xFF;
 
-			const size_t nElements = nBlocks * 16;
+			const int nElements = nBlocks * 16;
 			auto data = _mm_malloc_m128i(nElements);
 			fillRand_epu8<5>(data);
 
@@ -228,7 +228,7 @@ namespace hli
 				double min3 = std::numeric_limits<double>::max();
 				double min4 = std::numeric_limits<double>::max();
 
-				for (size_t i = 0; i < nExperiments; ++i)
+				for (int i = 0; i < nExperiments; ++i)
 				{
 
 					timer::reset_and_start_timer();
@@ -307,7 +307,7 @@ namespace hli
 	// Variance population SSE: return 2x double var
 	template <bool HAS_MV, U8 MV>
 	inline __m128d _mm_variance_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data,
+		const std::tuple<const __m128i * const, const int>& data,
 		const __m128d average)
 	{
 		return priv::_mm_variance_epu8_method1<HAS_MV, MV>(data, average);
@@ -316,7 +316,7 @@ namespace hli
 	// Variance population SSE: return 2x double var
 	template <int N_BITS, bool HAS_MV, U8 MV>
 	inline __m128d _mm_variance_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data)
+		const std::tuple<const __m128i * const, const int>& data)
 	{
 		return priv::_mm_variance_epu8_method1<N_BITS, HAS_MV, MV>(data);
 	}

@@ -21,12 +21,12 @@ namespace hli
 	{
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline void _mm_mi_corr_epu8_perm_method0(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements,
-			const std::tuple<__m128d * const, const size_t>& results_mi,
-			const std::tuple<__m128d * const, const size_t>& results_corr,
-			const size_t nPermutations,
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements,
+			const std::tuple<__m128d * const, const int>& results_mi,
+			const std::tuple<__m128d * const, const int>& results_corr,
+			const int nPermutations,
 			__m128i& randInts)
 		{
 			_mm_mi_epu8_perm<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements, results_mi, nPermutations, randInts);
@@ -35,12 +35,12 @@ namespace hli
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline void _mm_mi_corr_epu8_perm_method1(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements,
-			const std::tuple<__m128d * const, const size_t>& results_mi,
-			const std::tuple<__m128d * const, const size_t>& results_corr,
-			const size_t nPermutations,
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements,
+			const std::tuple<__m128d * const, const int>& results_mi,
+			const std::tuple<__m128d * const, const int>& results_corr,
+			const int nPermutations,
 			__m128i& randInts)
 		{
 			if constexpr (HAS_MV) //TODO
@@ -65,7 +65,7 @@ namespace hli
 				__int32 s1 = 0;
 				__int32 s2 = 0;
 
-				for (size_t i = 0; i < nElements; ++i)
+				for (int i = 0; i < nElements; ++i)
 				{
 					const U8 d1 = ptr1[i];
 					const U8 d2 = ptr2[i];
@@ -88,7 +88,7 @@ namespace hli
 				double * const results_corr_Double = reinterpret_cast<double * const>(std::get<0>(results_corr));
 				const U8 * const ptr3 = reinterpret_cast<const U8 * const>(std::get<0>(data3));
 
-				for (size_t permutation = 0; permutation < nPermutations; ++permutation)
+				for (int permutation = 0; permutation < nPermutations; ++permutation)
 				{
 					//1] Permutate
 					_mm_permute_epu8_array(data3, nElements, swap, randInts);
@@ -105,7 +105,7 @@ namespace hli
 
 					// calc Corr
 					__int32 s12 = 0;
-					for (size_t i = 0; i < nElements; ++i)
+					for (int i = 0; i < nElements; ++i)
 					{
 						const U8 d1 = ptr1[i];
 						const U8 d2 = ptr3[i];
@@ -128,12 +128,12 @@ namespace hli
 
 	template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 	inline void _mm_mi_corr_epu8_perm(
-		const std::tuple<const __m128i * const, const size_t>& data1,
-		const std::tuple<const __m128i * const, const size_t>& data2,
-		const size_t nElements,
-		const std::tuple<__m128d * const, const size_t>& results_mi,
-		const std::tuple<__m128d * const, const size_t>& results_corr,
-		const size_t nPermutations,
+		const std::tuple<const __m128i * const, const int>& data1,
+		const std::tuple<const __m128i * const, const int>& data2,
+		const int nElements,
+		const std::tuple<__m128d * const, const int>& results_mi,
+		const std::tuple<__m128d * const, const int>& results_corr,
+		const int nPermutations,
 		__m128i& randInts)
 	{
 		if constexpr (HAS_MV)
@@ -148,14 +148,14 @@ namespace hli
 
 	template <bool HAS_MV, U8 MV>
 	inline void _mm_mi_corr_epu8_perm(
-		const std::tuple<const __m128i * const, const size_t>& data1,
+		const std::tuple<const __m128i * const, const int>& data1,
 		const int nBits1,
-		const std::tuple<const __m128i * const, const size_t>& data2,
+		const std::tuple<const __m128i * const, const int>& data2,
 		const int nBits2,
-		const size_t nElements,
-		const std::tuple<__m128d * const, const size_t>& results_mi,
-		const std::tuple<__m128d * const, const size_t>& results_corr,
-		const size_t nPermutations,
+		const int nElements,
+		const std::tuple<__m128d * const, const int>& results_mi,
+		const std::tuple<__m128d * const, const int>& results_corr,
+		const int nPermutations,
 		__m128i& randInts)
 	{
 		switch (nBits1)

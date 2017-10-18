@@ -27,9 +27,9 @@ namespace hli
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_mi_epu8_method0(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements)
 		{
 			if constexpr (HAS_MV)
 			{
@@ -76,9 +76,9 @@ namespace hli
 
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline __m128d _mm_mi_epu8_method1(
-			const std::tuple<const __m128i * const, const size_t>& data1,
-			const std::tuple<const __m128i * const, const size_t>& data2,
-			const size_t nElements)
+			const std::tuple<const __m128i * const, const int>& data1,
+			const std::tuple<const __m128i * const, const int>& data2,
+			const int nElements)
 		{
 			//TODO
 			return _mm_mi_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
@@ -90,15 +90,15 @@ namespace hli
 
 		// Test speed of mutual information 8-bits unsigned integers no missing values
 		void _mm_mi_epu8_speed_test_1(
-			const size_t nBlocks,
-			const size_t nExperiments,
+			const int nBlocks,
+			const int nExperiments,
 			const bool doTests)
 		{
 			const double delta = 0.0000001;
 			const bool HAS_MV = false;
 			const U8 MV = 0xFF;
 
-			const size_t nElements = 16 * nBlocks;
+			const int nElements = 16 * nBlocks;
 			const int N_BITS1 = 2;
 			const int N_BITS2 = 2;
 
@@ -108,15 +108,15 @@ namespace hli
 			fillRand_epu8<N_BITS1>(data1_r);
 			fillRand_epu8<N_BITS2>(data2_r);
 
-			const std::tuple<const __m128i * const, const size_t> data1 = data1_r;
-			const std::tuple<const __m128i * const, const size_t> data2 = data2_r;
+			const std::tuple<const __m128i * const, const int> data1 = data1_r;
+			const std::tuple<const __m128i * const, const int> data2 = data2_r;
 
 			double min0 = std::numeric_limits<double>::max();
 			double min1 = std::numeric_limits<double>::max();
 
 			__m128d result0, result1;
 
-			for (size_t i = 0; i < nExperiments; ++i)
+			for (int i = 0; i < nExperiments; ++i)
 			{
 				timer::reset_and_start_timer();
 				result0 = hli::priv::_mm_mi_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
@@ -148,9 +148,9 @@ namespace hli
 
 	template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 	inline __m128d _mm_mi_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data1,
-		const std::tuple<const __m128i * const, const size_t>& data2,
-		const size_t nElements)
+		const std::tuple<const __m128i * const, const int>& data1,
+		const std::tuple<const __m128i * const, const int>& data2,
+		const int nElements)
 	{
 		return priv::_mm_mi_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
 		//return priv::_mm_mi_epu8_method1<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
@@ -158,11 +158,11 @@ namespace hli
 
 	template <bool HAS_MV, U8 MV>
 	inline __m128d _mm_mi_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data1,
+		const std::tuple<const __m128i * const, const int>& data1,
 		const int nBits1,
-		const std::tuple<const __m128i * const, const size_t>& data2,
+		const std::tuple<const __m128i * const, const int>& data2,
 		const int nBits2,
-		const size_t nElements)
+		const int nElements)
 	{
 		#if _DEBUG
 		if ((nBits1 > 8) || (nBits1 < 1)) std::cout << "WARNING: _mm_mi_epu8: nBits1=" << nBits1 << " has to be in range[1..8]" << std::endl;

@@ -21,7 +21,7 @@ namespace hli
 	{
 
 		inline __m128i _mm_freq_epu8_nBits2_method1(
-			const std::tuple<const __m128i * const, const size_t>& data)
+			const std::tuple<const __m128i * const, const int>& data)
 		{
 			const __m128i * const ptr = std::get<0>(data);
 
@@ -31,8 +31,8 @@ namespace hli
 
 			__m128i freq = _mm_setzero_si128();
 
-			const size_t nBlocks = std::get<1>(data) >> 4;
-			size_t block;
+			const int nBlocks = std::get<1>(data) >> 4;
+			int block;
 
 			for (block = 0; block < nBlocks - 4; block += 4)
 			{
@@ -76,7 +76,7 @@ namespace hli
 		}
 
 		inline __m128i _mm_freq_epu8_nBits2_method2(
-			const std::tuple<const __m128i * const, const size_t>& data)
+			const std::tuple<const __m128i * const, const int>& data)
 		{
 			const __m128i * const ptr = std::get<0>(data);
 
@@ -89,10 +89,10 @@ namespace hli
 			__m128i freq1 = _mm_setzero_si128();
 			__m128i freq2 = _mm_setzero_si128();
 
-			const size_t nBlocks = std::get<1>(data) >> 4;
-			const size_t nLoops = nBlocks >> 6; //divide by 2^6=64
+			const int nBlocks = std::get<1>(data) >> 4;
+			const int nLoops = nBlocks >> 6; //divide by 2^6=64
 
-			for (size_t block = 0; block < nBlocks; ++block)
+			for (int block = 0; block < nBlocks; ++block)
 			{
 				const __m128i d0 = ptr[block + 0];
 				freq0 = _mm_add_epi8(freq0, _mm_and_si128(_mm_cmpeq_epi8(d0, mask_0_epu8), mask_1_epu8));
@@ -111,15 +111,15 @@ namespace hli
 		}
 
 		inline __m128i _mm_freq_epu8_nBits2_method3(
-			const std::tuple<const __m128i * const, const size_t>& data)
+			const std::tuple<const __m128i * const, const int>& data)
 		{
 			const __m128i * const ptr = std::get<0>(data);
 
 
 			__m128i freq = _mm_setzero_si128();
 
-			const size_t nBlocks = std::get<1>(data) >> 4;
-			size_t block;
+			const int nBlocks = std::get<1>(data) >> 4;
+			int block;
 
 			for (block = 0; block < nBlocks - 4; block += 4)
 			{
@@ -163,7 +163,7 @@ namespace hli
 
 	template <int N_BITS>
 	inline __m128i _mm_freq_epu8(
-		const std::tuple<const __m128i * const, const size_t>& data)
+		const std::tuple<const __m128i * const, const int>& data)
 	{
 		switch (N_BITS)
 		{

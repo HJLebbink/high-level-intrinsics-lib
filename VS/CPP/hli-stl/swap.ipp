@@ -22,7 +22,7 @@ namespace hli
 	inline void swapArray(
 		T * const data,
 		const U16 * const swap_array,
-		const size_t nElements)
+		const int nElements)
 	{
 		for (int i = static_cast<int>(nElements) - 1; i > 0; --i)
 		{
