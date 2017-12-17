@@ -329,11 +329,11 @@ namespace hli
 			const __m128d var1 = priv::_mm_variance_epu8_method1<N_BITS1, HAS_MV, MV>(data1, nElements, data1_d);
 			const __m128d var2 = priv::_mm_variance_epu8_method1<N_BITS2, HAS_MV, MV>(data2, nElements, data2_d);
 			const __m128d var1_2 = _mm_sqrt_pd(_mm_mul_pd(var1, var2));
-			const __m128d corr = _mm_corr_dp_method3<HAS_MV, MV>(data1_d, data2_d, nElements, var1_2);
+			const double corr = _mm_corr_dp_method3<HAS_MV, MV>(data1_d, data2_d, nElements, var1_2);
 
 			_mm_free2(data1_d);
 			_mm_free2(data2_d);
-			return corr;
+			return _mm_set1_pd(corr);
 		}
 	}
 
@@ -388,7 +388,8 @@ namespace hli
 			double min8 = std::numeric_limits<double>::max();
 			double min9 = std::numeric_limits<double>::max();
 
-			__m128d result_ref, result1, result2, result3, result4, result5, result6, result7, result8, result9;
+			__m128d result_ref, result1, result2, result3, result4, result5, result6, result7, result8;
+			double result9;
 
 			for (int i = 0; i < nExperiments; ++i)
 			{
@@ -517,9 +518,9 @@ namespace hli
 
 					if (doTests)
 					{
-						if (std::abs(result_ref.m128d_f64[0] - result9.m128d_f64[0]) > delta)
+						if (std::abs(result_ref.m128d_f64[0] - result9) > delta)
 						{
-							std::cout << "WARNING: test _mm_corr_pd_method0<8>: result-ref=" << hli::toString_f64(result_ref) << "; result4=" << hli::toString_f64(result9) << std::endl;
+							std::cout << "WARNING: test _mm_corr_pd_method0<8>: result-ref=" << hli::toString_f64(result_ref) << "; result4=" << result9 << std::endl;
 							return;
 						}
 					}
@@ -534,7 +535,7 @@ namespace hli
 			printf("[_mm_corr_epu8_method2<6>]: %9.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min6, result6.m128d_f64[0], min_ref / min6);
 			printf("[_mm_corr_epu8_method3]   : %9.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min7, result7.m128d_f64[0], min_ref / min7);
 			printf("[_mm_corr_epu8_method4<8>]: %9.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min8, result8.m128d_f64[0], min_ref / min8);
-			printf("[_mm_corr_pd_method0]     : %9.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min9, result9.m128d_f64[0], min_ref / min9);
+			printf("[_mm_corr_pd_method0]     : %9.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min9, result9, min_ref / min9);
 
 			_mm_free2(data1);
 			_mm_free2(data2);

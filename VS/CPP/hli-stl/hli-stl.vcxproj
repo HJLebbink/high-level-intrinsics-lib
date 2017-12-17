@@ -38,7 +38,7 @@
     <ProjectGuid>{0062C23B-6723-40A4-BBF6-DAD73AAB9E8C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>hlilib</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

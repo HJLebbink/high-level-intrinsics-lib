@@ -218,7 +218,7 @@ namespace hli
 		const int nElements = nBytes >> 3;
 		for (int i = 0; i < nElements; ++i)
 		{
-			ptr[i] = static_cast<double>(rand()) / rand();
+			ptr[i] = static_cast<double>(rand()) / (rand()+1);
 		}
 	}
 	void fillRand_pd(std::tuple<__m512d * const, const int> data)
@@ -228,7 +228,7 @@ namespace hli
 		const int nElements = nBytes >> 3;
 		for (int i = 0; i < nElements; ++i)
 		{
-			ptr[i] = static_cast<double>(rand()) / rand();
+			ptr[i] = static_cast<double>(rand()) / (rand()+1);
 		}
 	}
 }

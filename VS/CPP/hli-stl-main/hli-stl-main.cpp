@@ -52,7 +52,7 @@ void testAll() {
 	hli::test::_mm_variance_epu8_speed_test_1(10010, nExperiments, true);
 	hli::test::_mm_corr_epu8_speed_test_1(1010, nExperiments, true);
 	hli::test::_mm_corr_pd_speed_test_1(1010, nExperiments, true);
-	hli::test::_mm512_corr_pd_speed_test_1(1010, nExperiments, true);
+	//hli::test::_mm512_corr_pd_speed_test_1(1010, nExperiments, true);
 
 	hli::test::_mm_rand_si128_speed_test_1(1010, nExperiments, true);
 	hli::test::_mm_rescale_epu16_speed_test_1(2102, nExperiments, true);
@@ -69,20 +69,18 @@ void testAll() {
 
 int main()
 {
-#	ifdef _MSC_VER
-#		if _DEBUG
-	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
-#		endif
-#	endif
 	{
 		const auto start = std::chrono::system_clock::now();
 
 		if (false) {
 			testAll();
 		} else {
-			const size_t nExperiments = 1000;
+			const int nExperiments = 1000;
+			const int nElements = 200* 128 * 8;
+
 			//hli::test::_mm_permute_epu8_array_speed_test_1(139, nExperiments, true);
-			hli::test::_mm512_corr_pd_speed_test_1(1010, nExperiments, true);
+			hli::test::_mm_corr_pd_speed_test_1(nElements, nExperiments, true);
+			//hli::test::_mm512_corr_pd_speed_test_1(nElements, nExperiments, true);
 		}
 
 		const auto diff = std::chrono::system_clock::now() - start;
@@ -96,13 +94,6 @@ int main()
 		printf("\n-------------------\n");
 		printf("\nPress RETURN to finish:");
 	}
-
-#	ifdef _MSC_VER
-#		if _DEBUG
-	_CrtDumpMemoryLeaks();
-#		endif
-#	endif
-
 	getchar();
 	return 0;
 }

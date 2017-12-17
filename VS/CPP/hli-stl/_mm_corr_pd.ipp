@@ -26,7 +26,7 @@ namespace hli
 	{
 
 		template <bool HAS_MV, int MV>
-		inline __m128d _mm_corr_pd_method0(
+		inline double _mm_corr_pd_method0(
 			const std::tuple<const __m128d * const, const int>& data1,
 			const std::tuple<const __m128d * const, const int>& data2,
 			const int nElements)
@@ -52,11 +52,11 @@ namespace hli
 			}
 
 			double corr = ((nElements * s12) - (s1*s2)) / (sqrt((nElements*s11) - (s1*s1)) * sqrt((nElements * s22) - (s2*s2)));
-			return _mm_set1_pd(corr);
+			return corr;
 		}
 
 		template <bool HAS_MV, int MV>
-		inline __m128d _mm_corr_pd_method1(
+		inline double _mm_corr_pd_method1(
 			const std::tuple<const __m128d * const, const int>& data1,
 			const std::tuple<const __m128d * const, const int>& data2,
 			const int nElements)
@@ -90,11 +90,11 @@ namespace hli
 			const __m128d covar = _mm_sub_pd(_mm_mul_pd(_mm_hadd_pd(s12, s12), nElementsD), _mm_mul_pd(s1_s2, _mm_swap_64(s1_s2)));
 			const __m128d corr = _mm_div_pd(covar, s11_s22_p);
 			//double corr = ((nElements*s12) - (s1*s2)) / (sqrt((nElements*s11) - (s1*s1)) * sqrt((nElements*s22) - (s2*s2)));
-			return corr;
+			return _mm_cvtsd_f64(corr);
 		}
 
 		template <bool HAS_MV, int MV>
-		inline __m128d _mm_corr_dp_method3(
+		inline double _mm_corr_dp_method3(
 			const std::tuple<const __m128d * const, const int>& data1,
 			const std::tuple<const __m128d * const, const int>& data2,
 			const int nElements,
@@ -148,7 +148,7 @@ namespace hli
 			covar = _mm_div_pd(_mm_hadd_pd(covar, covar), nElementsD);
 			const __m128d corr = _mm_div_pd(covar, var1_2);
 			//std::cout << "INFO: _mm_corr_epu8::_mm_corr_dp_method3: covar=" << covar.m128d_f64[0] << "; corr=" << corr.m128d_f64[0] << std::endl;
-			return corr;
+			return _mm_cvtsd_f64(corr);
 		}
 	}
 
@@ -157,17 +157,19 @@ namespace hli
 		using namespace tools::timing;
 
 		void _mm_corr_pd_speed_test_1(
-			const int nBlocks,
+			const int nElements,
 			const int nExperiments,
 			const bool doTests)
 		{
 			const double delta = 0.0000001;
 			const bool HAS_MV = false;
 			const int MV = 99999;
-			const int nElements = nBlocks * 2;
 
-			auto data1_r = _mm_malloc_m128d(nElements * 8);
-			auto data2_r = _mm_malloc_m128d(nElements * 8);
+			const int nBlocks = nElements >> 1;
+			const int nBytes = nElements * sizeof(double);
+
+			auto data1_r = _mm_malloc_m128d(nBytes);
+			auto data2_r = _mm_malloc_m128d(nBytes);
 
 			fillRand_pd(data1_r);
 			fillRand_pd(data2_r);
@@ -175,15 +177,13 @@ namespace hli
 			const std::tuple<const __m128d * const, const int> data1 = data1_r;
 			const std::tuple<const __m128d * const, const int> data2 = data2_r;
 
-
 			double min0 = std::numeric_limits<double>::max();
 			double min1 = std::numeric_limits<double>::max();
 
-			__m128d result0, result1;
+			double result0, result1;
 
 			for (int i = 0; i < nExperiments; ++i)
 			{
-
 				reset_and_start_timer();
 				result0 = hli::priv::_mm_corr_pd_method0<HAS_MV, MV>(data1, data2, nElements);
 				min0 = std::min(min0, get_elapsed_kcycles());
@@ -195,16 +195,16 @@ namespace hli
 
 					if (doTests)
 					{
-						if (std::abs(result0.m128d_f64[0] - result1.m128d_f64[0]) > delta)
+						if (std::abs(result0 - result1) > delta)
 						{
-							std::cout << "WARNING: test _mm_corr_pd_method0: result0=" << hli::toString_f64(result0) << "; result1=" << hli::toString_f64(result1) << std::endl;
+							std::cout << "WARNING: test _mm_corr_pd_method0: result0=" << result0 << "; result1=" << result1 << std::endl;
 							return;
 						}
 					}
 				}
 			}
-			printf("[_mm_corr_pd_method0]: %2.5f Kcycles; %0.14f\n", min0, result0.m128d_f64[0]);
-			printf("[_mm_corr_pd_method1]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min1, result1.m128d_f64[0], min0 / min1);
+			printf("[_mm_corr_pd_method0]: %2.5f Kcycles; %0.14f\n", min0, result0);
+			printf("[_mm_corr_pd_method1]: %2.5f Kcycles; %0.14f; %2.3f times faster than ref\n", min1, result1, min0 / min1);
 
 			_mm_free2(data1);
 			_mm_free2(data2);

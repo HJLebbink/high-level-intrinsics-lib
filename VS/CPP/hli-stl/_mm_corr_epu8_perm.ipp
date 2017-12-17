@@ -104,9 +104,9 @@ namespace hli
 			for (int permutation = 0; permutation < nPermutations; ++permutation)
 			{
 				_mm_permute_pd_array(data2_Double, nElements, swap, randInts);
-				const __m128d corr = _mm_corr_dp_method3<HAS_MV, MV>(data1_Double, data2_Double, nElements, var1_2);
+				const double corr = _mm_corr_dp_method3<HAS_MV, MV>(data1_Double, data2_Double, nElements, var1_2);
 				//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_perm_method2: corr=" << corr.m128d_f64[0] << std::endl;
-				results_double[permutation] = corr.m128d_f64[0];
+				results_double[permutation] = corr;
 			}
 			_mm_free2(data1_Double);
 			_mm_free2(data2_Double);
