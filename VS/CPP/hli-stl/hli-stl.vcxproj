@@ -247,6 +247,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="emi.ipp" />
     <ClInclude Include="equal.ipp" />
     <ClInclude Include="get_set.ipp" />
     <ClInclude Include="tools.ipp" />

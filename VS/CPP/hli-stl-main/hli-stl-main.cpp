@@ -32,8 +32,6 @@
 #include "..\hli-stl\_mm_corr_pd.ipp"
 #include "..\hli-stl\_mm512_corr_pd.ipp"
 
-
-
 #include "..\hli-stl\_mm_rand_si128.ipp"
 #include "..\hli-stl\_mm_rescale_epu16.ipp"
 #include "..\hli-stl\_mm_permute_epu8_array.ipp"
@@ -42,6 +40,8 @@
 
 #include "..\hli-stl\_mm_mi_epu8.ipp"
 #include "..\hli-stl\_mm_mi_epu8_perm.ipp"
+
+#include "..\hli-stl\emi.ipp"
 
 
 void testAll() {
@@ -76,11 +76,14 @@ int main()
 			testAll();
 		} else {
 			const int nExperiments = 1000;
-			const int nElements = 200* 128 * 8;
+			const int nElements = 1 * 1000 * 8;
 
 			//hli::test::_mm_permute_epu8_array_speed_test_1(139, nExperiments, true);
-			hli::test::_mm_corr_pd_speed_test_1(nElements, nExperiments, true);
+			//hli::test::_mm_corr_pd_speed_test_1(nElements, nExperiments, true);
 			//hli::test::_mm512_corr_pd_speed_test_1(nElements, nExperiments, true);
+
+			hli::test::__mm_emi_epu8_methode0_test_0();
+			hli::test::__mm_emi_epu8_methode0_test_1(nElements, nExperiments);
 		}
 
 		const auto diff = std::chrono::system_clock::now() - start;

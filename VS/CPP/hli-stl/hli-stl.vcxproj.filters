@@ -17,6 +17,7 @@
     <ClInclude Include="toString.ipp" />
     <ClInclude Include="_mm_permute_epu8_array.ipp" />
     <ClInclude Include="timing.ipp" />
+    <ClInclude Include="emi.ipp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="span.ipp" />
