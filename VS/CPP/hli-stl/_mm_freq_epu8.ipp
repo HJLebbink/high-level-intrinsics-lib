@@ -2,8 +2,6 @@
 
 #include <tuple>
 
-
-
 //#include "mmintrin.h"  // mmx
 #include "emmintrin.h"  // sse
 #include "pmmintrin.h"  // sse3
@@ -16,10 +14,8 @@
 
 namespace hli
 {
-
 	namespace priv
 	{
-
 		inline __m128i _mm_freq_epu8_nBits2_method1(
 			const std::tuple<const __m128i * const, const int>& data)
 		{
@@ -115,7 +111,6 @@ namespace hli
 		{
 			const __m128i * const ptr = std::get<0>(data);
 
-
 			__m128i freq = _mm_setzero_si128();
 
 			const int nBlocks = std::get<1>(data) >> 4;
@@ -147,13 +142,9 @@ namespace hli
 				(_mm256_movemask_epi8(_mm256_slli_si256(de0, 7)) ||
 				(_mm256_movemask_epi8(_mm256_slli_si256(de1, 7)) << (1 * 32)));
 				*/
-
-
-
 			}
 			return _mm_setzero_si128();
 		}
-
 	}
 
 	namespace test
@@ -161,6 +152,8 @@ namespace hli
 
 	}
 
+
+	//return 
 	template <int N_BITS>
 	inline __m128i _mm_freq_epu8(
 		const std::tuple<const __m128i * const, const int>& data)

@@ -30,7 +30,7 @@ namespace hli
 			const std::tuple<const __m128i * const, const int>& data2,
 			const int nElements)
 		{
-			if constexpr (HAS_MV)
+			if (HAS_MV)
 			{
 				auto data1b = deepCopy(data1);
 				auto data2b = deepCopy(data2);
@@ -77,7 +77,7 @@ namespace hli
 			const __m128d average1,
 			const __m128d average2)
 		{
-			if constexpr (HAS_MV)
+			if (HAS_MV)
 			{ //TODO
 				std::cout << "WARNING: _mm_corr_epu8_method0: Not implemented yet" << std::endl;
 				return _mm_setzero_pd();
@@ -133,7 +133,7 @@ namespace hli
 			const __m128d average1,
 			const __m128d average2)
 		{
-			if constexpr (HAS_MV)
+			if (HAS_MV)
 			{ //TODO
 				std::cout << "WARNING: _mm_corr_epu8_method1: Not implemented yet" << std::endl;
 				return _mm_setzero_pd();
@@ -235,7 +235,7 @@ namespace hli
 			const std::tuple<const __m128i * const, const int>& data2,
 			const int nElements)
 		{
-			if constexpr (HAS_MV)
+			if (HAS_MV)
 			{ //TODO
 				std::cout << "WARNING: _mm_corr_epu8_method3: Not implemented yet" << std::endl;
 				return _mm_setzero_pd();

@@ -25,7 +25,6 @@
 
 namespace hli
 {
-
 	namespace priv
 	{
 
@@ -55,9 +54,9 @@ namespace hli
 			#pragma endregion
 
 			const int nBlocks = std::get<1>(data1) >> 4;
-			if constexpr (HAS_MV)
+			if (HAS_MV)
 			{
-				if constexpr (MV == 0xFF)
+				if (MV == 0xFF)
 				{
 					//TODO
 				}
@@ -316,7 +315,6 @@ namespace hli
 			const bool HAS_MV = false;
 			const U8 MV = 0xFF;
 
-
 			const int nElements = 16 * nBlocks;
 			const int N_BITS1 = 3;
 			const int N_BITS2 = 2;
@@ -336,7 +334,6 @@ namespace hli
 
 			for (int i = 0; i < nExperiments; ++i)
 			{
-
 				reset_and_start_timer();
 				result0 = hli::priv::_mm_entropy_epu8_method0<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data2, nElements);
 				min0 = std::min(min0, get_elapsed_kcycles());

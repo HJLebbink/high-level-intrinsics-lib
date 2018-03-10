@@ -31,7 +31,7 @@ namespace hli
 			const std::tuple<const __m128i * const, const int>& data2,
 			const int nElements)
 		{
-			if constexpr (HAS_MV)
+			if (HAS_MV)
 			{
 				auto data1b = deepCopy(data1);
 				auto data2b = deepCopy(data2);

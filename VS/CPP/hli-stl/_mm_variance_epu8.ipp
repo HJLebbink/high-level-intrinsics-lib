@@ -33,7 +33,7 @@ namespace hli
 			auto ptr = reinterpret_cast<const U8 * const>(std::get<0>(data));
 			double sum = 0;
 
-			if constexpr (HAS_MV)
+			if (HAS_MV)
 			{
 				for (int i = 0; i < nElements; ++i)
 				{
@@ -62,7 +62,7 @@ namespace hli
 			const std::tuple<const __m128i * const, const int>& data,
 			const int nElements)
 		{
-			if constexpr (HAS_MV) //TODO
+			if (HAS_MV) //TODO
 			{ 
 				std::cout << "WARNING: _mm_variance_epu8_method1: Not implemented yet" << std::endl;
 				return _mm_setzero_pd();
@@ -81,7 +81,7 @@ namespace hli
 			const std::tuple<const __m128i * const, const int>& data,
 			const __m128d average)
 		{
-			if constexpr (HAS_MV)
+			if (HAS_MV)
 			{ //TODO
 				std::cout << "WARNING: _mm_variance_epu8_method1: Not implemented yet" << std::endl;
 				return _mm_setzero_pd();
@@ -137,7 +137,7 @@ namespace hli
 			const int nElements,
 			const std::tuple<__m128d * const, const int>& data_double_out)
 		{
-			if constexpr (HAS_MV)
+			if (HAS_MV)
 			{ //TODO
 				std::cout << "WARNING: _mm_variance_epu8_method1: Not implemented yet" << std::endl;
 				return _mm_setzero_pd();
