@@ -84,6 +84,7 @@ namespace hli
 		inline __m128d freq_2bits_to_entropy_ref(
 			const __m128i freq)
 		{
+
 			const __m128i nValues0 = _mm_shuffle_epi32(freq, 0b00000000);
 			const __m128i nValues1 = _mm_shuffle_epi32(freq, 0b01010101);
 			const __m128i nValues2 = _mm_shuffle_epi32(freq, 0b10101010);
@@ -93,8 +94,8 @@ namespace hli
 			const __m128d prob1 = _mm_div_pd(_mm_cvtepi32_pd(freq), nValuesDP);
 			const __m128d prob2 = _mm_div_pd(_mm_cvtepi32_pd(_mm_swap_64(freq)), nValuesDP);
 
-			const __m128d sum_a = _mm_mul_pd(prob1, _mm_log2_pd(prob1));
-			const __m128d sum_b = _mm_mul_pd(prob2, _mm_log2_pd(prob2));
+			const __m128d sum_a = _mm_set1_pd(0); //_mm_mul_pd(prob1, _mm_log2_pd(prob1));
+			const __m128d sum_b = _mm_set1_pd(0); //_mm_mul_pd(prob2, _mm_log2_pd(prob2));
 
 			const __m128d sum_c = _mm_add_pd(sum_a, _mm_blend_pd(sum_b, _mm_setzero_pd(), 1));
 			const __m128d sum_d = _mm_hadd_pd(sum_c, sum_c);

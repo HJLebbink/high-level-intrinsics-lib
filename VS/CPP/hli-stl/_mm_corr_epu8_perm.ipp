@@ -20,6 +20,7 @@
 
 
 #include "_mm_rand_si128.ipp"
+#include "equal.ipp"
 
 
 namespace hli
@@ -33,14 +34,14 @@ namespace hli
 			const std::tuple<const __m128i * const, const int>& data2,
 			const int nElements,
 			const std::tuple<__m128d * const, const int>& results,
-			const int nPermutations,
+			const long long nPermutations,
 			__m128i& randInts)
 		{
 			auto data3 = deepCopy(data2);
 			auto swap = _mm_malloc_m128i(nElements << 1);
 
 			double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
-			for (int permutation = 0; permutation < nPermutations; ++permutation)
+			for (long long permutation = 0; permutation < nPermutations; ++permutation)
 			{
 				_mm_permute_epu8_array_method0(data3, nElements, swap, randInts);
 				const __m128d corr1 = _mm_corr_epu8_ref<N_BITS1, N_BITS2, HAS_MV, MV>(data1, data3, nElements);
@@ -56,7 +57,7 @@ namespace hli
 			const std::tuple<const __m128i * const, const int>& data2,
 			const int nElements,
 			const std::tuple<__m128d * const, const int>& results,
-			const int nPermutations,
+			const long long nPermutations,
 			__m128i& randInts)
 		{
 			auto data3 = deepCopy(data2);
@@ -70,7 +71,7 @@ namespace hli
 			const __m128d average2 = _mm_div_pd(_mm_cvtepi32_pd(std::get<0>(tup2)), _mm_cvtepi32_pd(std::get<1>(tup2)));
 
 			double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
-			for (int permutation = 0; permutation < nPermutations; ++permutation)
+			for (long long permutation = 0; permutation < nPermutations; ++permutation)
 			{
 				_mm_permute_epu8_array(data3, nElements, swap, randInts);
 				const __m128d corr = _mm_corr_epu8_method1<HAS_MV, MV>(data1, data3, nElements, average1, average2);
@@ -86,7 +87,7 @@ namespace hli
 			const std::tuple<const __m128i * const, const int>& data2,
 			const int nElements,
 			const std::tuple<__m128d * const, const int>& results,
-			const int nPermutations,
+			const long long nPermutations,
 			__m128i& randInts)
 		{
 			const int nBytes = std::get<1>(data1);
@@ -101,7 +102,7 @@ namespace hli
 			//std::cout << "INFO: _mm_corr_epu8::_mm_corr_epu8_perm_method2: var1=" << var1.m128d_f64[0] << "; var2=" << var2.m128d_f64[0] << std::endl;
 
 			double * const results_double = reinterpret_cast<double * const>(std::get<0>(results));
-			for (int permutation = 0; permutation < nPermutations; ++permutation)
+			for (long long permutation = 0; permutation < nPermutations; ++permutation)
 			{
 				_mm_permute_pd_array(data2_Double, nElements, swap, randInts);
 				const double corr = _mm_corr_dp_method3<HAS_MV, MV>(data1_Double, data2_Double, nElements, var1_2);
@@ -119,11 +120,11 @@ namespace hli
 			const std::tuple<const __m128i * const, const int>& data2,
 			const int nElements,
 			const std::tuple<__m128d * const, const int>& results,
-			const int nPermutations,
+			const long long nPermutations,
 			__m128i& randInts)
 		{
 			const int nBytes = std::get<1>(data1);
-			const int nBlocks = nBytes >> 4;
+			//const int nBlocks = nBytes >> 4;
 
 			if (nElements > 0xFFFF)
 			{
@@ -160,7 +161,7 @@ namespace hli
 			const U8 * const ptr3 = reinterpret_cast<const U8 * const>(std::get<0>(data3));
 			double * const results_Double = reinterpret_cast<double * const>(std::get<0>(results));
 
-			for (int permutation = 0; permutation < nPermutations; ++permutation)
+			for (long long permutation = 0; permutation < nPermutations; ++permutation)
 			{
 				_mm_permute_epu8_array(data3, nElements, swap, randInts);
 
@@ -186,7 +187,7 @@ namespace hli
 
 		void _mm_corr_epu8_perm_speed_test_1(
 			const int nBlocks,
-			const int nPermutations,
+			const long long nPermutations,
 			const int nExperiments,
 			const bool doTests)
 		{
@@ -196,7 +197,6 @@ namespace hli
 			const int nElements = nBlocks * 16;
 			const int N_BITS1 = 5;
 			const int N_BITS2 = N_BITS1;
-
 
 			auto data1_r = _mm_malloc_m128i(nElements);
 			auto data2_r = _mm_malloc_m128i(nElements);
@@ -337,7 +337,7 @@ namespace hli
 		const std::tuple<const __m128i * const, const int>& data2,
 		const int nElements,
 		const std::tuple<__m128d * const, const int>& results,
-		const int nPermutations,
+		const long long nPermutations,
 		__m128i& randInts)
 	{
 		if constexpr (HAS_MV)
@@ -352,7 +352,7 @@ namespace hli
 
 		#if _DEBUG
 		const double * const ptr = reinterpret_cast<double * const>(std::get<0>(results));
-		for (int i = 0; i < nPermutations; ++i)
+		for (long long i = 0; i < nPermutations; ++i)
 		{
 			if ((ptr[i] < -1) || (ptr[i] > 1))
 			{
@@ -370,7 +370,7 @@ namespace hli
 		int nBits2,
 		const int nElements,
 		const std::tuple<__m128d * const, const int>& results,
-		const int nPermutations,
+		const long long nPermutations,
 		__m128i& randInts)
 	{
 		#if _DEBUG

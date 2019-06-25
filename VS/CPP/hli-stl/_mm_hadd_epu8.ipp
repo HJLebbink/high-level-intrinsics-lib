@@ -30,7 +30,7 @@ namespace hli
 			const std::tuple<const __m128i * const, const int>& data,
 			const int nElements)
 		{
-			const int nBytes = std::get<1>(data);
+			//const int nBytes = std::get<1>(data);
 			auto ptr = reinterpret_cast<const U8 * const>(std::get<0>(data));
 			unsigned __int32 sum = 0;
 

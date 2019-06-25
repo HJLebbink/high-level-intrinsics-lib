@@ -46,7 +46,7 @@ namespace hli_lib_cli_unittest
                 Assert.IsTrue(mi >= -margin, "nElements=" + nElements + "; nBits1=" + nBits1 + "; nBits2=" + nBits2 + ": mi=" + mi + " is smaller than zero");
                 Assert.IsTrue(mi <= maxMi,   "nElements=" + nElements + "; nBits1=" + nBits1 + "; nBits2=" + nBits2 + ": mi=" + mi + " is larger than maxValue=" + maxMi);
 
-                hli_cli.HliCli._mm_mi_perm_epu8(data1, nBits1, data2, nBits2, false, results, randInts);
+                hli_cli.HliCli._mm_mi_epu8_perm(data1, nBits1, data2, nBits2, false, results, randInts);
 
                 for (int j = 0; j<nPermutations; ++j)
                 {

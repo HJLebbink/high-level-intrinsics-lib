@@ -129,7 +129,7 @@ namespace hli
 	{
 		return std::make_tuple(reinterpret_cast<__m128d * const>(std::get<0>(data)), std::get<1>(data));
 	}
-	inline std::tuple<const __m128d * const, const int> _mm_cast_m128d(
+	inline std::tuple<const __m128d * const, const int> _mm_cast_m128d_c(
 		const std::tuple<const U8 * const, const int>& data)
 	{
 		return std::make_tuple(reinterpret_cast<const __m128d * const>(std::get<0>(data)), std::get<1>(data));

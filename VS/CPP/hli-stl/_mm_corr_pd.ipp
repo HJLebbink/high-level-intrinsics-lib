@@ -21,10 +21,8 @@
 
 namespace hli
 {
-
 	namespace priv
 	{
-
 		template <bool HAS_MV, int MV>
 		inline double _mm_corr_pd_method0(
 			const std::tuple<const __m128d * const, const int>& data1,
@@ -108,7 +106,7 @@ namespace hli
 
 			if (false)
 			{ // unrolling is NOT faster
-				const int nLoops = nBlocks >> 2;
+				//const int nLoops = nBlocks >> 2;
 				const int tail = nBlocks & 0b11;
 				for (int block = 0; block < nBlocks; block += 4)
 				{
@@ -165,7 +163,7 @@ namespace hli
 			const bool HAS_MV = false;
 			const int MV = 99999;
 
-			const int nBlocks = nElements >> 1;
+			//const int nBlocks = nElements >> 1;
 			const int nBytes = nElements * sizeof(double);
 
 			auto data1_r = _mm_malloc_m128d(nBytes);
@@ -212,12 +210,13 @@ namespace hli
 	}
 
 	template <bool HAS_MV, int MV>
-	inline __m128d _mm_corr_pd(
+	inline double _mm_corr_pd(
 		const std::tuple<const __m128d * const, const int>& data1,
 		const std::tuple<const __m128d * const, const int>& data2,
 		const int nElements)
 	{
-		return priv::_mm_corr_pd_method0<HAS_MV, MV>(data1, data2, nElements);
-		//return priv::_mm_corr_pd_method1<HAS_MV>(data1, data2);
+		return (true) 
+			? priv::_mm_corr_pd_method0<HAS_MV, MV>(data1, data2, nElements)
+			: priv::_mm_corr_pd_method1<HAS_MV, MV>(data1, data2, nElements);
 	}
 }

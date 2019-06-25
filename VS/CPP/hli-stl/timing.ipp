@@ -4,7 +4,7 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-#include <windows.h>
+//#include <windows.h>
 #else
 #include <x86intrin.h>
 #endif

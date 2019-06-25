@@ -10,10 +10,8 @@
 
 namespace hli
 {
-
 	namespace priv
 	{
-
 		template <int N_BITS1, int N_BITS2, bool HAS_MV, U8 MV>
 		inline void _mm_mi_epu8_perm_method0(
 			const std::tuple<const __m128i * const, const int>& data1,
@@ -115,7 +113,6 @@ namespace hli
 
 	namespace test
 	{
-
 		void _mm_mi_epu8_perm_speed_test_1(
 			const int nBlocks,
 			const int nPermutations,
@@ -133,10 +130,10 @@ namespace hli
 			auto data1_r = _mm_malloc_m128i(nElements * 1);
 			auto data2_r = _mm_malloc_m128i(nElements * 1);
 
-			const int nBytesResults = resizeNBytes(8 * nPermutations, 16);
+			//const int nBytesResults = resizeNBytes(8 * nPermutations, 16);
 			//std::cout << "INFO: test_mm_corr_perm_epu8: nPermutations=" << nPermutations << "; nBytesResults=" << nBytesResults << std::endl;
-			auto results0 = _mm_malloc_m128d(nBytesResults);
-			auto results1 = _mm_malloc_m128d(nBytesResults);
+			//auto results0 = _mm_malloc_m128d(nBytesResults);
+			//auto results1 = _mm_malloc_m128d(nBytesResults);
 
 
 			fillRand_epu8<N_BITS1>(data1_r);

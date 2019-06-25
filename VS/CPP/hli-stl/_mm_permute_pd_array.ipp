@@ -87,7 +87,7 @@ namespace hli
 			const __m128i seed = _mm_set_epi32(rand() || rand() << 16, rand() || rand() << 16, rand() || rand() << 16, rand() || rand() << 16);
 			__m128i randInt = seed;
 			__m128i randInt1 = seed;
-			const int N_BITS = 5;
+			//const int N_BITS = 5;
 
 			fillRand_pd(data);
 

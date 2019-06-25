@@ -92,7 +92,7 @@ namespace hli
 			auto ptr1 = reinterpret_cast<const U8 * const>(std::get<0>(data1));
 			auto ptr2 = reinterpret_cast<const U8 * const>(std::get<0>(data2));
 
-			const int nBytes = std::get<1>(data1);
+			//const int nBytes = std::get<1>(data1);
 
 			for (int element = 0; element < nElements; ++element)
 			{
@@ -241,8 +241,8 @@ namespace hli
 				return _mm_setzero_pd();
 			}
 
-			const int nBytes = std::get<1>(data1);
-			const int nBlocks = nBytes >> 4;
+			//const int nBytes = std::get<1>(data1);
+			//const int nBlocks = nBytes >> 4;
 
 			if (nElements > 0xFFFF)
 			{

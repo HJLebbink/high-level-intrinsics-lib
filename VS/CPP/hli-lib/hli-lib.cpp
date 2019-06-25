@@ -23,6 +23,3 @@
 #include "..\hli-stl\_mm_rand_si128.ipp"
 #include "..\hli-stl\_mm_rescale_epu16.ipp"
 #include "..\hli-stl\_mm_variance_epu8.ipp"
-
-
-
